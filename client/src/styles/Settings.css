@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.main-bg {
+    background-image: url("../assets/bg-texture.png"),
+    linear-gradient(170deg, #313131 0%, #000000 100%);
+  background-repeat: repeat, no-repeat;
+  background-blend-mode: normal;
+  background-size: auto, 100vw 100vh;
+  height: 100vh;
+  width: 100vw;
+  transform-origin: top left;
+}
+
+.settings-container {
+    display: flex;
+    background-color: rgb(72, 69, 69);
+    margin: 100px;
+    padding-left: 20px;
+    border-radius: 8 px;
+    box-shadow: 0 2px 4px rgba(242, 6, 6, 0.1);
+    overflow: hidden;
+    
+}
+
+.nav-bar {
+    width: 200px;
+    padding: 20px;
+    border-right: 3px solid black;
+}
+
+.nav-bar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.settings-content {
+    margin: 30px;
+}
