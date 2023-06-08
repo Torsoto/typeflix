@@ -1,32 +1,85 @@
-const express = require("express");
+import express from 'express';
 const app = express();
-const firebaseConfig = require("./db/firebase.js");
-const {
-  getAuth,
-  createUserWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithPopup,
-} = require("firebase/auth");
+import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
+import { getFirestore, doc, setDoc, getDocs, collection } from "firebase/firestore";
+import './db/firebase.mjs';
 const auth = getAuth();
+const db = getFirestore();
 
-app.get("/", (req, res) => {
-  res.send("A very professional backend server of Typeflix Corp.");
-});
+import cors from 'cors';
 
-app.get("/signup", (req, res) => {
-  const { email, password } = req.body;
-  createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      const user = userCredential.user;
-      console.log("Successfully created new user:", user.uid);
-      res.status(200).send({ uid: user.uid }); // Send the UID to the client
-    })
-    .catch((error) => {
-      console.log("Error creating new user:", error);
-      res.status(500).send({ error: error.message });
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors({ origin: 'http://localhost:5173' }));
+
+
+app.post('/signup', (req, res) => {
+    try {
+        const { username, email, password } = req.body;
+        createUserWithEmailAndPassword(auth, email, password)
+            .then((userRecord) => {
+                console.log('Successfully created new user:', userRecord.user.uid);
+                console.log('Username: ', username);
+
+                // Add a new document in collection "users" with UID as the document ID
+                console.log(db);
+                setDoc(doc(db, "users", username), {
+                    username: username,
+                    email: email,
+                    userid: userRecord.user.uid
+                }).then(() => {
+                    console.log("User data stored in Firestore");
+                    res.status(200).send({ uid: userRecord.user.uid });
+                }).catch((error) => {
+                    console.log("Error storing user data in Firestore:", error);
+                    res.status(500).send({ error: error.message });
+                });
+
+            })
+            .catch((error) => {
+                console.log('Error creating new user:', error);
+                res.status(500).send({ error: error.message });
+            });
+    } catch (e) {
+        res.status(500).send({ error: e.message });
+    }
+})
+
+app.post('/login', (req, res) => {
+    const { identifier, password } = req.body;
+
+    getDocs(collection(db, "users")).then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            if(doc.data().username === identifier) {
+                signInWithEmailAndPassword(auth, doc.data().email, password)
+                    .then((userCredential) => {
+                        console.log("User logged in successfully");
+                        res.status(200).send({ uid: userCredential.user.uid });
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error.message);
+                        res.status(400).send({ error: error.message }); // Here, 400 is used as a generic client error status
+                    });
+            } else {
+                signInWithEmailAndPassword(auth, identifier, password)
+                    .then((userCredential) => {
+                        console.log("User logged in successfully");
+                        res.status(200).send({ uid: userCredential.user.uid });
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error.message);
+                        res.status(400).send({ error: error.message }); // Here, 400 is used as a generic client error status
+                    });
+            }
+        });
     });
 });
 
+app.get('/', (req, res) => {
+    res.send('Hello World!')
+})
+
 app.listen(3000, () => {
-  console.log("Typeflix listening on port http://localhost:3000/");
-});
+    console.log('Example app listening on port 3000!')
+})
