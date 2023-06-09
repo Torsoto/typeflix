@@ -65,3 +65,9 @@
     animation: move 2s infinite;
   }
 }
+
+@layer components {
+  .blinking-cursor {
+    animation: blink 0.85s infinite;
+  }
+}

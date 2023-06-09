@@ -17,11 +17,6 @@ const Navbar = () => {
         <img src={logo} alt="Logo" />
       </div>
       <div className="flex gap-6">
-        <a href="/random" className="navbar__link">
-          <span className="font-medium text-white transition-colors hover:text-gray-400">
-            Random
-          </span>
-        </a>
         <a href="/training" className="navbar__link">
           <span className="font-medium text-white transition-colors hover:text-gray-400">
             Training
@@ -32,19 +27,14 @@ const Navbar = () => {
             Leaderboard
           </span>
         </a>
-        <a href="/create" className="navbar__link">
-          <span className="font-medium text-white transition-colors hover:text-gray-400">
-            Create
-          </span>
-        </a>
       </div>
       <div className="relative w-[152px] text-right">
-        <div className="flex items-center gap-1 justify-end">
+        <div className="flex items-center justify-end gap-1">
           <img
-              src={userIcon}
-              alt="User Icon"
-              className="w-8 h-8 rounded-full cursor-pointer"
-              onClick={toggleDropdown}
+            src={userIcon}
+            alt="User Icon"
+            className="w-8 h-8 rounded-full cursor-pointer"
+            onClick={toggleDropdown}
           />
         </div>
         {isDropdownOpen && <DropdownMenu />}
