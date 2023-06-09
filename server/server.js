@@ -18,13 +18,13 @@ app.use(cors({ origin: 'http://localhost:5173' }));
 app.post('/signup', async (req, res) => {
     try {
         const {username, email, password} = req.body;
+        const lowercaseUsername = username.toLowerCase();
 
-        // Check if username already exists
         const userDoc = await getDocs(collection(db, "users"));
         let usernameExists = false;
 
         userDoc.forEach((doc) => {
-            if (doc.data().username === username) {
+            if (doc.data().username === lowercaseUsername) {
                 usernameExists = true;
             }
         });
@@ -41,10 +41,11 @@ app.post('/signup', async (req, res) => {
 
                         console.log('Successfully created new user:', userRecord.user.uid);
 
-                        setDoc(doc(db, "users", username), {
-                            username: username,
+                        setDoc(doc(db, "users", lowercaseUsername), {
+                            username: lowercaseUsername,
                             email: email,
-                            userid: userRecord.user.uid
+                            userid: userRecord.user.uid,
+                            friends: []
 
                         }).then(() => {
 
@@ -52,7 +53,7 @@ app.post('/signup', async (req, res) => {
 
                             const payload = {
                                 uid: userRecord.user.uid,
-                                username: username,
+                                username: lowercaseUsername,
                                 email: email
                             };
 
@@ -85,13 +86,14 @@ app.post('/signup', async (req, res) => {
 
 app.post('/login', async (req, res) => {
     const { identifier, password } = req.body;
+    const lowercaseIdentifier = identifier.toLowerCase();
 
     // First, attempt to find the user by username.
     const userDoc = await getDocs(collection(db, "users"));
     let email;
 
     userDoc.forEach((doc) => {
-        if(doc.data().username === identifier) {
+        if(doc.data().username === lowercaseIdentifier) {
             email = doc.data().email;
         }
     });
@@ -104,8 +106,8 @@ app.post('/login', async (req, res) => {
 
                 const payload = {
                     uid: userCredential.user.uid,
-                    username: identifier,
-                    email: email
+                    username: lowercaseIdentifier,
+                    email: email,
                 };
 
                 const token = jwt.sign(payload, secretKey, { expiresIn: '336h' });
@@ -119,13 +121,13 @@ app.post('/login', async (req, res) => {
             });
     } else {
         // User not found by username, attempt to sign in with the identifier as email.
-        signInWithEmailAndPassword(auth, identifier, password)
+        signInWithEmailAndPassword(auth, lowercaseIdentifier, password)
             .then((userCredential) => {
                 console.log("User logged in successfully");
 
                 const payload = {
                     uid: userCredential.user.uid,
-                    username: identifier,
+                    username: lowercaseIdentifier,
                     email: email
                 };
 
@@ -135,7 +137,7 @@ app.post('/login', async (req, res) => {
             })
             .catch((error) => {
                 console.error("Error:", error.message);
-                console.error(identifier, password);
+                console.error(lowercaseIdentifier, password);
                 res.status(400).send({ error: error.message });
             });
     }
@@ -150,13 +152,42 @@ app.post('/validate', (req, res) => {
             res.status(200).send({ valid: true });
         } catch (e) {
             console.log("Bad JWT")
-            res.status(200).send({ valid: false });
+            res.status(401).send({ valid: false });
         }
     } else {
         console.log("Error JWT")
-        res.status(200).send({ valid: false });
+        res.status(400).send({ valid: false });
     }
 });
+
+app.get('/:username', async (req, res) => {
+    const {username} = req.params;
+
+    try {
+        // Get the user document from Firestore
+        const userDoc = await getDocs(collection(db, "users"));
+        let userData = null;
+
+        userDoc.forEach((doc) => {
+            if (doc.data().username === username) {
+                userData = doc.data();
+            }
+        });
+
+        if (userData) {
+            // If the user exists, send their data in the response
+            res.status(200).json(userData);
+        } else {
+            // If the user doesn't exist, send a 404 error
+            res.status(404).send({error: 'User not found'});
+        }
+    } catch (error) {
+        console.error("Error getting user data:", error);
+        res.status(500).send({error: error.message});
+    }
+});
+
+
 
 app.get('/', (req, res) => {
     res.send('Hello World!')

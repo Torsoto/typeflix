@@ -55,6 +55,8 @@ export const AuthContextProvider = ({children}) => {
                     console.error('Error:', error);
                     logout();
                 });
+        } else {
+            logout();
         }
         console.log(isLoggedIn)
     }, []);

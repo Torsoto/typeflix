@@ -71,10 +71,6 @@ function Signup() {
     });
   };
 
-  const closeNotification = () => {
-    setNotification({ show: false, message: '' });
-  };
-
   return (
       <>
         <div className="main-bg">
@@ -168,7 +164,7 @@ function Signup() {
             </div>
           </div>
         </div>
-        {notification.show && <Notification message={notification.message} onClose={closeNotification} />}
+        {notification.show && <Notification message={notification.message}/>}
       </>
   );
 }
