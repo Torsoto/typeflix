@@ -46,34 +46,44 @@ app.post('/signup', (req, res) => {
     }
 })
 
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
     const { identifier, password } = req.body;
 
-    getDocs(collection(db, "users")).then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-            if(doc.data().username === identifier) {
-                signInWithEmailAndPassword(auth, doc.data().email, password)
-                    .then((userCredential) => {
-                        console.log("User logged in successfully");
-                        res.status(200).send({ uid: userCredential.user.uid });
-                    })
-                    .catch((error) => {
-                        console.error("Error:", error.message);
-                        res.status(400).send({ error: error.message }); // Here, 400 is used as a generic client error status
-                    });
-            } else {
-                signInWithEmailAndPassword(auth, identifier, password)
-                    .then((userCredential) => {
-                        console.log("User logged in successfully");
-                        res.status(200).send({ uid: userCredential.user.uid });
-                    })
-                    .catch((error) => {
-                        console.error("Error:", error.message);
-                        res.status(400).send({ error: error.message }); // Here, 400 is used as a generic client error status
-                    });
-            }
-        });
+    // First, attempt to find the user by username.
+    const userDoc = await getDocs(collection(db, "users"));
+    let email;
+
+    userDoc.forEach((doc) => {
+        if(doc.data().username === identifier) {
+            email = doc.data().email;
+        }
     });
+
+    if (email) {
+        // User found by username, attempt to sign in with their email.
+        signInWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                console.log("User logged in successfully");
+                res.status(200).send({ uid: userCredential.user.uid });
+            })
+            .catch((error) => {
+                console.error("Error:", error.message);
+                console.error(email, password);
+                res.status(400).send({ error: error.message });
+            });
+    } else {
+        // User not found by username, attempt to sign in with the identifier as email.
+        signInWithEmailAndPassword(auth, identifier, password)
+            .then((userCredential) => {
+                console.log("User logged in successfully");
+                res.status(200).send({ uid: userCredential.user.uid });
+            })
+            .catch((error) => {
+                console.error("Error:", error.message);
+                console.error(identifier, password);
+                res.status(400).send({ error: error.message });
+            });
+    }
 });
 
 app.get('/', (req, res) => {
