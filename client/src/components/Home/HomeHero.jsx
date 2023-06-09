@@ -48,10 +48,20 @@ const HomeGame = () => {
       }
     }
 
-    if (isBackspace && currentLetterIndex > 0) {
-      setCurrentLetterIndex(currentLetterIndex - 1);
-      setCorrectLetters(correctLetters.filter(item => item !== `${currentWordIndex}-${currentLetterIndex - 1}`));
-      setIncorrectLetters(incorrectLetters.filter(item => item !== `${currentWordIndex}-${currentLetterIndex - 1}`));
+    if (isBackspace) {
+      if (currentLetterIndex > 0) {
+        setCurrentLetterIndex(currentLetterIndex - 1);
+        setCorrectLetters(correctLetters.filter(item => item !== `${currentWordIndex}-${currentLetterIndex - 1}`));
+        setIncorrectLetters(incorrectLetters.filter(item => item !== `${currentWordIndex}-${currentLetterIndex - 1}`));
+      } else if (currentWordIndex > 0) {
+        const previousWordIndex = currentWordIndex - 1;
+        const previousWord = text[previousWordIndex];
+        const previousWordLength = previousWord.length;
+        setCurrentWordIndex(previousWordIndex);
+        setCurrentLetterIndex(previousWordLength - 1);
+        setCorrectLetters(correctLetters.filter(item => item !== `${previousWordIndex}-${previousWordLength - 1}`));
+        setIncorrectLetters(incorrectLetters.filter(item => item !== `${previousWordIndex}-${previousWordLength - 1}`));
+      }
     }
 
     if (isSpace && currentLetterIndex === currentWord.length) {
@@ -115,10 +125,10 @@ const HomeGame = () => {
                           key={`${letter}-${letterIndex}`}
                           className={
                             correctLetters.includes(`${wordIndex}-${letterIndex}`)
-                                ? "current opacity-100 relative"
+                                ? "current opacity-100 relative transition-color"
                                 : incorrectLetters.includes(`${wordIndex}-${letterIndex}`)
-                                    ? "opacity-100 text-red-500 relative"
-                                    : "opacity-60 relative"
+                                    ? "opacity-100 text-red-500 relative transition-color"
+                                    : "opacity-60 relative transition-color"
                           }
                       >
                         {letter}

@@ -64,10 +64,14 @@
   .stance {
     animation: move 2s infinite;
   }
-}
 
-@layer components {
   .blinking-cursor {
     animation: blink 0.85s infinite;
+    position: relative;
+    transition: left 0.3s ease-in-out;
+  }
+
+  .transition-color {
+    transition: all 0.1s ease;
   }
 }
