@@ -22,27 +22,39 @@ const HomeGame = () => {
   const handleKeyUp = (e) => {
     const key = e.key;
     const currentWord = text[currentWordIndex];
-    const currentLetter = currentWord && currentWord[currentLetterIndex];
-    const expected = currentLetter || " ";
-    const isLetter = key.length === 1 && key !== " ";
+    const expectedLetter = currentWord[currentLetterIndex];
+    const isLetter = key.length === 1;
     const isSpace = key === " ";
+    const isBackspace = key === "Backspace";
 
     if (isLetter) {
-      if (key === expected) {
-        setCurrentLetterIndex(currentLetterIndex + 1);
-        setCorrectLetters([
-          ...correctLetters,
-          `${currentWordIndex}-${currentLetterIndex}`,
-        ]);
+      if (currentLetterIndex === currentWord.length) {
+        return;
+      }
+      const nextLetterIndex = currentLetterIndex + 1;
+      if (key === expectedLetter) {
+        setCorrectLetters([...correctLetters, `${currentWordIndex}-${currentLetterIndex}`]);
+        if (nextLetterIndex < currentWord.length) {
+          setCurrentLetterIndex(nextLetterIndex);
+        } else {
+          setCurrentWordIndex(currentWordIndex + 1);
+          setCurrentLetterIndex(0);
+        }
       } else {
-        setIncorrectLetters([
-          ...incorrectLetters,
-          `${currentWordIndex}-${currentLetterIndex}`,
-        ]);
+        setIncorrectLetters([...incorrectLetters, `${currentWordIndex}-${currentLetterIndex}`]);
+        if (nextLetterIndex < currentWord.length) {
+          setCurrentLetterIndex(nextLetterIndex);
+        }
       }
     }
 
-    if (isSpace && !currentLetter) {
+    if (isBackspace && currentLetterIndex > 0) {
+      setCurrentLetterIndex(currentLetterIndex - 1);
+      setCorrectLetters(correctLetters.filter(item => item !== `${currentWordIndex}-${currentLetterIndex - 1}`));
+      setIncorrectLetters(incorrectLetters.filter(item => item !== `${currentWordIndex}-${currentLetterIndex - 1}`));
+    }
+
+    if (isSpace && currentLetterIndex === currentWord.length) {
       setCurrentWordIndex(currentWordIndex + 1);
       setCurrentLetterIndex(0);
     }
@@ -95,26 +107,19 @@ const HomeGame = () => {
                       {wordIndex === currentWordIndex &&
                         letterIndex === currentLetterIndex &&
                         !isBlurred && (
-                          <span className="fixed z-10 -ml-[3px] -mt-[1.5px] text-yellow-400 blinking-cursor">
+                          <span className="fixed z-10 -ml-[0px] -mt-[1.5px] text-yellow-400 blinking-cursor">
                             |
                           </span>
                         )}
                       <span
-                        key={`${letter}-${letterIndex}`}
-                        className={
-                          wordIndex === currentWordIndex &&
-                          letterIndex === currentLetterIndex
-                            ? "current opacity-100 relative"
-                            : correctLetters.includes(
-                                `${wordIndex}-${letterIndex}`
-                              )
-                            ? "opacity-100 relative"
-                            : incorrectLetters.includes(
-                                `${wordIndex}-${letterIndex}`
-                              )
-                            ? "opacity-100 text-red-500 relative"
-                            : "opacity-60 relative"
-                        }
+                          key={`${letter}-${letterIndex}`}
+                          className={
+                            correctLetters.includes(`${wordIndex}-${letterIndex}`)
+                                ? "current opacity-100 relative"
+                                : incorrectLetters.includes(`${wordIndex}-${letterIndex}`)
+                                    ? "opacity-100 text-red-500 relative"
+                                    : "opacity-60 relative"
+                          }
                       >
                         {letter}
                       </span>
