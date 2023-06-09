@@ -1,7 +1,33 @@
-import {useState} from "react";
+import { useEffect, useState } from "react";
 
 export const DropdownMenu = () => {
-  const [isLoggedIn] = useState(false);
+
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    const logout = () => {
+        localStorage.removeItem('jwt');
+    }
+
+    useEffect(() => {
+        const token = localStorage.getItem('jwt');
+        console.log(token)
+        if (token ) {
+            fetch('http://localhost:3000/validate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ token })
+            })
+                .then(response => response.json())
+                .then(data => setIsLoggedIn(data.valid))
+                .catch(error => {
+                    console.error('Error:', error);
+                    setIsLoggedIn(false);
+                });
+        }
+    }, []);
+
   return (
     <div className="absolute w-[152px]">
       <div
@@ -23,7 +49,9 @@ export const DropdownMenu = () => {
                 <a href="/settings" className="text-white block px-4 py-2 text-sm">
                   Settings
                 </a>
-                <a href="/" className="text-white block px-4 py-2 text-sm">
+                <a href="/"
+                   className="text-white block px-4 py-2 text-sm"
+                    onClick={logout}>
                   Log out
                 </a>
               </div>

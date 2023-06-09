@@ -3,11 +3,13 @@ import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWith
 import { getFirestore, doc, setDoc, getDocs, collection } from "firebase/firestore";
 import './db/firebase.mjs';
 import cors from 'cors';
+import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
+
 const app = express();
 const auth = getAuth();
 const db = getFirestore();
-
-
+const secretKey = crypto.randomBytes(64).toString('hex');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -35,24 +37,43 @@ app.post('/signup', async (req, res) => {
             try {
                 const {username, email, password} = req.body;
                 createUserWithEmailAndPassword(auth, email, password)
+
                     .then((userRecord) => {
+
                         console.log('Successfully created new user:', userRecord.user.uid);
+
                         setDoc(doc(db, "users", username), {
                             username: username,
                             email: email,
                             userid: userRecord.user.uid
+
                         }).then(() => {
+
                             console.log("User data stored in Firestore");
-                            res.status(200).send({uid: userRecord.user.uid});
+
+                            const payload = {
+                                uid: userRecord.user.uid,
+                                username: username,
+                                email: email
+                            };
+
+                            const token = jwt.sign(payload, secretKey, { expiresIn: '336h' });
+
+                            res.status(200).send({ token: token, uid: userRecord.user.uid });
+
                         }).catch((error) => {
+
                             console.log("Error storing user data in Firestore:", error);
                             res.status(500).send({error: error.message});
+
                         });
 
                     })
                     .catch((error) => {
+
                         console.log('Error creating new user:', error);
                         res.status(500).send({error: error.message});
+
                     });
             } catch (e) {
                 res.status(500).send({error: e.message});
@@ -81,7 +102,16 @@ app.post('/login', async (req, res) => {
         signInWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
                 console.log("User logged in successfully");
-                res.status(200).send({ uid: userCredential.user.uid });
+
+                const payload = {
+                    uid: userCredential.user.uid,
+                    username: identifier,
+                    email: email
+                };
+
+                const token = jwt.sign(payload, secretKey, { expiresIn: '1h' });
+
+                res.status(200).send({ token: token, uid: userCredential.user.uid });
             })
             .catch((error) => {
                 console.error("Error:", error.message);
@@ -93,13 +123,39 @@ app.post('/login', async (req, res) => {
         signInWithEmailAndPassword(auth, identifier, password)
             .then((userCredential) => {
                 console.log("User logged in successfully");
-                res.status(200).send({ uid: userCredential.user.uid });
+
+                const payload = {
+                    uid: userCredential.user.uid,
+                    username: identifier,
+                    email: email
+                };
+
+                const token = jwt.sign(payload, secretKey, { expiresIn: '1h' });
+
+                res.status(200).send({ token: token, uid: userCredential.user.uid });
             })
             .catch((error) => {
                 console.error("Error:", error.message);
                 console.error(identifier, password);
                 res.status(400).send({ error: error.message });
             });
+    }
+});
+
+app.post('/validate', (req, res) => {
+    const token = req.body.token;
+    if (token) {
+        try {
+            jwt.verify(token, secretKey);
+            console.log("Good JWT")
+            res.status(200).send({ valid: true });
+        } catch (e) {
+            console.log("Bad JWT")
+            res.status(200).send({ valid: false });
+        }
+    } else {
+        console.log("Error JWT")
+        res.status(200).send({ valid: false });
     }
 });
 

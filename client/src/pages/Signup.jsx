@@ -59,6 +59,7 @@ function Signup() {
             throw new Error(data.error);
           } else {
             console.log(`Successfully created new user with id: ${data.uid}`);
+            localStorage.setItem('jwt', data.token);
             window.location.href = "/";
           }
         })

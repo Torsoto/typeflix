@@ -32,6 +32,7 @@ function Login() {
           if (data.error) {
             throw new Error(data.error);
           } else {
+            localStorage.setItem('jwt', data.token);
             window.location.href = "/";
           }
         })
