@@ -6,6 +6,8 @@ import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { BeatLoader } from "react-spinners";  // import the spinner
 import Notification from '../components/UI/Notification/Notification.jsx';
 import {ERROR_MAP} from "../components/UI/Notification/ERROR_MAP.js";
+import { auth } from "../../db/firebase.js";
+import { UserAuth } from "../components/context/AuthContext.jsx"
 
 function Signup() {
   const [email, setEmail] = useState("");
@@ -15,8 +17,7 @@ function Signup() {
   const [emailError, setEmailError] = useState(false);
   const [loading, setLoading] = useState(false);  // new loading state
   const [notification, setNotification] = useState({ show: false, message: '' });
-  const googleProvider = new GoogleAuthProvider();
-  const auth = getAuth();
+  const { googleSignIn, login } = UserAuth();
 
   const validateEmail = (e) => {
     setEmail(e.target.value);
@@ -26,13 +27,11 @@ function Signup() {
     }
   };
 
-  const handelGoogleSignUp = async () => {
+  const handelGoogleSignUp = () => {
     setLoading(true);  // start loading
-    await signInWithPopup(auth, googleProvider).then(() => {
-      window.location.href = "/";
-    }).finally(() => {
-      setLoading(false);  // stop loading regardless of success or error
-    });
+    googleSignIn().then(() => {
+      setLoading(false);
+    })
   };
 
   const handleSignup = () => {
@@ -60,6 +59,7 @@ function Signup() {
           } else {
             console.log(`Successfully created new user with id: ${data.uid}`);
             localStorage.setItem('jwt', data.token);
+            login(data.token);
             window.location.href = "/";
           }
         })

@@ -15,7 +15,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: 'http://localhost:5173' }));
 
-
 app.post('/signup', async (req, res) => {
     try {
         const {username, email, password} = req.body;
@@ -109,7 +108,7 @@ app.post('/login', async (req, res) => {
                     email: email
                 };
 
-                const token = jwt.sign(payload, secretKey, { expiresIn: '1h' });
+                const token = jwt.sign(payload, secretKey, { expiresIn: '336h' });
 
                 res.status(200).send({ token: token, uid: userCredential.user.uid });
             })

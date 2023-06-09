@@ -6,14 +6,15 @@ import React, {useState} from "react";
 import { BeatLoader } from "react-spinners";
 import Notification from "../components/UI/Notification/Notification.jsx";
 import {ERROR_MAP} from "../components/UI/Notification/ERROR_MAP.js";
+import { auth } from "../../db/firebase.js";
+import {UserAuth} from "../components/context/AuthContext.jsx";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState({ show: false, message: '' });
-  const googleProvider = new GoogleAuthProvider();
-  const auth = getAuth();
+  const { googleSignIn, login, isLoggedIn } = UserAuth();
 
   const handleLogin = () => {
     setLoading(true);
@@ -33,6 +34,7 @@ function Login() {
             throw new Error(data.error);
           } else {
             localStorage.setItem('jwt', data.token);
+            login(data.token);
             window.location.href = "/";
           }
         })
@@ -46,11 +48,9 @@ function Login() {
 
   const handelGoogleLogin = () => {
     setLoading(true);  // start loading
-    signInWithPopup(auth, googleProvider).then(() => {
-      window.location.href = "/";
-    }).finally(() => {
-      setLoading(false);  // stop loading regardless of success or error
-    });
+    googleSignIn().then(() => {
+      setLoading(false);
+    })
   };
 
   const closeNotification = () => {

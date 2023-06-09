@@ -1,32 +1,8 @@
 import { useEffect, useState } from "react";
+import {AuthContextProvider, UserAuth} from "../context/AuthContext.jsx";
 
 export const DropdownMenu = () => {
-
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-    const logout = () => {
-        localStorage.removeItem('jwt');
-    }
-
-    useEffect(() => {
-        const token = localStorage.getItem('jwt');
-        console.log(token)
-        if (token ) {
-            fetch('http://localhost:3000/validate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ token })
-            })
-                .then(response => response.json())
-                .then(data => setIsLoggedIn(data.valid))
-                .catch(error => {
-                    console.error('Error:', error);
-                    setIsLoggedIn(false);
-                });
-        }
-    }, []);
+    const { isLoggedIn, logout } = UserAuth();
 
   return (
     <div className="absolute w-[152px]">
@@ -51,7 +27,10 @@ export const DropdownMenu = () => {
                 </a>
                 <a href="/"
                    className="text-white block px-4 py-2 text-sm"
-                    onClick={logout}>
+                   onClick={(e) => {
+                       e.preventDefault();
+                       logout();
+                   }}>
                   Log out
                 </a>
               </div>
