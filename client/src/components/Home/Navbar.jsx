@@ -1,11 +1,10 @@
 import logo from "../../assets/wide-logo.svg";
-import userIcon from "../../assets/user-icon.png";
+import userIcon from "../../assets/profile.svg";
 import { IoIosArrowDown } from "react-icons/io";
 import { useState } from "react";
 import DropdownMenu from "./Dropdown";
 
 const Navbar = () => {
-  const [isLoggedIn] = useState(true);
   const [isDropdownOpen, setDropdownOpen] = useState(false);
 
   const toggleDropdown = () => {
@@ -40,30 +39,15 @@ const Navbar = () => {
         </a>
       </div>
       <div className="relative w-[152px] text-right">
-        {isLoggedIn ? (
-          <div>
-            <div className="flex items-center gap-1 justify-end">
-              <IoIosArrowDown
-                className={`mr-1 text-lg text-white cursor-pointer transform transition-transform ${
-                  isDropdownOpen ? "rotate-180" : ""
-                }`}
-                onClick={toggleDropdown}
-              />
-              <img
-                src={userIcon}
-                alt="User Icon"
-                className="w-8 h-8 rounded-full cursor-pointer"
-              />
-            </div>
-            {isDropdownOpen && <DropdownMenu />}
-          </div>
-        ) : (
-          <a href="/login" className="navbar__link">
-            <span className="font-medium text-white transition-colors hover:text-gray-400">
-              Login
-            </span>
-          </a>
-        )}
+        <div className="flex items-center gap-1 justify-end">
+          <img
+              src={userIcon}
+              alt="User Icon"
+              className="w-8 h-8 rounded-full cursor-pointer"
+              onClick={toggleDropdown}
+          />
+        </div>
+        {isDropdownOpen && <DropdownMenu />}
       </div>
     </nav>
   );

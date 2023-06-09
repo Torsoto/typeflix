@@ -64,7 +64,7 @@ function Signup() {
         })
         .catch((error) => {
           console.log(error.message)
-          setNotification({ show: true, message: ERROR_MAP[error.message] || error.message });
+          setNotification({ show: true, message: ERROR_MAP[error.message] || "An error occurred during signup. Please try again." });
         }).finally(() => {
       setLoading(false);  // stop loading regardless of success or error
     });

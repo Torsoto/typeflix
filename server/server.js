@@ -37,8 +37,6 @@ app.post('/signup', async (req, res) => {
                 createUserWithEmailAndPassword(auth, email, password)
                     .then((userRecord) => {
                         console.log('Successfully created new user:', userRecord.user.uid);
-                        console.log('Username: ', username);
-
                         setDoc(doc(db, "users", username), {
                             username: username,
                             email: email,

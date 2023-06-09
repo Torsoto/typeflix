@@ -36,7 +36,7 @@ function Login() {
           }
         })
         .catch((error) => {
-          setNotification({ show: true, message: ERROR_MAP[error.message] || error.message });
+          setNotification({ show: true, message: ERROR_MAP[error.message] || "An error occurred during login. Please try again." });
         })
         .finally(() => {
           setLoading(false);  // stop loading regardless of success or error
