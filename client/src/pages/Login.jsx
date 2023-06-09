@@ -2,15 +2,21 @@ import "../styles/Login.css";
 import LogoNav from "../components/Login/LogoNav";
 import googleLogo from "../assets/google-logo.svg";
 import {getAuth, GoogleAuthProvider, signInWithPopup,} from "firebase/auth";
-import {useState} from "react";
+import React, {useState} from "react";
+import { BeatLoader } from "react-spinners";
+import Notification from "../components/UI/Notification/Notification.jsx";
+import {ERROR_MAP} from "../components/UI/Notification/ERROR_MAP.js";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState({ show: false, message: '' });
   const googleProvider = new GoogleAuthProvider();
   const auth = getAuth();
 
   const handleLogin = () => {
+    setLoading(true);
     fetch('http://localhost:3000/login', {
       method: 'POST',
       headers: {
@@ -30,16 +36,24 @@ function Login() {
           }
         })
         .catch((error) => {
-          // An error occurred during login...
-          alert(error.message);
+          setNotification({ show: true, message: ERROR_MAP[error.message] || error.message });
+        })
+        .finally(() => {
+          setLoading(false);  // stop loading regardless of success or error
         });
   };
 
-
   const handelGoogleLogin = () => {
+    setLoading(true);  // start loading
     signInWithPopup(auth, googleProvider).then(() => {
       window.location.href = "/";
+    }).finally(() => {
+      setLoading(false);  // stop loading regardless of success or error
     });
+  };
+
+  const closeNotification = () => {
+    setNotification({ show: false, message: '' });
   };
 
   return (
@@ -81,8 +95,15 @@ function Login() {
               <button
                   className="flex items-center justify-center w-full py-3 my-8 font-bold text-white bg-black rounded-full"
                   onClick={handleLogin}
+                  disabled={loading}
               >
-                Login
+                {loading ? (
+                    <div className="h-[24px]">
+                      <BeatLoader color="#FFFFFF" size={8} />
+                    </div>
+                ) : (
+                    'Login'
+                )}
               </button>
               <div className="flex items-center justify-between mt-5">
                 <div className="flex-1 bg-gray-500">
@@ -119,6 +140,7 @@ function Login() {
             </div>
           </div>
         </div>
+        {notification.show && <Notification message={notification.message} onClose={closeNotification} />}
       </>
   );
 }

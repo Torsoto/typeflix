@@ -3,6 +3,9 @@ import LogoNav from "../components/Login/LogoNav";
 import googleLogo from "../assets/google-logo.svg";
 import React, { useState } from "react";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { BeatLoader } from "react-spinners";  // import the spinner
+import Notification from '../components/UI/Notification/Notification.jsx';
+import {ERROR_MAP} from "../components/UI/Notification/ERROR_MAP.js";
 
 function Signup() {
   const [email, setEmail] = useState("");
@@ -10,6 +13,8 @@ function Signup() {
   const [username, setUsername] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [emailError, setEmailError] = useState(false);
+  const [loading, setLoading] = useState(false);  // new loading state
+  const [notification, setNotification] = useState({ show: false, message: '' });
   const googleProvider = new GoogleAuthProvider();
   const auth = getAuth();
 
@@ -22,8 +27,11 @@ function Signup() {
   };
 
   const handelGoogleSignUp = async () => {
+    setLoading(true);  // start loading
     await signInWithPopup(auth, googleProvider).then(() => {
       window.location.href = "/";
+    }).finally(() => {
+      setLoading(false);  // stop loading regardless of success or error
     });
   };
 
@@ -33,6 +41,7 @@ function Signup() {
       return;
     }
 
+    setLoading(true);  // start loading
     fetch("http://localhost:3000/signup", {
       method: "POST",
       headers: {
@@ -49,17 +58,20 @@ function Signup() {
           if (data.error) {
             throw new Error(data.error);
           } else {
-            // Alert with the user's uid
             console.log(`Successfully created new user with id: ${data.uid}`);
-
-            // You can do something with the user's uid here if you want
             window.location.href = "/";
           }
         })
         .catch((error) => {
-          // An error occurred during registration...
-          alert(error.message);
-        });
+          console.log(error.message)
+          setNotification({ show: true, message: ERROR_MAP[error.message] || error.message });
+        }).finally(() => {
+      setLoading(false);  // stop loading regardless of success or error
+    });
+  };
+
+  const closeNotification = () => {
+    setNotification({ show: false, message: '' });
   };
 
   return (
@@ -124,8 +136,15 @@ function Signup() {
               <button
                   onClick={handleSignup}
                   className="flex items-center justify-center w-full py-3 my-8 font-bold text-white bg-black rounded-full"
+                  disabled={loading}
               >
-                Sign up
+                {loading ? (
+                    <div className="h-[24px]">
+                      <BeatLoader color="#FFFFFF" size={8} />
+                    </div>
+                ) : (
+                    'Sign up'
+                )}
               </button>
               <div className="flex items-center justify-center my-5">
                 <div className="w-16 h-0.5 bg-white"></div>
@@ -139,9 +158,16 @@ function Signup() {
                 <img src={googleLogo} alt="" className="w-6 h-6 mr-3" />
                 Sign up with Google
               </button>
+              <div className="flex items-center justify-center mt-5">
+                <span className="text-gray-500">Already have an account?</span>
+                <a href="/login" className="ml-2 text-white">
+                  Log in
+                </a>
+              </div>
             </div>
           </div>
         </div>
+        {notification.show && <Notification message={notification.message} onClose={closeNotification} />}
       </>
   );
 }

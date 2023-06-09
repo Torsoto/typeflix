@@ -1,12 +1,12 @@
 import express from 'express';
-const app = express();
 import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDocs, collection } from "firebase/firestore";
 import './db/firebase.mjs';
+import cors from 'cors';
+const app = express();
 const auth = getAuth();
 const db = getFirestore();
 
-import cors from 'cors';
 
 
 app.use(express.json());
@@ -14,35 +14,54 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: 'http://localhost:5173' }));
 
 
-app.post('/signup', (req, res) => {
+app.post('/signup', async (req, res) => {
     try {
-        const { username, email, password } = req.body;
-        createUserWithEmailAndPassword(auth, email, password)
-            .then((userRecord) => {
-                console.log('Successfully created new user:', userRecord.user.uid);
-                console.log('Username: ', username);
+        const {username, email, password} = req.body;
 
-                // Add a new document in collection "users" with UID as the document ID
-                console.log(db);
-                setDoc(doc(db, "users", username), {
-                    username: username,
-                    email: email,
-                    userid: userRecord.user.uid
-                }).then(() => {
-                    console.log("User data stored in Firestore");
-                    res.status(200).send({ uid: userRecord.user.uid });
-                }).catch((error) => {
-                    console.log("Error storing user data in Firestore:", error);
-                    res.status(500).send({ error: error.message });
-                });
+        // Check if username already exists
+        const userDoc = await getDocs(collection(db, "users"));
+        let usernameExists = false;
 
-            })
-            .catch((error) => {
-                console.log('Error creating new user:', error);
-                res.status(500).send({ error: error.message });
-            });
+        userDoc.forEach((doc) => {
+            if (doc.data().username === username) {
+                usernameExists = true;
+            }
+        });
+
+        if (usernameExists) {
+            console.log('Username already exists');
+            res.status(401).send({error: 'Username already exists'});
+        } else {
+            try {
+                const {username, email, password} = req.body;
+                createUserWithEmailAndPassword(auth, email, password)
+                    .then((userRecord) => {
+                        console.log('Successfully created new user:', userRecord.user.uid);
+                        console.log('Username: ', username);
+
+                        setDoc(doc(db, "users", username), {
+                            username: username,
+                            email: email,
+                            userid: userRecord.user.uid
+                        }).then(() => {
+                            console.log("User data stored in Firestore");
+                            res.status(200).send({uid: userRecord.user.uid});
+                        }).catch((error) => {
+                            console.log("Error storing user data in Firestore:", error);
+                            res.status(500).send({error: error.message});
+                        });
+
+                    })
+                    .catch((error) => {
+                        console.log('Error creating new user:', error);
+                        res.status(500).send({error: error.message});
+                    });
+            } catch (e) {
+                res.status(500).send({error: e.message});
+            }
+        }
     } catch (e) {
-        res.status(500).send({ error: e.message });
+        res.status(500).send({error: e.message});
     }
 })
 
