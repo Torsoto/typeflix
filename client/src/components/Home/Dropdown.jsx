@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import {AuthContextProvider, UserAuth} from "../context/AuthContext.jsx";
+import {useContext, useEffect, useState} from "react";
+import AuthContext from "../context/AuthContext.jsx";
 
 export const DropdownMenu = () => {
-    const { isLoggedIn, logout } = UserAuth();
+    const { isLoggedIn, logout } = useContext(AuthContext);
 
   return (
     <div className="absolute w-[152px]">

@@ -131,7 +131,7 @@ app.post('/login', async (req, res) => {
                     email: email
                 };
 
-                const token = jwt.sign(payload, secretKey, { expiresIn: '1h' });
+                const token = jwt.sign(payload, secretKey, { expiresIn: '336h' });
 
                 res.status(200).send({ token: token, uid: userCredential.user.uid });
             })
@@ -147,46 +147,52 @@ app.post('/validate', (req, res) => {
     const token = req.body.token;
     if (token) {
         try {
-            jwt.verify(token, secretKey);
+            const decoded = jwt.verify(token, secretKey);
             console.log("Good JWT")
-            res.status(200).send({ valid: true });
+            res.status(200).send({ valid: true, username: decoded.username });
         } catch (e) {
             console.log("Bad JWT")
-            res.status(401).send({ valid: false });
+            res.status(401).send({ valid: false, error: e.message });
         }
     } else {
         console.log("Error JWT")
-        res.status(400).send({ valid: false });
+        res.status(400).send({ valid: false, error: "No token provided" });
     }
 });
 
 app.get('/:username', async (req, res) => {
-    const {username} = req.params;
+    const { username } = req.params;
+    const lowercaseUsername = username.toLowerCase();
 
     try {
-        // Get the user document from Firestore
-        const userDoc = await getDocs(collection(db, "users"));
+        // Get the user documents from Firestore
+        const userDocs = await getDocs(collection(db, "users"));
         let userData = null;
 
-        userDoc.forEach((doc) => {
-            if (doc.data().username === username) {
+        userDocs.forEach((doc) => {
+            if (doc.data().username === lowercaseUsername) {
                 userData = doc.data();
             }
         });
 
         if (userData) {
+            // Sort the properties of the userData object
+            const sortedUserData = {};
+            Object.keys(userData).sort().forEach((key) => {
+                sortedUserData[key] = userData[key];
+            });
+
             // If the user exists, send their data in the response
-            res.status(200).json(userData);
+            res.status(200).json(sortedUserData);
         } else {
             // If the user doesn't exist, send a 404 error
-            res.status(404).send({error: 'User not found'});
+            res.status(404).send({ error: 'User not found' });
         }
     } catch (error) {
         console.error("Error getting user data:", error);
-        res.status(500).send({error: error.message});
+        res.status(500).send({ error: error.message });
     }
 });
-
 
 
 app.get('/', (req, res) => {

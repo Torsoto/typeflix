@@ -1,13 +1,13 @@
 import "../styles/Signup.css";
 import LogoNav from "../components/Login/LogoNav";
 import googleLogo from "../assets/google-logo.svg";
-import React, { useState } from "react";
+import React, {useContext, useState} from "react";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { BeatLoader } from "react-spinners";  // import the spinner
 import Notification from '../components/UI/Notification/Notification.jsx';
 import {ERROR_MAP} from "../components/UI/Notification/ERROR_MAP.js";
 import { auth } from "../../db/firebase.js";
-import { UserAuth } from "../components/context/AuthContext.jsx"
+import AuthContext from "../components/context/AuthContext.jsx"
 
 function Signup() {
   const [email, setEmail] = useState("");
@@ -17,7 +17,7 @@ function Signup() {
   const [emailError, setEmailError] = useState(false);
   const [loading, setLoading] = useState(false);  // new loading state
   const [notification, setNotification] = useState({ show: false, message: '' });
-  const { googleSignIn, login } = UserAuth();
+  const { googleSignIn, login } = useContext(AuthContext);
 
   const validateEmail = (e) => {
     setEmail(e.target.value);

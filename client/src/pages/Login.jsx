@@ -1,70 +1,58 @@
 import "../styles/Login.css";
 import LogoNav from "../components/Login/LogoNav";
 import googleLogo from "../assets/google-logo.svg";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import React, { useState } from "react";
+import React, {useContext, useState} from "react";
 import { BeatLoader } from "react-spinners";
 import Notification from "../components/UI/Notification/Notification.jsx";
-import { ERROR_MAP } from "../components/UI/Notification/ERROR_MAP.js";
+import {ERROR_MAP} from "../components/UI/Notification/ERROR_MAP.js";
+import AuthContext from "../components/context/AuthContext.jsx";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [notification, setNotification] = useState({
-    show: false,
-    message: "",
-  });
-  const googleProvider = new GoogleAuthProvider();
-  const auth = getAuth();
+  const [notification, setNotification] = useState({ show: false, message: '' });
+  const { googleSignIn, login } = useContext(AuthContext);
 
   const handleLogin = () => {
     setLoading(true);
-    fetch("http://localhost:3000/login", {
-      method: "POST",
+    fetch('http://localhost:3000/login', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         identifier: email,
-        password: password,
-      }),
+        password: password
+      })
     })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.error) {
-          throw new Error(data.error);
-        } else {
-          localStorage.setItem("jwt", data.token);
-          window.location.href = "/";
-        }
-      })
-      .catch((error) => {
-        setNotification({
-          show: true,
-          message:
-            ERROR_MAP[error.message] ||
-            "An error occurred during login. Please try again.",
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            throw new Error(data.error);
+          } else {
+            localStorage.setItem('jwt', data.token);
+            login(data.token);
+            window.location.href = "/";
+          }
+        })
+        .catch((error) => {
+          setNotification({ show: true, message: ERROR_MAP[error.message] || "An error occurred during login. Please try again." });
+        })
+        .finally(() => {
+          setLoading(false);  // stop loading regardless of success or error
         });
-      })
-      .finally(() => {
-        setLoading(false); // stop loading regardless of success or error
-      });
   };
 
   const handelGoogleLogin = () => {
-    setLoading(true); // start loading
-    signInWithPopup(auth, googleProvider)
-      .then(() => {
-        window.location.href = "/";
-      })
-      .finally(() => {
-        setLoading(false); // stop loading regardless of success or error
-      });
+    setLoading(true);  // start loading
+    googleSignIn().then(() => {
+      setLoading(false);
+    })
   };
 
   const closeNotification = () => {
-    setNotification({ show: false, message: "" });
+    setNotification({ show: false, message: '' });
   };
 
   return (
