@@ -1,6 +1,5 @@
 import logo from "../../assets/wide-logo.svg";
 import userIcon from "../../assets/profile.svg";
-import { IoIosArrowDown } from "react-icons/io";
 import { useState } from "react";
 import DropdownMenu from "./Dropdown";
 
@@ -17,6 +16,9 @@ const Navbar = () => {
         <img src={logo} alt="Logo" />
       </div>
       <div className="flex gap-6">
+        <span className="font-medium text-white transition-colors hover:text-gray-400">
+          Theme
+        </span>
         <a href="/training" className="navbar__link">
           <span className="font-medium text-white transition-colors hover:text-gray-400">
             Training
