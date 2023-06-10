@@ -119,8 +119,8 @@ const HomeGame = () => {
             onKeyUp={handleKeyUp}
             onClick={handleClickForBlur}
             className={`max-w-[1200px] ${
-              isBlurred ? "blur" : ""
-            } overflow-hidden flex items-center text-2xl m-auto`}
+                isBlurred ? "blur" : ""
+            } overflow-hidden flex items-center text-2xl m-auto focus:outline-none`}
           >
             <p className="relative p-4 leading-loose text-justify line-clamp-3">
               {text.map((letter, letterIndex) => (
