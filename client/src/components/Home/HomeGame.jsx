@@ -134,12 +134,12 @@ const HomeGame = () => {
                     key={`${letter}-${letterIndex}`}
                     className={
                       letterIndex === currentLetterIndex
-                        ? "current opacity-60 relative"
+                        ? "current opacity-60 relative transition-color"
                         : correctLetters.includes(`${letterIndex}`)
-                        ? "opacity-100 relative"
+                        ? "opacity-100 relative transition-color"
                         : incorrectLetters.includes(`${letterIndex}`)
-                        ? "opacity-100 text-red-500 relative"
-                        : "opacity-60 relative"
+                        ? "opacity-100 text-red-500 relative transition-color"
+                        : "opacity-60 relative transition-color"
                     }
                   >
                     {letter}
