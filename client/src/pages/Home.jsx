@@ -1,6 +1,6 @@
 import "../styles/Home.css";
 import Navbar from "../components/Home/Navbar.jsx";
-import HomeHero from "../components/Home/HomeHero.jsx";
+import HomeGame from "../components/Home/HomeGame.jsx";
 
 function Home() {
   return (
@@ -8,7 +8,7 @@ function Home() {
       <div className="main-bg">
         <div className="h-[90%] m-auto max-w-7xl">
           <Navbar />
-          <HomeHero />
+          <HomeGame />
         </div>
       </div>
     </>
