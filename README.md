@@ -14,4 +14,4 @@ Welcome to Typeflix! This is a theme-based typewriting game that tests your typi
 
 Copyright (c) 2023 FH Campus Wien
 
-This project, XSolutions-Configurable-Cash-Register, is the property of FH Campus Wien and is protected by copyright laws. It is made available on GitHub for educational and reference purposes only. Any unauthorized use, reproduction, or distribution of this project is strictly prohibited.
+This project, Typeflix, is the property of FH Campus Wien and is protected by copyright laws. It is made available on GitHub for educational and reference purposes only. Any unauthorized use, reproduction, or distribution of this project is strictly prohibited.
