@@ -1,6 +1,6 @@
 # Typeflix
 
-Welcome to the Typewriting online game! This is a theme-based game that tests your typing speed and accuracy with different levels of difficulty.
+Welcome to Typeflix! This is a theme-based typewriting game that tests your typing speed and accuracy with different levels of difficulty.
 
 ## Features
 - Theme-based: We have different themes based on your favourite TV-Shows, Movies and Animes!
