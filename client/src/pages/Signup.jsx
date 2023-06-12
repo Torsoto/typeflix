@@ -1,12 +1,9 @@
 import "../styles/Signup.css";
 import LogoNav from "../components/Login/LogoNav";
-import googleLogo from "../assets/google-logo.svg";
 import React, { useContext, useState } from "react";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { BeatLoader } from "react-spinners"; // import the spinner
 import Notification from "../components/UI/Notification/Notification.jsx";
 import { ERROR_MAP } from "../components/UI/Notification/ERROR_MAP.js";
-import { auth } from "../../db/firebase.js";
 import AuthContext from "../components/context/AuthContext.jsx";
 
 function Signup() {
@@ -20,7 +17,7 @@ function Signup() {
     show: false,
     message: "",
   });
-  const { googleSignIn, login } = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
 
   const validateEmail = (e) => {
     setEmail(e.target.value);
@@ -28,13 +25,6 @@ function Signup() {
     if (e.target.value.length > 2) {
       setEmailError(!emailRegex.test(e.target.value));
     }
-  };
-
-  const handelGoogleSignUp = () => {
-    setLoading(true); // start loading
-    googleSignIn().then(() => {
-      setLoading(false);
-    });
   };
 
   const handleSignup = async () => {
@@ -150,19 +140,8 @@ function Signup() {
                 "Sign up"
               )}
             </button>
-            <div className="flex items-center justify-center my-5">
-              <div className="w-16 h-0.5 bg-white"></div>
-              <p className="mx-5 text-white">or</p>
-              <div className="w-16 h-0.5 bg-white"></div>
-            </div>
-            <button
-              onClick={handelGoogleSignUp}
-              className="flex items-center justify-center w-full py-3 my-5 text-black bg-white rounded-full"
-            >
-              <img src={googleLogo} alt="" className="w-6 h-6 mr-3" />
-              Sign up with Google
-            </button>
-            <div className="flex items-center justify-center mt-5">
+            <div className="flex items-center justify-center "></div>
+            <div className="flex items-center justify-center ">
               <span className="text-gray-500">Already have an account?</span>
               <a href="/login" className="ml-2 text-white">
                 Log in
