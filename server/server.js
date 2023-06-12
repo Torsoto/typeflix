@@ -151,21 +151,39 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.post("/validate", (req, res) => {
-  const token = req.body.token;
-  if (token) {
-    try {
-      const decoded = jwt.verify(token, secretKey);
-      console.log("Good JWT");
-      res.status(200).send({ valid: true, username: decoded.username });
-    } catch (e) {
-      console.log("Bad JWT");
-      res.status(401).send({ valid: false, error: e.message });
+app.post('/validate', async (req, res) => {
+    const token = req.body.token;
+    if (token) {
+        try {
+            const decoded = jwt.verify(token, secretKey);
+            res.status(200).send({ valid: true, username: decoded.username });
+        } catch (e) {
+            res.status(401).send({ valid: false, error: e.message });
+        }
+    } else {
+        res.status(400).send({ valid: false, error: "No token provided" });
     }
-  } else {
-    console.log("Error JWT");
-    res.status(400).send({ valid: false, error: "No token provided" });
-  }
+});
+
+app.get("/movies", async (req, res) => {
+    try {
+        const moviesRef = collection(db, "movies");
+        const moviesSnapshot = await getDocs(moviesRef);
+
+        const moviesList = [];
+        moviesSnapshot.forEach((doc) => {
+            const movieData = {
+                title: doc.id,
+                poster: doc.data().poster,
+            };
+            moviesList.push(movieData);
+        });
+
+        res.status(200).json(moviesList);
+    } catch (error) {
+        console.error("Error retrieving movie list:", error);
+        res.status(500).send({ error: error.message });
+    }
 });
 
 app.get("/:username", async (req, res) => {
