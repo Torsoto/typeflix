@@ -5,6 +5,14 @@ function Settings() {
   const [error, setError] = useState("");
   const [avatarStyle, setAvatarStyle] = useState(""); // State to store the avatar URL
   const [showAvatarOptions, setShowAvatarOptions] = useState(false); // State to control the display of avatar options
+  const [newUsername, setNewUsername] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+
+  const handleDeleteAccount = () => {};
+  const handleUpdateEmail = () => {};
+  const handleUpdatePassword = () => {};
+  const handleUpdateUsername = () => {};
 
   const handleToggleAvatarOptions = () => {
     setShowAvatarOptions(!showAvatarOptions);
@@ -34,30 +42,25 @@ function Settings() {
             </ul>
             <div className="ml-auto">
               <button
-                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-                onClick={() => {
-                  // Implement edit username logic
-                }}
+                className="bg-black text-white font-semibold py-2 px-4 rounded"
+                onClick={handleUpdateUsername}
               >
                 Edit
               </button>
+              <p>Username</p>
             </div>
           </div>
           <div className="flex items-center">
             <div className="ml-auto">
               <button
-                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-                onClick={() => {
-                  // Implement edit email logic
-                }}
+                className="bg-black text-white font-semibold py-2 px-4 rounded"
+                onClick={handleUpdateEmail}
               >
                 Edit
               </button>
               <button
-                className="ml-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-                onClick={() => {
-                  // Implement edit password logic
-                }}
+                className="ml-4 bg-black text-white font-semibold py-2 px-4 rounded"
+                onClick={handleUpdatePassword}
               >
                 Edit
               </button>
@@ -70,7 +73,10 @@ function Settings() {
             >
               Change Avatar
             </button>
-            <button className="mt-4 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded">
+            <button
+              className="mt-4 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded"
+              onClick={() => handleDeleteAccount()}
+            >
               Delete Account
             </button>
           </div>
@@ -153,7 +159,7 @@ function Settings() {
                   </button>
                   <button
                     className="w-16 h-16 rounded-full overflow-hidden mr-2 mb-2"
-                    onClick={() => handleSelectAvatar("fun-emoji")}
+                    onClick={() => handleSelectAvatar("pixel-art")}
                   >
                     <img
                       src={`https://api.dicebear.com/6.x/pixel-art/svg`}
@@ -162,7 +168,7 @@ function Settings() {
                   </button>
                   <button
                     className="w-16 h-16 rounded-full overflow-hidden mr-2 mb-2"
-                    onClick={() => handleSelectAvatar("pixel-art")}
+                    onClick={() => handleSelectAvatar("fun-emoji")}
                   >
                     <img
                       src={`https://api.dicebear.com/6.x/fun-emoji/svg`}
