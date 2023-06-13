@@ -12,6 +12,9 @@ import AuthContext from "../src/components/context/AuthContext.jsx";
 
 function App() {
     const [userId, setUserId] = useState("");
+    const [text, setText] = useState(`The bush began to shake. Brad couldn't see what was causing it to shake, but he didn't care. he had a pretty good idea about what was going on and what was happening. He was so confident that he approached the bush carefree and with a smile on his face. That all changed the instant he realized what was actually behind the bush. She sat in the darkened room waiting. It was now a standoff. He had the power to put her in the room, but not the power to make her repent. It wasn't fair and no matter how long she had to endure the darkness, she wouldn't change her attitude. At three years old, Sandy's stubborn personality had already bloomed into full view.`
+        .toLowerCase()
+        .split(""));
     const [isLoggedIn, setIsLoggedIn] = useState({})
 
     const googleSignIn = () => {
@@ -67,7 +70,7 @@ function App() {
 
     return (
     <>
-        <AuthContext.Provider value={{googleSignIn, logout, login, isLoggedIn, userId }}>
+        <AuthContext.Provider value={{googleSignIn, logout, login, isLoggedIn, userId, text, setText }}>
             <Routes>
                 <Route path="/" element={<Home />}></Route>
                 <Route path="/login" element={<Login />}></Route>

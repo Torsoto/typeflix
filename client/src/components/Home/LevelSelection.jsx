@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, {useContext, useEffect, useState} from "react";
 import axios from "axios";
 import "../../styles/LevelSelection.css";
+import HomeGame from "./HomeGame.jsx";
+import AuthContext from "../context/AuthContext.jsx";
 
 const LevelSelection = () => {
     const [movies, setMovies] = useState([]);
@@ -9,6 +11,8 @@ const LevelSelection = () => {
     const [poster, setPoster] = useState(null);
     const [levels, setLevels] = useState([]);
     const [showLevels, setShowLevels] = useState(false);
+    const [showHomeGame, setShowHomeGame] = useState(false);
+    const { setText } = useContext(AuthContext);
 
     useEffect(() => {
         fetchMovieList();
@@ -78,14 +82,17 @@ const LevelSelection = () => {
 
     const renderLevels = () => {
         return levels.map((level) => {
-            const handleClick = async () => {
+            const handleLevelSelection = async () => {
                 try {
                     const response = await fetch(
                         `http://localhost:3000/movies/${encodeURIComponent(title)}/levels/${level}`
                     );
                     const data = await response.json();
+                    console.log(data.text);
+                    setText(data.text);
 
-                    console.log(data); // Example: log the data to the console
+                    // Transition to HomeGame component
+                    setShowHomeGame(true);
                 } catch (error) {
                     console.error(error);
                 }
@@ -101,7 +108,7 @@ const LevelSelection = () => {
                     <div
                         className="min-w-[376px] min-h-[224px] rounded-md border-4 border-white cursor-pointer relative"
                         style={{ boxShadow: '0px 2px 6px rgba(0, 0, 0, 0.3)' }}
-                        onClick={handleClick}
+                        onClick={handleLevelSelection}
                     >
                         <div
                             className="absolute inset-0 bg-cover bg-center"
@@ -119,13 +126,17 @@ const LevelSelection = () => {
     };
 
     return (
-        <div className="h-[85%] my-20 mx-auto text-white">
-            <div className="text-2xl text-center font-medium">
-                <p className="my-16">{showLevels ? 'Select Level' : 'Select Movie'}</p>
-            </div>
-            <div className="flex flex-wrap justify-center gap-[52px]">
-                {showLevels ? renderLevels() : renderMovies()}
-            </div>
+        <div className="h-[85%]">
+            {showHomeGame ? <HomeGame /> : (
+                <div className="h-[85%] mx-auto text-white">
+                    <div className="text-2xl text-center font-medium">
+                        <p className="my-16">{showLevels ? 'Select Level' : 'Select Movie'}</p>
+                    </div>
+                    <div className="flex flex-wrap justify-center gap-[52px]">
+                        {showLevels ? renderLevels() : renderMovies()}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

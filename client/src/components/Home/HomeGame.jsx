@@ -1,7 +1,8 @@
 import { BiTimeFive } from "react-icons/bi";
 import gangster1 from "../../assets/ganster-lv1.png";
-import React, {useState, useCallback, useEffect, useRef} from "react";
+import React, {useState, useCallback, useEffect, useRef, useContext} from "react";
 import "../../styles/Home.css";
+import AuthContext from "../context/AuthContext.jsx";
 
 const HomeGame = () => {
   const [isBlurred, setIsBlurred] = useState(true);
@@ -17,6 +18,11 @@ const HomeGame = () => {
   const [timesCalculated, setTimesCalculated] = useState(0);
   const [timesUpdatedCursor, setTimesUpdatedCursor] = useState(0);
   const pRef = useRef();
+  const { text } = useContext(AuthContext);
+
+  useEffect(() => {
+      console.log(text)
+  }, [])
 
     useEffect(() => {
     if (timeLeft > 0 && hasStartedTyping) {
@@ -28,10 +34,6 @@ const HomeGame = () => {
     }
   }, [timeLeft, hasStartedTyping]);
 
-  const text =
-      `The bush began to shake. Brad couldn't see what was causing it to shake, but he didn't care. he had a pretty good idea about what was going on and what was happening. He was so confident that he approached the bush carefree and with a smile on his face. That all changed the instant he realized what was actually behind the bush. She sat in the darkened room waiting. It was now a standoff. He had the power to put her in the room, but not the power to make her repent. It wasn't fair and no matter how long she had to endure the darkness, she wouldn't change her attitude. At three years old, Sandy's stubborn personality had already bloomed into full view.`
-          .toLowerCase()
-          .split("");
 
   const handleClickForBlur = useCallback(() => {
     setIsBlurred(false);
@@ -144,7 +146,7 @@ const HomeGame = () => {
                 } overflow-hidden inline-block items-center h-[155px]  text-2xl m-auto focus:outline-none`}
             >
                 <p ref={pRef} className={`relative leading-[50px] text-justify`} style={{top: -50 * timesUpdatedCursor}}>
-                {text.map((letter, letterIndex) => (
+                    {text.split('').map((letter, letterIndex) => (
                     <React.Fragment key={letterIndex}>
                       {letterIndex === currentLetterIndex && !isBlurred && (
                           <span className="fixed z-10 -ml-[3px] -mt-[1.5px] text-yellow-400 blinking-cursor">
