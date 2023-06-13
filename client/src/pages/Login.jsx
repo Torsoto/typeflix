@@ -1,4 +1,3 @@
-import "../styles/Login.css";
 import LogoNav from "../components/Login/LogoNav";
 import googleLogo from "../assets/google-logo.svg";
 import React, { useContext, useState } from "react";

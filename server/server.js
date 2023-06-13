@@ -7,11 +7,12 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import {
-  getFirestore,
-  doc,
-  setDoc,
-  getDocs,
-  collection,
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc,
+    getDocs,
+    collection,
 } from "firebase/firestore";
 import "./db/firebase.mjs";
 import cors from "cors";
@@ -186,6 +187,40 @@ app.get("/movies", async (req, res) => {
     }
 });
 
+function decodeMovieName(encodedMovieName) {
+    let decodedMovieName = '';
+    try {
+        decodedMovieName = decodeURIComponent(encodedMovieName);
+    } catch (error) {
+        // Handle any decoding errors here
+        console.error('Error decoding movie name:', error);
+    }
+    return decodedMovieName;
+}
+
+app.get("/movies/:movie/levels/:level", async (req, res) => {
+    try {
+        const { movie, level } = req.params;
+        const decodedMovieName = decodeMovieName(movie);
+        const levelRef = doc(db, `movies/${decodedMovieName}/levels/lvl${level}`);
+        const levelSnapshot = await getDoc(levelRef);
+
+        if (!levelSnapshot.exists()) {
+            res.status(404).send({ error: "Level not found" });
+            return;
+        }
+
+        const levelData = levelSnapshot.data();
+        const text = levelData.text;
+
+        res.status(200).json({ text: text });
+    } catch (error) {
+        console.error(`Error retrieving level for movie: `, error);
+        res.status(500).send({ error: error.message });
+    }
+});
+
+
 app.get("/:username", async (req, res) => {
   const { username } = req.params;
   const lowercaseUsername = username.toLowerCase();
@@ -221,6 +256,21 @@ app.get("/:username", async (req, res) => {
     res.status(500).send({ error: error.message });
   }
 });
+
+app.get("/movies/:movie/countlevels", async (req, res) => {
+    try {
+        const { movie } = req.params;
+        const levelsRef = collection(db, `movies/${movie}/levels`);
+        const levelsSnapshot = await getDocs(levelsRef);
+        const levelsCount = levelsSnapshot.size;
+
+        res.status(200).json({ count: levelsCount });
+    } catch (error) {
+        console.error(`Error retrieving levels for movie ${movie}:`, error);
+        res.status(500).send({ error: error.message });
+    }
+});
+
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
