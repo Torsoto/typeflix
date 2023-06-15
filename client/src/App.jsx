@@ -16,6 +16,7 @@ function App() {
         .toLowerCase()
         .split(""));
     const [isLoggedIn, setIsLoggedIn] = useState({})
+    const [gradientColor, setGradientColor] = React.useState('#313131');
 
     const googleSignIn = () => {
         const provider = new GoogleAuthProvider();
@@ -70,7 +71,7 @@ function App() {
 
     return (
     <>
-        <AuthContext.Provider value={{googleSignIn, logout, login, isLoggedIn, userId, text, setText }}>
+        <AuthContext.Provider value={{googleSignIn, logout, login, isLoggedIn, userId, text, setText, gradientColor, setGradientColor }}>
             <Routes>
                 <Route path="/" element={<Home />}></Route>
                 <Route path="/login" element={<Login />}></Route>

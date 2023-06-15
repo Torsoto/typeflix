@@ -214,6 +214,30 @@ app.get("/movies", async (req, res) => {
   }
 });
 
+app.get("/movies/:movie", async (req, res) => {
+    try {
+        const { movie } = req.params;
+        const movieRef = doc(db, `movies/${movie}`);
+        const movieSnapshot = await getDoc(movieRef);
+
+        if (!movieSnapshot.exists()) {
+            res.status(404).send({ error: `Movie ${movie} not found` });
+            return;
+        }
+
+        const gradientColor = movieSnapshot.data().gradientColor;
+
+        const levelsRef = collection(db, `movies/${movie}/levels`);
+        const levelsSnapshot = await getDocs(levelsRef);
+        const levelsCount = levelsSnapshot.size;
+
+        res.status(200).json({ count: levelsCount, color: gradientColor });
+    } catch (error) {
+        console.error(`Error retrieving levels or gradient color for movie ${movie}:`, error);
+        res.status(500).send({ error: error.message });
+    }
+});
+
 function decodeMovieName(encodedMovieName) {
   let decodedMovieName = "";
   try {
@@ -279,20 +303,6 @@ app.get("/:username", async (req, res) => {
     }
   } catch (error) {
     console.error("Error getting user data:", error);
-    res.status(500).send({ error: error.message });
-  }
-});
-
-app.get("/movies/:movie/countlevels", async (req, res) => {
-  try {
-    const { movie } = req.params;
-    const levelsRef = collection(db, `movies/${movie}/levels`);
-    const levelsSnapshot = await getDocs(levelsRef);
-    const levelsCount = levelsSnapshot.size;
-
-    res.status(200).json({ count: levelsCount });
-  } catch (error) {
-    console.error(`Error retrieving levels for movie ${movie}:`, error);
     res.status(500).send({ error: error.message });
   }
 });
