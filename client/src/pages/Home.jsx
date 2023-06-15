@@ -5,14 +5,12 @@ import LevelSelection from "../components/Game/LevelSelection.jsx";
 
 function Home() {
   return (
-    <>
-      <div className="main-bg">
-        <div className="m-auto max-w-7xl">
-          <Navbar />
-          <LevelSelection />
-        </div>
+      <div className="main-bg my-auto">
+          <div className="m-auto max-w-7xl">
+              <Navbar />
+              <LevelSelection />
+          </div>
       </div>
-    </>
   );
 }
 

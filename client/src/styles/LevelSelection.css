@@ -10,6 +10,7 @@
 
 .fade-in {
     animation: fadeIn ease 0.3s;
+    animation-fill-mode: backwards;
 }
 
 .fade-out {

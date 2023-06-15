@@ -4,7 +4,7 @@ import React, {useState, useCallback, useEffect, useRef, useContext} from "react
 import "../../styles/Home.css";
 import AuthContext from "../context/AuthContext.jsx";
 
-const HomeGame = () => {
+const Game = () => {
   const [isBlurred, setIsBlurred] = useState(true);
   const [isMessageVisible, setIsMessageVisible] = useState(true);
   const [currentLetterIndex, setCurrentLetterIndex] = useState(0);
@@ -106,11 +106,8 @@ const HomeGame = () => {
   );
 
   return (
-      <div className="h-[85%] mx-auto grid place-items-center text-white ">
-        <div className="text-2xl text-center">
-          <p>Level 1</p>
-        </div>
-        <div>
+      <div className="mx-auto grid place-items-center text-white ">
+        <div className="mb-[100px]">
           <img
               src={gangster1}
               alt="pixel image of low level thug"
@@ -119,15 +116,9 @@ const HomeGame = () => {
         </div>
         <div>
           <div className="flex gap-1 place-content-center">
-            {timeLeft > 0 && !isBlurred && (
-                <p
-                    className={`text-2xl font-bold align-middle ${
-                        timeLeft > 0 && !isBlurred ? "opacity-100" : "invisible"
-                    }`}
-                >
-                  {timeLeft}
-                </p>
-            )}
+              <p className={`text-2xl font-bold align-middle ${timeLeft > 0 && !isBlurred ? "opacity-100" : "invisible"}`}>
+                    {timeLeft > 0 && !isBlurred ? `${timeLeft}` : "0"}
+              </p>
           </div>
           <div className="relative">
             <div
@@ -177,4 +168,4 @@ const HomeGame = () => {
   );
 };
 
-export default HomeGame;
+export default Game;

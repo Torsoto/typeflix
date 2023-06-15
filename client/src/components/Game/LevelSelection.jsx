@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import "../../styles/LevelSelection.css";
-import HomeGame from "./Game.jsx";
+import Game from "./Game.jsx";
 import AuthContext from "../context/AuthContext.jsx";
 import { IoIosArrowBack } from "react-icons/io";
 
@@ -13,6 +13,8 @@ const LevelSelection = () => {
   const [showLevels, setShowLevels] = useState(false);
   const [showHomeGame, setShowHomeGame] = useState(false);
   const [showBackButton, setShowBackButton] = useState(false);
+  const [gameOpacity, setGameOpacity] = useState(0);
+
   const { setText } = useContext(AuthContext);
 
   useEffect(() => {
@@ -26,7 +28,7 @@ const LevelSelection = () => {
         setMovies([]);
         setShowLevels(true);
         setFadeOut(false);
-      }, 500);
+      }, 200);
     }
     return () => {
       clearTimeout(timer1);
@@ -68,9 +70,17 @@ const LevelSelection = () => {
   };
 
   const handleBackClick = () => {
-    setShowLevels(false);
-    setShowBackButton(false);
-    fetchMovieList();
+    if (showHomeGame) {
+      // If the game is currently being shown, go back to the level selection
+      setShowHomeGame(false);
+      setShowLevels(true);
+      setGameOpacity(0);
+    } else {
+      // If the level selection is being shown, go back to the movie selection
+      setShowLevels(false);
+      setShowBackButton(false);
+      fetchMovieList();
+    }
   };
 
   const renderMovies = () => {
@@ -98,28 +108,35 @@ const LevelSelection = () => {
       const handleLevelSelection = async () => {
         try {
           const response = await fetch(
-            `http://localhost:3000/movies/${encodeURIComponent(
-              title
-            )}/levels/${level}`
+              `http://localhost:3000/movies/${encodeURIComponent(
+                  title
+              )}/levels/${level}`
           );
           const data = await response.json();
           console.log(data.text);
           setText(data.text);
 
-          // Transition to HomeGame component
-          setShowHomeGame(true);
+          setFadeOut(true);  // trigger the fade-out transition
+
+          setTimeout(() => {
+            setFadeOut(false);  // stop the fade-out transition
+            setShowLevels(false);  // hide the level options
+            setShowHomeGame(true);  // show the home game
+            setGameOpacity(1);  // fully show the home game (after the fade-in transition)
+            setShowBackButton(true);  // show the back button
+          }, 200);
         } catch (error) {
           console.error(error);
         }
       };
 
       return (
-        <div
-          key={level}
-          className={`flex flex-col items-center m-2 ${
-            fadeOut ? "fade-out" : "fade-in"
-          }`}
-        >
+          <div
+              key={level}
+              className={`flex flex-col items-center m-2 ${
+                  fadeOut ? "fade-out" : "fade-in"
+              }`}
+          >
           <div
             className="min-w-[376px] min-h-[224px] rounded-md border-4 border-white cursor-pointer relative"
             style={{ boxShadow: "0px 2px 6px rgba(0, 0, 0, 0.3)" }}
@@ -143,38 +160,42 @@ const LevelSelection = () => {
 
   return (
     <div className="h-[85%]">
-      {showHomeGame ? (
-        <HomeGame />
-      ) : (
-        <div className="h-[85%] mx-auto text-white">
-          <div className="text-2xl text-center font-medium">
-            <div className="grid grid-cols-3">
-              <div className="flex items-center">
-                {showBackButton && (
+      <div className="h-[85%] mx-auto text-white">
+        <div className="text-2xl text-center font-medium">
+          <div className="grid grid-cols-3">
+            <div className="flex items-center">
+              {showBackButton && (
                   <button
-                    style={{
-                      opacity: fadeOut ? "0" : "1",
-                      transition: "opacity 0.5s",
-                    }}
-                    onClick={handleBackClick}
+                      style={{
+                        opacity: fadeOut ? "0" : "1",
+                        transition: "opacity 0.5s",
+                      }}
+                      onClick={handleBackClick}
                   >
                     <div className="flex text-xl font-normal flex-row justify-center items-center">
                       <IoIosArrowBack className="mr-1" /> Back
                     </div>
                   </button>
-                )}
-              </div>
-              <p className="my-16">
-                {showLevels ? "Select Level" : "Select Movie"}
-              </p>
-              <div></div>
+              )}
             </div>
-          </div>
-          <div className="flex flex-wrap justify-center gap-[52px]">
-            {showLevels ? renderLevels() : renderMovies()}
+            <p className="my-16">
+              {!showHomeGame
+                  ? (showLevels ? `Select Level` : "Select Movie")
+                  : `Level ${levels.length}`
+              }
+            </p>
           </div>
         </div>
-      )}
+        {showHomeGame ? (
+            <div style={{ opacity: gameOpacity, transition: "all 0.3s" }} className={fadeOut ? "fade-out" : "fade-in"}>
+              <Game />
+            </div>
+        ) : (
+            <div className="flex flex-wrap justify-center gap-[52px]">
+              {showLevels ? renderLevels() : renderMovies()}
+            </div>
+        )}
+      </div>
     </div>
   );
 };
