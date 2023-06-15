@@ -11,6 +11,7 @@ const LevelSelection = () => {
   const [poster, setPoster] = useState(null);
   const [levels, setLevels] = useState([]);
   const [showLevels, setShowLevels] = useState(false);
+  const [selectedLevelIndex, setSelectedLevelIndex] = useState(false);
   const [showHomeGame, setShowHomeGame] = useState(false);
   const [showBackButton, setShowBackButton] = useState(false);
   const [gameOpacity, setGameOpacity] = useState(0);
@@ -117,7 +118,7 @@ const LevelSelection = () => {
           const data = await response.json();
           console.log(data.text);
           setText(data.text);
-
+          setSelectedLevelIndex(level)
           setFadeOut(true);  // trigger the fade-out transition
 
           setTimeout(() => {
@@ -190,7 +191,7 @@ const LevelSelection = () => {
             <p className="my-16">
               {!showHomeGame
                   ? (showLevels ? `Select Level` : "Select Movie")
-                  : `Level ${levels.length}`
+                  : `Level ${selectedLevelIndex}`
               }
             </p>
           </div>
