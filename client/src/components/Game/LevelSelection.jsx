@@ -15,7 +15,7 @@ const LevelSelection = () => {
   const [showBackButton, setShowBackButton] = useState(false);
   const [gameOpacity, setGameOpacity] = useState(0);
 
-  const { setText } = useContext(AuthContext);
+  const { setText, setGradientColor } = useContext(AuthContext);
 
   useEffect(() => {
     fetchMovieList();
@@ -50,10 +50,9 @@ const LevelSelection = () => {
     setTitle(movieName);
     try {
       const response = await fetch(
-        `http://localhost:3000/movies/${movieName}/countlevels`
+        `http://localhost:3000/movies/${movieName}`
       );
       const data = await response.json();
-      console.log(`Levels for movie ${movieName}:`, data.count);
 
       // Update the levels state
       setLevels(
@@ -61,8 +60,10 @@ const LevelSelection = () => {
           .fill()
           .map((_, i) => i + 1)
       );
+
+      setGradientColor(data.color)
+      console.log(data)
       setShowBackButton(true);
-      // Trigger the fade-out animation
       setFadeOut(true);
     } catch (error) {
       console.error(`Error fetching levels for movie ${movieName}:`, error);
@@ -77,6 +78,7 @@ const LevelSelection = () => {
       setGameOpacity(0);
     } else {
       // If the level selection is being shown, go back to the movie selection
+      setGradientColor('#313131')
       setShowLevels(false);
       setShowBackButton(false);
       fetchMovieList();
@@ -92,7 +94,7 @@ const LevelSelection = () => {
         }`}
       >
         <div
-          className="min-w-[376px] min-h-[224px] bg-cover bg-center rounded-md border-4 border-white cursor-pointer"
+          className="min-w-[376px] min-h-[224px] bg-cover bg-center rounded-3xl border-4 border-white cursor-pointer"
           style={{ backgroundImage: `url('${movie.poster}')` }}
           onClick={() => handleMovieClick(movie.title, movie.poster)}
         ></div>
@@ -137,23 +139,30 @@ const LevelSelection = () => {
                   fadeOut ? "fade-out" : "fade-in"
               }`}
           >
-          <div
-            className="min-w-[376px] min-h-[224px] rounded-md border-4 border-white cursor-pointer relative"
-            style={{ boxShadow: "0px 2px 6px rgba(0, 0, 0, 0.3)" }}
-            onClick={handleLevelSelection}
-          >
             <div
-              className="absolute inset-0 bg-center bg-cover"
-              style={{
-                backgroundImage: `url('${poster}')`,
-                filter: "blur(5px)",
-              }}
-            ></div>
-            <p className="absolute z-10 text-xl font-medium text-center text-white transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
-              Level {level}
-            </p>
+                className="min-w-[376px] min-h-[224px] rounded-3xl cursor-pointer relative"
+                style={{ position: "relative", overflow: "hidden" }}
+                onClick={handleLevelSelection}
+            >
+              <div
+                  className="absolute inset-0 bg-center bg-cover rounded-3xl"
+                  style={{
+                    backgroundImage: `url('${poster}')`,
+                    filter: "blur(5px)",
+                  }}
+              ></div>
+              <div
+                  className="absolute inset-0 rounded-3xl border-4 border-white"
+                  style={{ boxShadow: "0px 2px 6px rgba(0, 0, 0, 0.3)", zIndex: 1 }}
+              ></div>
+              <p
+                  className="absolute z-10 text-xl font-medium text-center text-white transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
+                  style={{ textShadow: "0px 1px 6px #000000" }}
+              >
+                Level {level}
+              </p>
+            </div>
           </div>
-        </div>
       );
     });
   };
