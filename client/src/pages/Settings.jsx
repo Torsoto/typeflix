@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext } from "react";
 import { BiTimeFive } from "react-icons/bi";
+import { BiEdit } from "react-icons/bi";
 import Navbar from "../components/Home/Navbar.jsx";
 import AuthContext from "../components/context/AuthContext.jsx";
 import "../styles/Settings.css";
-
 
 function Settings() {
   const [error, setError] = useState("");
@@ -34,11 +34,9 @@ function Settings() {
     fetchData();
   }, [userId]);
 
-  const handleUpdateUsername = async () => {
-  };
+  const handleUpdateUsername = async () => {};
 
-  const handleUpdatePassword = async () => {
-  };
+  const handleUpdatePassword = async () => {};
 
   const handleToggleAvatarOptions = () => {
     setShowAvatarOptions(!showAvatarOptions);
@@ -53,14 +51,13 @@ function Settings() {
     setShowAvatarOptions(false);
   };
 
-  const handleDeleteAccount = async () => {
-  };
+  const handleDeleteAccount = async () => {};
 
   return (
     <>
       <div className="main-bg">
         <div className="h-[90%] m-auto max-w-7xl">
-        <Navbar />
+          <Navbar />
           <h1 className="text-white mt-8 text-xl pb-7">Settings</h1>
           <div className="container mx-auto bg-gray-600 p-8 rounded-lg flex">
             <div className="w-1/2">
@@ -69,29 +66,33 @@ function Settings() {
                   {avatarStyle && <img src={avatarStyle} alt="Avatar" />}
                 </div>
                 <div>
-                  <p className="text-white">Username: {userData && <p>{userData.username}</p>}</p>
+                  <p className="text-white">
+                    Username: {userData && <p>{userData.username}</p>}
+                  </p>
                   <button
-                    className="bg-black text-white font-semibold py-2 px-4 rounded mt-2"
+                    className="bg-black text-white font-semibold py-1 px-2 rounded mt-2"
                     onClick={handleUpdateUsername}
                   >
-                    Edit
+                    <BiEdit />
                   </button>
                 </div>
               </div>
 
               <div className="flex items-center">
                 <div>
-                  <p className="text-white">Email: {userData && <p>{userData.email}</p>}</p>
+                  <p className="text-white">
+                    Email: {userData && <p>{userData.email}</p>}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center">
                 <div>
                   <p className="text-white">Password</p>
                   <button
-                    className="bg-black text-white font-semibold py-2 px-4 rounded mt-2"
+                    className="bg-black text-white font-semibold py-1 px-2 rounded mt-2"
                     onClick={handleUpdatePassword}
                   >
-                    Edit
+                    <BiEdit />
                   </button>
                 </div>
               </div>
