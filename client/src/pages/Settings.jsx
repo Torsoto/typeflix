@@ -61,7 +61,7 @@ function Settings() {
           <Navbar />
           <div className="container mx-auto">
             <h1 className="text-white mt-8 text-xl pb-7">Settings</h1>
-            <div className="mx-auto bg-gray-600 p-8 rounded-lg flex flex-col md:flex-row">
+            <div className="mx-auto bg-neutral-700 p-8 rounded-lg flex flex-col md:flex-row">
               <div className="mb-4 md:mb-0 md:w-1/2 flex flex-col items-start">
                 <div className="w-16 h-16 rounded-full overflow-hidden">
                   {avatarStyle && <img src={avatarStyle} alt="Avatar" />}
@@ -119,7 +119,7 @@ function Settings() {
         </div>
         <div>
           <a href="/">
-            <span className="font-medium text-white transition-colors hover:text-gray-400">
+            <span className="font-medium text-white transition-colors hover:text-gray-400 pl-14 ">
               Go Back
             </span>
           </a>
