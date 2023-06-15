@@ -275,6 +275,7 @@ app.get("/movies/:movie/countlevels", async (req, res) => {
   }
 });
 
+//for changing user data
 app.post("/edit", async (req, res) => {
   const { token, username, email, password } = req.body;
 
@@ -311,6 +312,7 @@ app.post("/edit", async (req, res) => {
   }
 });
 
+//for deleting user account
 app.delete("/delete", async (req, res) => {
   const { token } = req.body;
 

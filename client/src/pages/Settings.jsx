@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
 import { BiTimeFive } from "react-icons/bi";
 import Navbar from "../components/Home/Navbar.jsx";
+import AuthContext from "../components/context/AuthContext.jsx";
 import "../styles/Settings.css";
+
 
 function Settings() {
   const [error, setError] = useState("");
@@ -10,73 +12,32 @@ function Settings() {
   const [newUsername, setNewUsername] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [userData, setUserData] = useState(null);
+  const { userId } = useContext(AuthContext);
 
-  const handleDeleteAccount = async () => {
-    try {
-      // Call the delete account API endpoint
-      await fetch("/api/delete-account", {
-        method: "DELETE",
-        // Add necessary headers or authentication tokens if required
-      });
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/${userId}`);
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const data = await response.json();
+        setUserData(data);
+      } catch (error) {
+        console.error(
+          "There has been a problem with your fetch operation: ",
+          error.message
+        );
+      }
+    };
+    fetchData();
+  }, [userId]);
 
-      // Account deletion successful, perform any additional cleanup or redirection
-    } catch (error) {
-      setError("Failed to delete the account. Please try again later.");
-    }
-  };
-
-  const handleUpdateEmail = async () => {
-    try {
-      // Call the update email API endpoint with the new email value
-      await fetch("/api/update-email", {
-        method: "POST",
-        body: JSON.stringify({ email: newEmail }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        // Add necessary headers or authentication tokens if required
-      });
-
-      // Email update successful, perform any additional actions
-    } catch (error) {
-      setError("Failed to update the email. Please try again later.");
-    }
+  const handleUpdateUsername = async () => {
   };
 
   const handleUpdatePassword = async () => {
-    try {
-      // Call the update password API endpoint with the new password value
-      await fetch("/api/update-password", {
-        method: "POST",
-        body: JSON.stringify({ password: newPassword }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        // Add necessary headers or authentication tokens if required
-      });
-
-      // Password update successful, perform any additional actions
-    } catch (error) {
-      setError("Failed to update the password. Please try again later.");
-    }
-  };
-
-  const handleUpdateUsername = async () => {
-    try {
-      // Call the update username API endpoint with the new username value
-      await fetch("/api/update-username", {
-        method: "POST",
-        body: JSON.stringify({ username: newUsername }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        // Add necessary headers or authentication tokens if required
-      });
-
-      // Username update successful, perform any additional actions
-    } catch (error) {
-      setError("Failed to update the username. Please try again later.");
-    }
   };
 
   const handleToggleAvatarOptions = () => {
@@ -92,11 +53,14 @@ function Settings() {
     setShowAvatarOptions(false);
   };
 
+  const handleDeleteAccount = async () => {
+  };
+
   return (
     <>
-      <div className="main-bg flex flex-col items-center justify-center h-screen">
+      <div className="main-bg">
         <div className="h-[90%] m-auto max-w-7xl">
-          <Navbar />
+        <Navbar />
           <h1 className="text-white mt-8 text-xl pb-7">Settings</h1>
           <div className="container mx-auto bg-gray-600 p-8 rounded-lg flex">
             <div className="w-1/2">
@@ -105,7 +69,7 @@ function Settings() {
                   {avatarStyle && <img src={avatarStyle} alt="Avatar" />}
                 </div>
                 <div>
-                  <p className="text-white">Username:</p>
+                  <p className="text-white">Username: {userData && <p>{userData.username}</p>}</p>
                   <button
                     className="bg-black text-white font-semibold py-2 px-4 rounded mt-2"
                     onClick={handleUpdateUsername}
@@ -117,19 +81,12 @@ function Settings() {
 
               <div className="flex items-center">
                 <div>
-                  <p className="text-white">Email:</p>
-                  <button
-                    className="bg-black text-white font-semibold py-2 px-4 rounded mt-2"
-                    onClick={handleUpdateEmail}
-                  >
-                    Edit
-                  </button>
+                  <p className="text-white">Email: {userData && <p>{userData.email}</p>}</p>
                 </div>
               </div>
-
               <div className="flex items-center">
                 <div>
-                  <p className="text-white">Password:</p>
+                  <p className="text-white">Password</p>
                   <button
                     className="bg-black text-white font-semibold py-2 px-4 rounded mt-2"
                     onClick={handleUpdatePassword}
@@ -139,7 +96,6 @@ function Settings() {
                 </div>
               </div>
             </div>
-
             <div className="w-1/2">
               <div className="flex flex-col mt-4">
                 <button
