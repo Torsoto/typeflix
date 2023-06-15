@@ -14,7 +14,7 @@ function Login() {
     show: false,
     message: "",
   });
-  const { googleSignIn, login } = useContext(AuthContext);
+  const { googleSignIn, login, setUserId } = useContext(AuthContext);
 
   const handleLogin = async () => {
     setLoading(true);

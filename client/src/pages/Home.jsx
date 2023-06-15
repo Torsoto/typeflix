@@ -7,7 +7,7 @@ function Home() {
   return (
     <>
       <div className="main-bg">
-        <div className="h-[90%] m-auto max-w-7xl">
+        <div className="m-auto max-w-7xl">
           <Navbar />
           <LevelSelection />
         </div>

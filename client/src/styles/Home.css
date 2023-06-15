@@ -2,7 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-.main-bg {
+body {
+  background-color: black;
   background-image: url("../assets/bg-texture.png"),
     linear-gradient(170deg, #313131 0%, #000000 100%);
   background-repeat: repeat, no-repeat;

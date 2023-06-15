@@ -1,23 +1,24 @@
 import express from "express";
 import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithPopup,
-  signInWithEmailAndPassword,
-  deleteUser,
-  updateProfile,
-  updateEmail,
-  updatePassword,
+    getAuth,
+    createUserWithEmailAndPassword,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signInWithEmailAndPassword,
+    deleteUser,
+    updateProfile,
+    updateEmail,
+    updatePassword,
 } from "firebase/auth";
 import {
-  getFirestore,
-  doc,
-  setDoc,
-  getDoc,
-  getDocs,
-  collection,
-  deleteDoc,
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc,
+    getDocs,
+    collection,
+    deleteDoc,
+    writeBatch ,
 } from "firebase/firestore";
 import "./db/firebase.mjs";
 import cors from "cors";
@@ -27,6 +28,7 @@ import jwt from "jsonwebtoken";
 const app = express();
 const auth = getAuth();
 const db = getFirestore();
+const batch = writeBatch(db);
 const secretKey = crypto.randomBytes(64).toString("hex");
 
 app.use(express.json());
@@ -52,40 +54,45 @@ app.post("/signup", async (req, res) => {
       res.status(401).send({ error: "Username already exists" });
     } else {
       try {
-        const { username, email, password } = req.body;
         createUserWithEmailAndPassword(auth, email, password)
-          .then((userRecord) => {
-            console.log("Successfully created new user:", userRecord.user.uid);
+            .then((userRecord) => {
+              console.log("Successfully created new user:", userRecord.user.uid);
 
-            setDoc(doc(db, "users", lowercaseUsername), {
-              username: lowercaseUsername,
-              email: email,
-              userid: userRecord.user.uid,
-              friends: [],
-            })
-              .then(() => {
-                console.log("User data stored in Firestore");
+              const userDoc = doc(db, "users", lowercaseUsername);
+              const emailToUsernameDoc = doc(db, "emailToUsername", email);
 
-                const payload = {
-                  uid: userRecord.user.uid,
-                  username: lowercaseUsername,
-                  email: email,
-                };
+              const batch = writeBatch(db);
+              batch.set(userDoc, {
+                username: lowercaseUsername,
+                email: email,
+                userid: userRecord.user.uid,
+                friends: [],
+                bestwpm: 0,
+              });
 
-                const token = jwt.sign(payload, secretKey, {
-                  expiresIn: "336h",
-                });
+              batch.set(emailToUsernameDoc, {
+                username: lowercaseUsername,
+              });
 
-                res
+              console.log("User data stored in Firestore");
+
+              const payload = {
+                uid: userRecord.user.uid,
+                username: lowercaseUsername,
+                email: email,
+              };
+
+              const token = jwt.sign(payload, secretKey, {
+                expiresIn: "336h",
+              });
+
+              res
                   .status(200)
                   .send({ token: token, uid: userRecord.user.uid });
-              })
-              .catch((error) => {
-                console.log("Error storing user data in Firestore:", error);
-                res.status(500).send({ error: error.message });
-              });
-          })
-          .catch((error) => {
+
+              return batch.commit();
+            })
+            .catch((error) => {
             console.log("Error creating new user:", error);
             res.status(500).send({ error: error.message });
           });
@@ -126,7 +133,7 @@ app.post("/login", async (req, res) => {
 
         const token = jwt.sign(payload, secretKey, { expiresIn: "336h" });
 
-        res.status(200).send({ token: token, uid: userCredential.user.uid });
+        res.status(200).send({ token: token, username: userCredential.user.uid, });
       })
       .catch((error) => {
         console.error("Error:", error.message);
@@ -136,24 +143,39 @@ app.post("/login", async (req, res) => {
   } else {
     // User not found by username, attempt to sign in with the identifier as email.
     signInWithEmailAndPassword(auth, lowercaseIdentifier, password)
-      .then((userCredential) => {
-        console.log("User logged in successfully");
+        .then((userCredential) => {
+          console.log("User logged in successfully");
 
-        const payload = {
-          uid: userCredential.user.uid,
-          username: lowercaseIdentifier,
-          email: email,
-        };
+          // Get the username corresponding to this email.
+          getDoc(doc(db, "emailToUsername", lowercaseIdentifier))
+              .then((docSnapshot) => {
+                if (docSnapshot.exists()) {
+                  const username = docSnapshot.data().username;
 
-        const token = jwt.sign(payload, secretKey, { expiresIn: "336h" });
+                  const payload = {
+                    uid: userCredential.user.uid,
+                    username: username,
+                    email: lowercaseIdentifier,
+                  };
 
-        res.status(200).send({ token: token, uid: userCredential.user.uid });
-      })
-      .catch((error) => {
-        console.error("Error:", error.message);
-        console.error(lowercaseIdentifier, password);
-        res.status(400).send({ error: error.message });
-      });
+                  const token = jwt.sign(payload, secretKey, { expiresIn: "336h" });
+
+                  res.status(200).send({ token: token, username: username });
+                } else {
+                  // Handle the case where no username was found for this email.
+                  // This should ideally never happen if your signup code is working correctly.
+                }
+              })
+              .catch((error) => {
+                console.error("Error getting username from email:", error);
+                res.status(500).send({ error: error.message });
+              });
+        })
+        .catch((error) => {
+          console.error("Error:", error.message);
+          console.error(lowercaseIdentifier, password);
+          res.status(400).send({ error: error.message });
+        });
   }
 });
 
