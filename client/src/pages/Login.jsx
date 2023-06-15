@@ -1,9 +1,9 @@
-import LogoNav from "../components/Login/LogoNav";
+import LogoNav from "../components/UI/LogoNav";
 import googleLogo from "../assets/google-logo.svg";
 import React, { useContext, useState } from "react";
 import { BeatLoader } from "react-spinners";
-import Notification from "../components/UI/Notification/Notification.jsx";
-import { ERROR_MAP } from "../components/UI/Notification/ERROR_MAP.js";
+import Notification from "../components/Notification/Notification.jsx";
+import { ERROR_MAP } from "../components/Notification/ERROR_MAP.js";
 import AuthContext from "../components/context/AuthContext.jsx";
 
 function Login() {

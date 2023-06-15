@@ -1,10 +1,10 @@
 import { useState, useEffect, useContext } from "react";
 import { BiTimeFive } from "react-icons/bi";
 import { BiEdit } from "react-icons/bi";
-import Navbar from "../components/Home/Navbar.jsx";
+import Navbar from "../components/UI/Navbar.jsx";
 import AuthContext from "../components/context/AuthContext.jsx";
 import "../styles/Settings.css";
-import {Avatars} from "../components/others/Avatars.jsx";
+import { Avatars } from "../components/UI/Avatars.jsx";
 
 function Settings() {
   const [error, setError] = useState("");
@@ -116,7 +116,10 @@ function Settings() {
             </div>
           </div>
           {showAvatarOptions && (
-              <Avatars handleSelectAvatar={handleSelectAvatar} handleToggleAvatarOptions={handleToggleAvatarOptions} />
+            <Avatars
+              handleSelectAvatar={handleSelectAvatar}
+              handleToggleAvatarOptions={handleToggleAvatarOptions}
+            />
           )}
           {error && <div className="text-red-500 mt-4">{error}</div>}
         </div>

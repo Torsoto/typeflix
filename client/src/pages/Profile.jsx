@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
 import "../styles/Home.css";
-import Navbar from "../components/Home/Navbar.jsx";
+import Navbar from "../components/UI/Navbar.jsx";
 import AuthContext from "../components/context/AuthContext.jsx";
+import "../styles/Profile.css";
 
 function Profile() {
   const [userData, setUserData] = useState(null);
@@ -34,6 +35,19 @@ function Profile() {
           <div>
             {/* Here you can use the user data. For example: */}
             {userData && <p>Welcome, {userData.username}!</p>}
+          </div>{" "}
+          <div style={{ backgroundColor: "gray", padding: "20px" }}>
+            <div style={{ display: "flex" }}>
+              <div style={{ marginLeft: "20px" }}>
+                <p>Best WPM: </p>
+                <p>Avg. WPM: </p>
+                <p>Accuracy: </p>
+                <p>Games Played: </p>
+                <p>Duels Win/Lose Ratio:</p>
+                <p>Bosses Defeated: </p>
+              </div>
+            </div>
+            <p style={{ marginTop: "20px" }}>Last Played:</p>
           </div>
         </div>
       </div>

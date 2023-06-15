@@ -1,7 +1,7 @@
 import logo from "../../assets/wide-logo.svg";
 import userIcon from "../../assets/profile.svg";
 import { useState } from "react";
-import DropdownMenu from "./Dropdown";
+import DropdownMenu from "../UI/Dropdown";
 
 const Navbar = () => {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
