@@ -13,7 +13,9 @@ const Navbar = () => {
   return (
     <nav className="flex items-center justify-between p-6 bg-transparent">
       <div className="navbar__logo">
-        <img src={logo} alt="Logo" />
+        <a href="/">
+          <img src={logo} alt="Logo" />
+        </a>
       </div>
       <div className="flex gap-6">
         <span className="font-medium text-white transition-colors hover:text-gray-400">
