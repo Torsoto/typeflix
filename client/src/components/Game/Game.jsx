@@ -57,7 +57,7 @@ const Game = () => {
     const isSpace = key === " ";
     const isBackspace = key === "Backspace";
 
-    const element = document.querySelector('.blinking-cursor');
+    const element = document.querySelector(".blinking-cursor");
     const cursorPosY = element.offsetTop;
 
     if (!hasCalculated) {
@@ -72,12 +72,14 @@ const Game = () => {
     }
 
     if (isLetter || (isSpace && expectedLetter === " ")) {
-      if (currentLetterIndex === text.length) {
+      if (currentLetterIndex >= text.length - 1) {
+        if (incorrectLetters.length > 0) {
+          setHasFailed(true);
+        }
         return;
       }
       const nextLetterIndex = currentLetterIndex + 1;
       if (key === expectedLetter) {
-        setHp(hp - 1);
         setCorrectLetters((prevCorrectLetters) => [
           ...prevCorrectLetters,
           `${currentLetterIndex}`,
@@ -85,11 +87,11 @@ const Game = () => {
         setCurrentLetterIndex(nextLetterIndex);
         if (nextLetterIndex === text.length && incorrectLetters.length === 0) {
           setIsFinished(true);
-          setHasFailed(false);
           const timeTaken = time - timeLeft;
           setTimeTaken(timeTaken);
           const wpm = Math.round((text.split(" ").length / timeTaken) * 60);
           setWpm(wpm);
+          //SEND REQUEST TO user document to add WPM achieved into wpm array
         }
         if (nextLetterIndex === text.length && incorrectLetters.length > 0) {
           setHasFailed(true);
@@ -117,13 +119,13 @@ const Game = () => {
           )
         );
         if (correctLetters.includes(`${currentLetterIndex - 1}`)) {
-          setHp(hp + 1);
         }
       }
     }
 
     e.preventDefault();
   };
+
 
 
   const WinMessage = ({ isFinished, timeTaken, wpm }) => {

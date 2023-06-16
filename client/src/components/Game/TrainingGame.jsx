@@ -14,7 +14,7 @@ const TrainingGame = () => {
     const [timesCalculated, setTimesCalculated] = useState(0);
     const [timesUpdatedCursor, setTimesUpdatedCursor] = useState(0);
     const pRef = useRef();
-    const [time, setTime] = useState(120)
+    const [time, setTime] = useState(999)
     const [isFinished, setIsFinished] = useState(false);
     const [timeLeft, setTimeLeft] = useState(time);
     const [timeTaken, setTimeTaken] = useState(0);
