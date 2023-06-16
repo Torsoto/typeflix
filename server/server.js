@@ -68,6 +68,7 @@ app.post("/signup", async (req, res) => {
               email: email,
               userid: userRecord.user.uid,
               friends: [],
+              avatar: `https://api.dicebear.com/6.x/adventurer-neutral/svg?seed=${lowercaseUsername}`,
               bestwpm: 0,
               levels: [],
             });

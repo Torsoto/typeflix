@@ -13,11 +13,31 @@ import AuthContext from "../src/components/context/AuthContext.jsx";
 
 function App() {
     const [userId, setUserId] = useState("");
+    const [userData, setUserData] = useState(null);
     const [text, setText] = useState(`TEST TEST TEST TEST TEST TEST TEST TEST TEST`);
     const [isLoggedIn, setIsLoggedIn] = useState({})
     const [gradientColor, setGradientColor] = React.useState('#313131');
     const [Img, setImg] = useState("https://i.imgur.com/oQUOXS8.png");
     const [time, setTime] = useState(60);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch(`http://localhost:3000/${userId}`);
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                const data = await response.json();
+                setUserData(data);
+            } catch (error) {
+                console.error(
+                    "There has been a problem with your fetch operation: ",
+                    error.message
+                );
+            }
+        };
+        fetchData();
+    }, [userId]);
 
     const googleSignIn = () => {
         const provider = new GoogleAuthProvider();
@@ -72,7 +92,7 @@ function App() {
 
     return (
         <>
-            <AuthContext.Provider value={{ googleSignIn, logout, login, isLoggedIn, userId, text, setText, gradientColor, setGradientColor, setImg, Img, time, setTime }}>
+            <AuthContext.Provider value={{ googleSignIn, logout, login, isLoggedIn, text, setText, gradientColor, setGradientColor, setImg, Img, time, setTime, userId, userData }}>
                 <Routes>
                     <Route path="/" element={<Home />}></Route>
                     <Route path="/login" element={<Login />}></Route>

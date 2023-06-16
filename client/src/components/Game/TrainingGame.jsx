@@ -38,10 +38,7 @@ const TrainingGame = () => {
         };
 
         fetchRandomWords();
-    }, [setText]);
-
-
-
+    }, [setText]);x
 
     useEffect(() => {
         if (timeLeft > 0 && hasStartedTyping) {
