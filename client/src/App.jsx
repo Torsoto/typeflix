@@ -6,8 +6,8 @@ import Settings from "./pages/Settings";
 import Signup from "./pages/Signup";
 import Profile from "./pages/Profile.jsx";
 import { Route, Routes } from "react-router-dom";
-import {GoogleAuthProvider, signInWithPopup} from "firebase/auth";
-import {auth} from "../db/firebase.js";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth } from "../db/firebase.js";
 import AuthContext from "../src/components/context/AuthContext.jsx";
 
 function App() {
@@ -17,6 +17,7 @@ function App() {
         .split(""));
     const [isLoggedIn, setIsLoggedIn] = useState({})
     const [gradientColor, setGradientColor] = React.useState('#313131');
+    const [Img, setImg] = useState("https://i.imgur.com/7byaekD.png");
 
     const googleSignIn = () => {
         const provider = new GoogleAuthProvider();
@@ -70,18 +71,18 @@ function App() {
     }, []);
 
     return (
-    <>
-        <AuthContext.Provider value={{googleSignIn, logout, login, isLoggedIn, userId, text, setText, gradientColor, setGradientColor }}>
-            <Routes>
-                <Route path="/" element={<Home />}></Route>
-                <Route path="/login" element={<Login />}></Route>
-                <Route path="/signup" element={<Signup />}></Route>
-                <Route path="/settings" element={<Settings></Settings>}></Route>
-                <Route path="/profile" element={<Profile></Profile>}></Route>
-            </Routes>
-        </AuthContext.Provider>
-    </>
-  );
+        <>
+            <AuthContext.Provider value={{ googleSignIn, logout, login, isLoggedIn, userId, text, setText, gradientColor, setGradientColor, setImg, Img }}>
+                <Routes>
+                    <Route path="/" element={<Home />}></Route>
+                    <Route path="/login" element={<Login />}></Route>
+                    <Route path="/signup" element={<Signup />}></Route>
+                    <Route path="/settings" element={<Settings></Settings>}></Route>
+                    <Route path="/profile" element={<Profile></Profile>}></Route>
+                </Routes>
+            </AuthContext.Provider>
+        </>
+    );
 }
 
 export default App;
