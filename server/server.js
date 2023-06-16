@@ -295,7 +295,7 @@ app.get("/movies/:movie/levels/:level", async (req, res) => {
 app.get("/training", (req, res) => {
   const options = {
     hostname: "random-word-api.herokuapp.com",
-    path: "/word?number=50",
+    path: "/word?number=200",
     method: "GET",
   };
 
@@ -319,7 +319,6 @@ app.get("/training", (req, res) => {
 
   request.end();
 });
-
 
 //for changing user data
 app.post("/edit", async (req, res) => {
@@ -468,20 +467,24 @@ app.get("/:username", async (req, res) => {
       // Sort the properties of the userData object
       const sortedUserData = {};
       Object.keys(userData)
-          .sort()
-          .forEach((key) => {
-            sortedUserData[key] = userData[key];
-          });
+        .sort()
+        .forEach((key) => {
+          sortedUserData[key] = userData[key];
+        });
 
       // If the user exists, send their data in the response
       res.status(200).json(sortedUserData);
     } else {
       // If the user doesn't exist, send a 404 error
-      res.status(404).send({ error: "User not found (You are sending request to /:username Endpoint)" });
+      res
+        .status(404)
+        .send({
+          error:
+            "User not found (You are sending request to /:username Endpoint)",
+        });
     }
   } catch (error) {
     console.error("Error getting user data:", error);
     res.status(500).send({ error: error.message });
   }
 });
-
