@@ -20,7 +20,9 @@ const LevelSelection = () => {
   const { setText, setGradientColor, setImg, setTime } = useContext(AuthContext);
 
   useEffect(() => {
-    fetchMovieList();
+    fetchMovieList().then((data) => {
+        setMovies(data);
+    });
   }, []);
 
   useEffect(() => {
@@ -40,8 +42,7 @@ const LevelSelection = () => {
   const fetchMovieList = async () => {
     try {
       const response = await fetch("http://localhost:3000/movies");
-      const data = await response.json();
-      setMovies(data);
+      return await response.json();
     } catch (error) {
       console.error("Error fetching movie list:", error);
     }
@@ -83,7 +84,9 @@ const LevelSelection = () => {
       setGradientColor('#313131')
       setShowLevels(false);
       setShowBackButton(false);
-      fetchMovieList();
+      fetchMovieList().then((data) => {
+        setMovies(data);
+      });
     }
   };
 
