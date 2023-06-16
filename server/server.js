@@ -69,6 +69,7 @@ app.post("/signup", async (req, res) => {
               userid: userRecord.user.uid,
               friends: [],
               bestwpm: 0,
+              levels: [],
             });
 
             batch.set(emailToUsernameDoc, {
@@ -411,6 +412,34 @@ app.get("/weather/vienna", (req, res) => {
 
   request.on("error", (error) => {
     console.error("Error retrieving weather data:", error);
+    res.status(500).send({ error: error.message });
+  });
+
+  request.end();
+});
+
+app.get("/training", (req, res) => {
+  const options = {
+    hostname: "random-word-api.herokuapp.com",
+    path: "/word?number=50",
+    method: "GET",
+  };
+
+  const request = https.request(options, (response) => {
+    let data = "";
+
+    response.on("data", (chunk) => {
+      data += chunk;
+    });
+
+    response.on("end", () => {
+      const words = JSON.parse(data);
+      res.status(200).json({ words });
+    });
+  });
+
+  request.on("error", (error) => {
+    console.error("Error retrieving random words:", error);
     res.status(500).send({ error: error.message });
   });
 

@@ -1,4 +1,3 @@
-import gangster1 from "../../assets/ganster-lv1.png";
 import React, { useState, useCallback, useEffect, useRef, useContext } from "react";
 import "../../styles/Home.css";
 import AuthContext from "../context/AuthContext.jsx";

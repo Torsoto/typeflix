@@ -35,9 +35,9 @@ function Settings() {
     fetchData();
   }, [userId]);
 
-  const handleUpdateUsername = async () => {};
+  const handleUpdateUsername = async () => { };
 
-  const handleUpdatePassword = async () => {};
+  const handleUpdatePassword = async () => { };
 
   const handleToggleAvatarOptions = () => {
     setShowAvatarOptions(!showAvatarOptions);
@@ -52,7 +52,7 @@ function Settings() {
     setShowAvatarOptions(false);
   };
 
-  const handleDeleteAccount = async () => {};
+  const handleDeleteAccount = async () => { };
 
   return (
     <>
@@ -60,32 +60,32 @@ function Settings() {
         <div className="h-[90%] m-auto max-w-7xl">
           <Navbar />
           <div className="container mx-auto">
-            <h1 className="text-white mt-8 text-xl pb-7">Settings</h1>
-            <div className="mx-auto bg-neutral-700 p-8 rounded-lg flex flex-col md:flex-row">
-              <div className="mb-4 md:mb-0 md:w-1/2 flex flex-col items-start">
-                <div className="w-16 h-16 rounded-full overflow-hidden">
+            <h1 className="mt-8 text-xl text-white pb-7">Settings</h1>
+            <div className="flex flex-col p-8 mx-auto rounded-lg bg-neutral-700 md:flex-row">
+              <div className="flex flex-col items-start mb-4 md:mb-0 md:w-1/2">
+                <div className="w-16 h-16 overflow-hidden rounded-full">
                   {avatarStyle && <img src={avatarStyle} alt="Avatar" />}
                 </div>
                 <button
-                  className="bg-black text-white font-semibold py-2 px-4 rounded-full mt-2"
+                  className="px-4 py-2 mt-2 font-semibold text-white bg-black rounded-full"
                   onClick={handleToggleAvatarOptions}
                 >
                   Change Avatar
                 </button>
                 <button
-                  className="mt-4 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-full"
+                  className="px-4 py-2 mt-4 font-semibold text-white bg-red-500 rounded-full hover:bg-red-600"
                   onClick={() => handleDeleteAccount()}
                 >
                   Delete Account
                 </button>
               </div>
-              <div className="md:w-1/2 flex flex-col">
+              <div className="flex flex-col md:w-1/2">
                 <div className="flex items-center">
-                  <p className="text-white mr-2">
+                  <p className="mr-2 text-white">
                     Username: {userData && <span>{userData.username}</span>}
                   </p>
                   <button
-                    className="bg-black text-white font-semibold py-1 px-2 rounded-full"
+                    className="px-2 py-1 font-semibold text-white bg-black rounded-full"
                     onClick={handleUpdateUsername}
                   >
                     <BiEdit />
@@ -98,9 +98,9 @@ function Settings() {
                   </p>
                 </div>
                 <div className="flex items-center mt-4">
-                  <p className="text-white mr-2">Change password</p>
+                  <p className="mr-2 text-white">Change password</p>
                   <button
-                    className="bg-black text-white font-semibold py-1 px-2 rounded-full"
+                    className="px-2 py-1 font-semibold text-white bg-black rounded-full"
                     onClick={handleUpdatePassword}
                   >
                     <BiEdit />
@@ -114,7 +114,7 @@ function Settings() {
                 handleToggleAvatarOptions={handleToggleAvatarOptions}
               />
             )}
-            {error && <div className="text-red-500 mt-4">{error}</div>}
+            {error && <div className="mt-4 text-red-500">{error}</div>}
           </div>
         </div>
         <div>
