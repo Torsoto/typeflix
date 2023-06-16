@@ -13,27 +13,7 @@ function Settings() {
   const [newUsername, setNewUsername] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [userData, setUserData] = useState(null);
-  const { userId } = useContext(AuthContext);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`http://localhost:3000/${userId}`);
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const data = await response.json();
-        setUserData(data);
-      } catch (error) {
-        console.error(
-          "There has been a problem with your fetch operation: ",
-          error.message
-        );
-      }
-    };
-    fetchData();
-  }, [userId]);
+  const { userId, userData } = useContext(AuthContext);
 
   const handleUpdateUsername = async () => { };
 
@@ -43,9 +23,16 @@ function Settings() {
     setShowAvatarOptions(!showAvatarOptions);
   };
 
+  useEffect(() => {
+    return () => {
+
+    };
+  }, [avatarStyle]);
+
+
   const handleSelectAvatar = (styleName) => {
     // Set the avatar URL
-    const avatarURL = `https://api.dicebear.com/6.x/${styleName}/svg`;
+    const avatarURL = `https://api.dicebear.com/6.x/${styleName}/svg?seed=${userId}`;
     setAvatarStyle(avatarURL);
 
     // Hide the avatar options
@@ -112,6 +99,7 @@ function Settings() {
               <Avatars
                 handleSelectAvatar={handleSelectAvatar}
                 handleToggleAvatarOptions={handleToggleAvatarOptions}
+                userId={userId}
               />
             )}
             {error && <div className="mt-4 text-red-500">{error}</div>}
