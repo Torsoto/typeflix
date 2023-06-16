@@ -30,9 +30,8 @@ const TrainingGame = () => {
     useEffect(() => {
         const fetchRandomWords = async () => {
             try {
-                const response = await fetch("/training");
+                const response = await fetch("http://localhost:3000/training");
                 const responseBody = await response.text();
-                console.log("responseBody:", responseBody); // Add this line
                 const data = JSON.parse(responseBody);
                 const words = data.words.join(" ");
                 setText(words);
