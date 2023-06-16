@@ -50,7 +50,7 @@ const Game = () => {
     setIsMessageVisible(false);
   }, []);
 
-  const handleKeyUp = (e) => {
+  const handleKeyDown = useCallback((e) => {
     setHasStartedTyping(true);
     const key = e.key;
     const expectedLetter = text[currentLetterIndex];
@@ -78,6 +78,7 @@ const Game = () => {
           setHasFailed(true);
         } else {
           setIsFinished(true);
+          setHp(hp - 1)
           const timeTaken = time - timeLeft;
           setTimeTaken(timeTaken);
           const wpm = Math.round((text.split(" ").length / timeTaken) * 60);
@@ -133,7 +134,8 @@ const Game = () => {
     }
 
     e.preventDefault();
-  };
+  }, [setHasStartedTyping, text, currentLetterIndex, hasCalculated, timesCalculated, timesUpdatedCursor, incorrectLetters, timeLeft, time]);
+
 
 
 
@@ -200,7 +202,7 @@ const Game = () => {
           </div>
           <main
             tabIndex={0}
-            onKeyDown={handleKeyUp}
+            onKeyDown={handleKeyDown}
             onClick={handleClickForBlur}
             className={`max-w-[1200px] ${isBlurred ? "blur" : ""
               } overflow-hidden inline-block items-center h-[155px]  text-2xl m-auto focus:outline-none ${isFinished || hasFailed ? "hidden" : ""

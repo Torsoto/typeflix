@@ -59,7 +59,7 @@ const TrainingGame = () => {
         setIsMessageVisible(false);
     }, []);
 
-    const handleKeyUp = (e) => {
+    const handleKeyDown = useCallback((e) => {
         setHasStartedTyping(true);
         const key = e.key;
         const expectedLetter = text[currentLetterIndex];
@@ -131,7 +131,8 @@ const TrainingGame = () => {
         }
 
         e.preventDefault();
-    };
+    }, [setHasStartedTyping, text, currentLetterIndex, hasCalculated, timesCalculated, timesUpdatedCursor, incorrectLetters, timeLeft, time]);
+
 
 
     const WinMessage = ({ isFinished, timeTaken, wpm }) => {
@@ -176,7 +177,7 @@ const TrainingGame = () => {
             <WinMessage isFinished={isFinished} timeTaken={timeTaken} wpm={wpm} />
             <FailMessage hasFailed={hasFailed} />
             <div>
-                <div className="flex gap-1 place-content-center mb-8">
+                <div className="flex gap-1 mb-8 place-content-center">
                     <p className={`text-2xl font-bold align-middle ${timeLeft > 0 && !isBlurred && !isFinished && !hasFailed ? "opacity-100" : "invisible"}`}>
                         {timeLeft > 0 && !isBlurred ? `${timeLeft}` : "0"}
                     </p>
@@ -190,7 +191,7 @@ const TrainingGame = () => {
                     </div>
                     <main
                         tabIndex={0}
-                        onKeyUp={handleKeyUp}
+                        onKeyDown={handleKeyDown}
                         onClick={handleClickForBlur}
                         className={`max-w-[1200px] ${isBlurred ? "blur" : ""
                             } overflow-hidden inline-block items-center h-[155px]  text-2xl m-auto focus:outline-none ${isFinished || hasFailed ? "hidden" : ""
