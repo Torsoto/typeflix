@@ -167,7 +167,7 @@ const Game = () => {
         <img
           src={Img}
           alt="pixel image of low level thug"
-          className="w-[200px] h-[200px] stance mr-8"
+          className="h-[200px] stance mr-8"
         />
       </div>
       <HpBar hp={hp} />
