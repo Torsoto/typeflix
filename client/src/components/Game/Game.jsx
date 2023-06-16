@@ -200,7 +200,7 @@ const Game = () => {
           </div>
           <main
             tabIndex={0}
-            onKeyUp={handleKeyUp}
+            onKeyDown={handleKeyUp}
             onClick={handleClickForBlur}
             className={`max-w-[1200px] ${isBlurred ? "blur" : ""
               } overflow-hidden inline-block items-center h-[155px]  text-2xl m-auto focus:outline-none ${isFinished || hasFailed ? "hidden" : ""
