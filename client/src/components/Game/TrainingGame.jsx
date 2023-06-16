@@ -24,10 +24,6 @@ const TrainingGame = () => {
     const [Img, setImg] = useState("https://i.imgur.com/gC8ZKJf.png")
 
     useEffect(() => {
-        setText("FUCK THIS")
-    })
-
-    useEffect(() => {
         const fetchRandomWords = async () => {
             try {
                 const response = await fetch("http://localhost:3000/training");
