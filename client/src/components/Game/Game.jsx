@@ -2,6 +2,7 @@ import gangster1 from "../../assets/ganster-lv1.png";
 import React, { useState, useCallback, useEffect, useRef, useContext } from "react";
 import "../../styles/Home.css";
 import AuthContext from "../context/AuthContext.jsx";
+import {FiClock} from "react-icons/fi";
 
 const Game = () => {
   const [isBlurred, setIsBlurred] = useState(true);
@@ -119,7 +120,7 @@ const Game = () => {
     const barColor = hpPercentage < 20 ? "bg-red-500" : "bg-green-500";
 
     return (
-      <div className={`w-full border-2 border-black h-4 mb-24 mt-4 max-w-[300px] bg-gray-400 rounded-full`}>
+      <div className={`w-full border-2 border-black h-4 mb-[24px] mt-8 max-w-[300px] bg-gray-400 rounded-full`}>
         <div
           className={`h-full ${barColor} rounded-full`}
           style={{ width: `${hpPercentage}%` }}
@@ -139,12 +140,18 @@ const Game = () => {
       </div>
       <HpBar hp={hp} />
       <div>
-        <div className="flex gap-1 place-content-center">
-          <p className={`text-2xl font-bold align-middle ${timeLeft > 0 && !isBlurred ? "opacity-100" : "invisible"}`}>
-            {timeLeft > 0 && !isBlurred ? `${timeLeft}` : "0"}
-          </p>
-        </div>
-        <div className="relative">
+          <div className="flex gap-1 place-content-left">
+              <p className={`text-2xl font-bold align-middle flex items-center gap-2 ${timeLeft > 0 && !isBlurred ? "opacity-100" : "invisible"}`}>
+                  {timeLeft > 0 && !isBlurred ? (
+                      <>
+                          <FiClock className="inline-block align-middle" /> {timeLeft} {/* Timer icon and time */}
+                      </>
+                  ) : (
+                      "0"
+                  )}
+              </p>
+          </div>
+          <div className="relative">
           <div
             className={`absolute text-2xl font-mono top-0 bottom-0 left-0 right-0 flex items-center justify-center text-center ${isMessageVisible ? "" : "hidden"
               }`}
