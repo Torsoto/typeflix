@@ -196,7 +196,7 @@ const Game = () => {
               } overflow-hidden inline-block items-center h-[155px]  text-2xl m-auto focus:outline-none ${isFinished || hasFailed ? "hidden" : ""
               }`}
           >
-            <p ref={pRef} className={`relative leading-[50px] text-justify`} style={{ top: -50 * timesUpdatedCursor }}>
+            <p ref={pRef} className={`relative leading-[50px] text-2xl font-semibold text-justify`} style={{ top: -50 * timesUpdatedCursor }}>
               {text.split('').map((letter, letterIndex) => (
                 <React.Fragment key={letterIndex}>
                   {letterIndex === currentLetterIndex && !isBlurred && (
