@@ -176,7 +176,7 @@ const Game = () => {
       <FailMessage hasFailed={hasFailed} />
       <div>
         <div className="flex gap-1 place-content-center">
-          <p className={`text-2xl font-bold align-middle ${timeLeft > 0 && !isBlurred && !isFinished ? "opacity-100" : "invisible"}`}>
+          <p className={`text-2xl font-bold align-middle ${timeLeft > 0 && !isBlurred && !isFinished && !hasFailed ? "opacity-100" : "invisible"}`}>
             {timeLeft > 0 && !isBlurred ? `${timeLeft}` : "0"}
           </p>
         </div>
@@ -192,7 +192,7 @@ const Game = () => {
             onKeyUp={handleKeyUp}
             onClick={handleClickForBlur}
             className={`max-w-[1200px] ${isBlurred ? "blur" : ""
-              } overflow-hidden inline-block items-center h-[155px]  text-2xl m-auto focus:outline-none ${isFinished ? "hidden" : ""
+              } overflow-hidden inline-block items-center h-[155px]  text-2xl m-auto focus:outline-none ${isFinished || hasFailed ? "hidden" : ""
               }`}
           >
             <p ref={pRef} className={`relative leading-[50px] text-justify`} style={{ top: -50 * timesUpdatedCursor }}>
