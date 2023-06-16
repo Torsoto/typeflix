@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef, useContext } from "react";
 import "../../styles/Home.css";
 import AuthContext from "../context/AuthContext.jsx";
+import "../../styles/App.css";
 
 const Game = () => {
   const [isBlurred, setIsBlurred] = useState(true);
@@ -151,7 +152,7 @@ const Game = () => {
     }
 
     return (
-      <div className={`w-full border-2 border-black h-4 mb-24 mt-4 max-w-[300px] bg-white rounded-full`}>
+      <div className={`w-full border-2 border-black h-4 mb-14 mt-4 max-w-[300px] bg-white rounded-full`}>
         <div
           className={`h-full ${barColor} rounded-full`}
           style={{ width: `${hpPercentage}%` }}
@@ -175,7 +176,7 @@ const Game = () => {
       <FailMessage hasFailed={hasFailed} />
       <div>
         <div className="flex gap-1 place-content-center">
-          <p className={`text-2xl font-bold align-middle ${timeLeft > 0 && !isBlurred && !isFinished && !hasFailed ? "opacity-100" : "invisible"}`}>
+          <p className={`text-2xl font-bold align-middle mb-8 ${timeLeft > 0 && !isBlurred && !isFinished && !hasFailed ? "opacity-100" : "invisible"}`}>
             {timeLeft > 0 && !isBlurred ? `${timeLeft}` : "0"}
           </p>
         </div>
@@ -194,7 +195,7 @@ const Game = () => {
               } overflow-hidden inline-block items-center h-[155px]  text-2xl m-auto focus:outline-none ${isFinished || hasFailed ? "hidden" : ""
               }`}
           >
-            <p ref={pRef} className={`relative leading-[50px] text-justify`} style={{ top: -50 * timesUpdatedCursor }}>
+            <p ref={pRef} className={`relative leading-[50px] text-justify text-xl font-medium`} style={{ top: -50 * timesUpdatedCursor }}>
               {text.split('').map((letter, letterIndex) => (
                 <React.Fragment key={letterIndex}>
                   {letterIndex === currentLetterIndex && !isBlurred && (

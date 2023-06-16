@@ -1,5 +1,6 @@
 import logo from "../../assets/wide-logo.svg";
 import userIcon from "../../assets/profile.svg";
+import "../../styles/App.css";
 import { useState } from "react";
 import DropdownMenu from "../UI/Dropdown";
 

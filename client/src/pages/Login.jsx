@@ -5,6 +5,7 @@ import { BeatLoader } from "react-spinners";
 import Notification from "../components/Notification/Notification.jsx";
 import { ERROR_MAP } from "../components/Notification/ERROR_MAP.js";
 import AuthContext from "../components/context/AuthContext.jsx";
+import "../styles/App.css";
 
 function Login() {
   const [email, setEmail] = useState("");

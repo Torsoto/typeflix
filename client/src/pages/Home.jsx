@@ -1,4 +1,5 @@
 import "../styles/Home.css";
+import "../styles/App.css";
 import Navbar from "../components/UI/Navbar.jsx";
 import LevelSelection from "../components/Game/LevelSelection.jsx";
 import AuthContext from "../components/context/AuthContext.jsx";

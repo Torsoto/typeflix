@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import "../../styles/LevelSelection.css";
+import "../../styles/App.css";
 import Game from "./Game.jsx";
 import AuthContext from "../context/AuthContext.jsx";
 import { IoIosArrowBack } from "react-icons/io";
@@ -188,7 +189,7 @@ const LevelSelection = () => {
                 </button>
               )}
             </div>
-            <p className="my-10">
+            <p className="my-10 font-semibold text-2xl text-white">
               {!showHomeGame
                 ? (showLevels ? `Select Level` : "Select Movie")
                 : `Level ${selectedLevelIndex}`

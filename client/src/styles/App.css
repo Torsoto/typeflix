@@ -15,3 +15,7 @@ body {
   transform-origin: top left;
   font-family: "Inter", sans-serif;
 }
+
+p {
+  font-family: "Inter", sans-serif;
+}

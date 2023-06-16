@@ -63,11 +63,11 @@ function Settings() {
             <h1 className="mt-8 text-xl text-white pb-7">Settings</h1>
             <div className="flex flex-col p-8 mx-auto rounded-lg bg-neutral-700 md:flex-row">
               <div className="flex flex-col items-start mb-4 md:mb-0 md:w-1/2">
-                <div className="w-16 h-16 overflow-hidden rounded-full">
+                <div className="w-40 h-40 overflow-hidden rounded-full">
                   {avatarStyle && <img src={avatarStyle} alt="Avatar" />}
                 </div>
                 <button
-                  className="px-4 py-2 mt-2 font-semibold text-white bg-black rounded-full"
+                  className="px-4 py-2 mt-4 font-semibold text-white bg-black rounded-full"
                   onClick={handleToggleAvatarOptions}
                 >
                   Change Avatar
