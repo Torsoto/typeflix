@@ -132,7 +132,7 @@ const Game = () => {
     <div className="grid mx-auto text-white place-items-center ">
       <div className="">
         <img
-          src={Img}
+          src={"https://i.imgur.com/7byaekD.png"}
           alt="pixel image of low level thug"
           className="w-[200px] stance mr-8"
         />
