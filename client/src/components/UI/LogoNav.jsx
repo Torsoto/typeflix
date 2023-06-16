@@ -1,4 +1,5 @@
 import logo from "../../assets/wide-logo.svg";
+import "../../styles/App.css";
 
 const LogoNav = () => {
   return (

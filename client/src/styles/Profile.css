@@ -1,4 +1,15 @@
 /* profile.css */
 p {
+  color: #bfbfbf;
+  font-size: large;
+}
+
+.profil-box-bg {
+  background-color: #414141;
+}
+
+h1 {
   color: white;
+  font-size: large;
+  padding-left: 20px;
 }

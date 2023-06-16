@@ -1,5 +1,6 @@
 import {useContext, useEffect, useState} from "react";
 import AuthContext from "../context/AuthContext.jsx";
+import "../../styles/App.css";
 
 export const DropdownMenu = () => {
     const { isLoggedIn, logout } = useContext(AuthContext);
