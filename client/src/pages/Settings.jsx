@@ -8,12 +8,37 @@ import { Avatars } from "../components/UI/Avatars.jsx";
 
 function Settings() {
   const [error, setError] = useState("");
-  const [avatarStyle, setAvatarStyle] = useState(""); // State to store the avatar URL
-  const [showAvatarOptions, setShowAvatarOptions] = useState(false); // State to control the display of avatar options
+  const [showAvatarOptions, setShowAvatarOptions] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const { userId, userData } = useContext(AuthContext);
+  const { userId, userData, avatarUrl, setAvatarUrl } = useContext(AuthContext);
+
+  const updateAvatar = async (newAvatar) => {
+    try {
+      const response = await fetch('http://localhost:3000/updateavatar', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: localStorage.getItem('jwt'),
+          newAvatar: newAvatar,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update avatar');
+      }
+
+      const data = await response.json();
+      setAvatarUrl(newAvatar);
+      console.log(data.message);
+    } catch (error) {
+      console.error('Error updating avatar:', error);
+    }
+  };
+
 
   const handleUpdateUsername = async () => { };
 
@@ -23,20 +48,13 @@ function Settings() {
     setShowAvatarOptions(!showAvatarOptions);
   };
 
-  useEffect(() => {
-    return () => {
-
-    };
-  }, [avatarStyle]);
-
 
   const handleSelectAvatar = (styleName) => {
     // Set the avatar URL
     const avatarURL = `https://api.dicebear.com/6.x/${styleName}/svg?seed=${userId}`;
-    setAvatarStyle(avatarURL);
-
-    // Hide the avatar options
+    setAvatarUrl(avatarURL);
     setShowAvatarOptions(false);
+    updateAvatar(avatarURL);
   };
 
   const handleDeleteAccount = async () => { };
@@ -51,7 +69,7 @@ function Settings() {
             <div className="flex flex-col p-8 mx-auto rounded-lg bg-neutral-700 md:flex-row">
               <div className="flex flex-col items-start mb-4 md:mb-0 md:w-1/2">
                 <div className="w-40 h-40 overflow-hidden rounded-full">
-                  {avatarStyle && <img src={avatarStyle} alt="Avatar" />}
+                  {avatarUrl && <img src={avatarUrl} alt="Avatar" />}
                 </div>
                 <button
                   className="px-4 py-2 mt-4 font-semibold text-white bg-black rounded-full"

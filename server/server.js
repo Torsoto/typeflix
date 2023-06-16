@@ -196,6 +196,32 @@ app.post("/validate", async (req, res) => {
   }
 });
 
+app.put("/updateavatar", async (req, res) => {
+  const { token, newAvatar } = req.body;
+
+  try {
+    const decoded = jwt.verify(token, secretKey);
+    const { username } = decoded;
+
+    // Get the user documents from Firestore
+    const userDoc = await getDoc(doc(db, "users", username));
+
+    if (!userDoc.exists()) {
+      res.status(404).send({ error: "User not found" });
+      return;
+    }
+
+    // Update the avatar field in the user's document
+    const updatedUser = { ...userDoc.data(), avatar: newAvatar };
+    await setDoc(doc(db, "users", username), updatedUser);
+
+    res.status(200).send({ message: "Avatar updated successfully" });
+  } catch (error) {
+    console.error("Error updating avatar:", error);
+    res.status(500).send({ error: error.message });
+  }
+});
+
 app.get("/movies", async (req, res) => {
   try {
     const moviesRef = collection(db, "movies");

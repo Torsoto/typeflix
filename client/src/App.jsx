@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import "./styles/App.css";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -6,9 +6,9 @@ import Settings from "./pages/Settings";
 import Signup from "./pages/Signup";
 import Profile from "./pages/Profile.jsx";
 import Training from "./pages/Training";
-import { Route, Routes } from "react-router-dom";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { auth } from "../db/firebase.js";
+import {Route, Routes} from "react-router-dom";
+import {GoogleAuthProvider, signInWithPopup} from "firebase/auth";
+import {auth} from "../db/firebase.js";
 import AuthContext from "../src/components/context/AuthContext.jsx";
 
 function App() {
@@ -19,25 +19,31 @@ function App() {
     const [gradientColor, setGradientColor] = React.useState('#313131');
     const [Img, setImg] = useState("https://i.imgur.com/oQUOXS8.png");
     const [time, setTime] = useState(60);
+    const [avatarUrl, setAvatarUrl] = useState("");
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(`http://localhost:3000/${userId}`);
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                const data = await response.json();
+        if (userId.length > 0) {
+            fetchData().then((data) =>{
                 setUserData(data);
-            } catch (error) {
-                console.error(
-                    "There has been a problem with your fetch operation: ",
-                    error.message
-                );
-            }
-        };
-        fetchData();
+                setAvatarUrl(data.avatar);
+            })
+        }
     }, [userId]);
+
+    const fetchData = async () => {
+        try {
+            const response = await fetch(`http://localhost:3000/${userId}`);
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            return await response.json();
+        } catch (error) {
+            console.error(
+                "There has been a problem with your fetch operation: ",
+                error.message
+            );
+        }
+    };
 
     const googleSignIn = () => {
         const provider = new GoogleAuthProvider();
@@ -92,7 +98,7 @@ function App() {
 
     return (
         <>
-            <AuthContext.Provider value={{ googleSignIn, logout, login, isLoggedIn, text, setText, gradientColor, setGradientColor, setImg, Img, time, setTime, userId, userData }}>
+            <AuthContext.Provider value={{ googleSignIn, logout, login, isLoggedIn, text, setText, gradientColor, setGradientColor, setImg, Img, time, setTime, userId, userData, avatarUrl, setAvatarUrl }}>
                 <Routes>
                     <Route path="/" element={<Home />}></Route>
                     <Route path="/login" element={<Login />}></Route>
