@@ -78,12 +78,16 @@ const Game = () => {
           setHasFailed(true);
         } else {
           setIsFinished(true);
-          setHasFailed(false);
+          const timeTaken = time - timeLeft;
+          setTimeTaken(timeTaken);
+          const wpm = Math.round((text.split(" ").length / timeTaken) * 60);
+          setWpm(wpm);
         }
         return;
       }
       const nextLetterIndex = currentLetterIndex + 1;
       if (key === expectedLetter) {
+        setHp(hp - 1);
         setCorrectLetters((prevCorrectLetters) => [
           ...prevCorrectLetters,
           `${currentLetterIndex}`,
@@ -91,11 +95,11 @@ const Game = () => {
         setCurrentLetterIndex(nextLetterIndex);
         if (nextLetterIndex === text.length && incorrectLetters.length === 0) {
           setIsFinished(true);
+          setHasFailed(false);
           const timeTaken = time - timeLeft;
           setTimeTaken(timeTaken);
           const wpm = Math.round((text.split(" ").length / timeTaken) * 60);
           setWpm(wpm);
-          //SEND REQUEST TO user document to add WPM achieved into wpm array
         }
         if (nextLetterIndex === text.length && incorrectLetters.length > 0) {
           setHasFailed(true);
@@ -123,12 +127,14 @@ const Game = () => {
           )
         );
         if (correctLetters.includes(`${currentLetterIndex - 1}`)) {
+          setHp(hp + 1);
         }
       }
     }
 
     e.preventDefault();
   };
+
 
 
 
@@ -200,7 +206,7 @@ const Game = () => {
               } overflow-hidden inline-block items-center h-[155px]  text-2xl m-auto focus:outline-none ${isFinished || hasFailed ? "hidden" : ""
               }`}
           >
-            <p ref={pRef} className={`relative leading-[50px] text-2xl font-semibold text-justify`} style={{ top: -50 * timesUpdatedCursor }}>
+            <p ref={pRef} className={`relative leading-[50px] text-justify text-2xl font-medium`} style={{ top: -50 * timesUpdatedCursor }}>
               {text.split('').map((letter, letterIndex) => (
                 <React.Fragment key={letterIndex}>
                   {letterIndex === currentLetterIndex && !isBlurred && (
