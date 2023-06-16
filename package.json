@@ -8,8 +8,6 @@
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\""
   },
   "dependencies": {
-    "concurrently": "^6.2.1",
-    "@dicebear/collection": "^6.0.4",
-    "@dicebear/core": "^6.0.4"
+    "concurrently": "^6.2.1"
   }
 }
