@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 
+body {
+  overflow-x: hidden;
+}
+
 .fadeUp {
   animation-name: fade-in-Up;
   animation-duration: 400ms;

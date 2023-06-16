@@ -169,8 +169,8 @@ const LevelSelection = () => {
   };
 
   return (
-    <div className="h-[85%]">
-      <div className="h-[85%] mx-auto text-white">
+    <div className="h-[100%]">
+      <div className="mx-auto text-white">
         <div className="text-2xl text-center font-medium">
           <div className="grid grid-cols-3">
             <div className="flex items-center">
@@ -188,7 +188,7 @@ const LevelSelection = () => {
                   </button>
               )}
             </div>
-            <p className="my-16">
+            <p className="my-10">
               {!showHomeGame
                   ? (showLevels ? `Select Level` : "Select Movie")
                   : `Level ${selectedLevelIndex}`
@@ -201,7 +201,7 @@ const LevelSelection = () => {
               <Game />
             </div>
         ) : (
-            <div className="flex flex-wrap justify-center gap-[52px]">
+            <div className="flex flex-wrap justify-center gap-[52px] pb-[50px] overflow-hidden">
               {showLevels ? renderLevels() : renderMovies()}
             </div>
         )}

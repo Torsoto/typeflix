@@ -13,7 +13,7 @@ function Home() {
         backgroundRepeat: 'repeat, no-repeat',
         backgroundBlendMode: 'normal',
         backgroundSize: 'auto, cover',
-        height: '100vh',
+        minHeight: '100vh',
         width: '100vw',
         transformOrigin: 'top left',
     };
