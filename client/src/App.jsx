@@ -121,8 +121,12 @@ function App() {
                 }}
             >
                 <Routes>
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/login"
+                           element={!isLoggedIn ? <Login /> : <Navigate to="/" />}
+                    />
+                    <Route path="/signup"
+                           element={!isLoggedIn ? <Signup /> : <Navigate to="/" />}
+                    />
                     <Route path="/"
                            element={isLoggedIn ? <Home /> : <Navigate to="/login" />}
                     />
