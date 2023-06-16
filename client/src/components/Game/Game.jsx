@@ -9,7 +9,6 @@ const Game = () => {
   const [currentLetterIndex, setCurrentLetterIndex] = useState(0);
   const [correctLetters, setCorrectLetters] = useState([]);
   const [incorrectLetters, setIncorrectLetters] = useState([]);
-  const [timeLeft, setTimeLeft] = useState(120);
   const [hasStartedTyping, setHasStartedTyping] = useState(false);
   const [lineCount, setLineCount] = useState(0);
   const [nextCursorY, setNextCursorY] = useState(0);
@@ -17,9 +16,16 @@ const Game = () => {
   const [timesCalculated, setTimesCalculated] = useState(0);
   const [timesUpdatedCursor, setTimesUpdatedCursor] = useState(0);
   const pRef = useRef();
-  const { text, Img } = useContext(AuthContext);
+  const { text, Img, time } = useContext(AuthContext);
   const [hp, setHp] = useState(text.length);
   const [isFinished, setIsFinished] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(time);
+  const hpPercentage = (hp / text.length) * 100;
+  const [timeTaken, setTimeTaken] = useState(0);
+  const [wpm, setWpm] = useState(0);
+  const [hasFailed, setHasFailed] = useState(false);
+
+
 
   useEffect(() => {
     console.log(text)
@@ -29,6 +35,9 @@ const Game = () => {
     if (timeLeft > 0 && hasStartedTyping) {
       const timerId = setTimeout(() => {
         setTimeLeft(timeLeft - 1);
+        if (timeLeft === 1) {
+          setHasFailed(true);
+        }
       }, 1000);
 
       return () => clearTimeout(timerId);
@@ -41,85 +50,109 @@ const Game = () => {
     setIsMessageVisible(false);
   }, []);
 
-  const handleKeyUp = useCallback(
-    (e) => {
-      setHasStartedTyping(true);
-      const key = e.key;
-      const expectedLetter = text[currentLetterIndex];
-      const isLetter = key.length === 1;
-      const isSpace = key === " ";
-      const isBackspace = key === "Backspace";
+  const handleKeyUp = (e) => {
+    setHasStartedTyping(true);
+    const key = e.key;
+    const expectedLetter = text[currentLetterIndex];
+    const isLetter = key.length === 1;
+    const isSpace = key === " ";
+    const isBackspace = key === "Backspace";
 
-      const element = document.querySelector('.blinking-cursor');
-      const cursorPosY = element.offsetTop;
+    const element = document.querySelector('.blinking-cursor');
+    const cursorPosY = element.offsetTop;
 
-      if (!hasCalculated) {
-        setNextCursorY(cursorPosY + 100);
-        sethasCalculated(true);
-        setTimesCalculated(timesCalculated + 1);
+    if (!hasCalculated) {
+      setNextCursorY(cursorPosY + 100);
+      sethasCalculated(true);
+      setTimesCalculated(timesCalculated + 1);
+    }
+
+    if (cursorPosY >= nextCursorY && timesCalculated === 1) {
+      setNextCursorY(cursorPosY);
+      setTimesUpdatedCursor(timesUpdatedCursor + 1);
+    }
+
+    if (isLetter || (isSpace && expectedLetter === " ")) {
+      if (currentLetterIndex === text.length) {
+        return;
       }
-
-      if (cursorPosY >= nextCursorY && timesCalculated === 1) {
-        setNextCursorY(cursorPosY);
-        setTimesUpdatedCursor(timesUpdatedCursor + 1);
-      }
-
-      if (isLetter || (isSpace && expectedLetter === " ")) {
-        if (currentLetterIndex === text.length) {
-          return;
+      const nextLetterIndex = currentLetterIndex + 1;
+      if (key === expectedLetter) {
+        setHp(hp - 1);
+        setCorrectLetters((prevCorrectLetters) => [
+          ...prevCorrectLetters,
+          `${currentLetterIndex}`,
+        ]);
+        setCurrentLetterIndex(nextLetterIndex);
+        if (nextLetterIndex === text.length && incorrectLetters.length === 0) {
+          setIsFinished(true);
+          setHasFailed(false);
+          const timeTaken = time - timeLeft;
+          setTimeTaken(timeTaken);
+          const wpm = Math.round((text.split(" ").length / timeTaken) * 60);
+          setWpm(wpm);
         }
-        const nextLetterIndex = currentLetterIndex + 1;
-        if (key === expectedLetter) {
-          setHp(hp - 1);
-          setCorrectLetters((prevCorrectLetters) => [
-            ...prevCorrectLetters,
-            `${currentLetterIndex}`,
-          ]);
-          setCurrentLetterIndex(nextLetterIndex);
+        if (nextLetterIndex === text.length && incorrectLetters.length > 0) {
+          setHasFailed(true);
+        }
+      } else if (expectedLetter !== " ") {
+        setIncorrectLetters((prevIncorrectLetters) => [
+          ...prevIncorrectLetters,
+          `${currentLetterIndex}`,
+        ]);
+        setCurrentLetterIndex(nextLetterIndex);
+      }
+    }
 
-        } else if (expectedLetter !== " ") {
-          setIncorrectLetters((prevIncorrectLetters) => [
-            ...prevIncorrectLetters,
-            `${currentLetterIndex}`,
-          ]);
-          setCurrentLetterIndex(nextLetterIndex);
-          if (nextLetterIndex === text.length) {
-            setIsFinished(true);
-          }
-
+    if (isBackspace) {
+      if (currentLetterIndex > 0) {
+        setCurrentLetterIndex(currentLetterIndex - 1);
+        setCorrectLetters((prevCorrectLetters) =>
+          prevCorrectLetters.filter(
+            (item) => item !== `${currentLetterIndex - 1}`
+          )
+        );
+        setIncorrectLetters((prevIncorrectLetters) =>
+          prevIncorrectLetters.filter(
+            (item) => item !== `${currentLetterIndex - 1}`
+          )
+        );
+        if (correctLetters.includes(`${currentLetterIndex - 1}`)) {
+          setHp(hp + 1);
         }
       }
+    }
 
-      if (isBackspace) {
-        if (currentLetterIndex > 0) {
-          setCurrentLetterIndex(currentLetterIndex - 1);
-          setCorrectLetters((prevCorrectLetters) =>
-            prevCorrectLetters.filter(
-              (item) => item !== `${currentLetterIndex - 1}`
-            )
-          );
-          setIncorrectLetters((prevIncorrectLetters) =>
-            prevIncorrectLetters.filter(
-              (item) => item !== `${currentLetterIndex - 1}`
-            )
-          );
-          if (correctLetters.includes(`${currentLetterIndex - 1}`)) {
-            setHp(hp + 1);
-          }
-        }
-      }
+    e.preventDefault();
+  };
 
-      e.preventDefault();
-    },
-    [currentLetterIndex, text, lineCount]
-  );
 
-  const HpBar = ({ hp }) => {
-    const hpPercentage = (hp / text.length) * 100;
-    const barColor = hpPercentage < 20 ? "bg-red-500" : "bg-green-500";
+  const WinMessage = ({ isFinished, timeTaken, wpm }) => {
+    if (!isFinished) return null;
 
     return (
-      <div className={`w-full border-2 border-black h-4 mb-24 mt-4 max-w-[300px] bg-gray-400 rounded-full`}>
+      <div className="text-2xl">
+        Congratulations! You beat this level in {timeTaken} seconds with {wpm} WPM!
+      </div>
+    );
+  };
+
+  const FailMessage = ({ hasFailed }) => {
+    if (!hasFailed) return null;
+
+    return <div className="text-2xl">Sorry! You failed this level.</div>;
+  };
+
+  const HpBar = ({ hp }) => {
+    let barColor = "bg-green-500";
+    if (hpPercentage < 20) {
+      barColor = "bg-red-500";
+    } else if (hpPercentage < 50) {
+      barColor = "bg-orange-500";
+    }
+
+    return (
+      <div className={`w-full border-2 border-black h-4 mb-24 mt-4 max-w-[300px] bg-white rounded-full`}>
         <div
           className={`h-full ${barColor} rounded-full`}
           style={{ width: `${hpPercentage}%` }}
@@ -128,19 +161,22 @@ const Game = () => {
     );
   };
 
+
   return (
     <div className="grid mx-auto text-white place-items-center ">
       <div className="">
         <img
-          src={"https://i.imgur.com/7byaekD.png"}
+          src={Img}
           alt="pixel image of low level thug"
-          className="w-[200px] stance mr-8"
+          className="w-[200px] h-[200px] stance mr-8"
         />
       </div>
       <HpBar hp={hp} />
+      <WinMessage isFinished={isFinished} timeTaken={timeTaken} wpm={wpm} />
+      <FailMessage hasFailed={hasFailed} />
       <div>
         <div className="flex gap-1 place-content-center">
-          <p className={`text-2xl font-bold align-middle ${timeLeft > 0 && !isBlurred ? "opacity-100" : "invisible"}`}>
+          <p className={`text-2xl font-bold align-middle ${timeLeft > 0 && !isBlurred && !isFinished ? "opacity-100" : "invisible"}`}>
             {timeLeft > 0 && !isBlurred ? `${timeLeft}` : "0"}
           </p>
         </div>
@@ -156,7 +192,8 @@ const Game = () => {
             onKeyUp={handleKeyUp}
             onClick={handleClickForBlur}
             className={`max-w-[1200px] ${isBlurred ? "blur" : ""
-              } overflow-hidden inline-block items-center h-[155px]  text-2xl m-auto focus:outline-none`}
+              } overflow-hidden inline-block items-center h-[155px]  text-2xl m-auto focus:outline-none ${isFinished ? "hidden" : ""
+              }`}
           >
             <p ref={pRef} className={`relative leading-[50px] text-justify`} style={{ top: -50 * timesUpdatedCursor }}>
               {text.split('').map((letter, letterIndex) => (

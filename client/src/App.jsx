@@ -17,7 +17,8 @@ function App() {
         .split(""));
     const [isLoggedIn, setIsLoggedIn] = useState({})
     const [gradientColor, setGradientColor] = React.useState('#313131');
-    const [Img, setImg] = useState("https://i.imgur.com/7byaekD.png");
+    const [Img, setImg] = useState("");
+    const [time, setTime] = useState(60);
 
     const googleSignIn = () => {
         const provider = new GoogleAuthProvider();
@@ -72,7 +73,7 @@ function App() {
 
     return (
         <>
-            <AuthContext.Provider value={{ googleSignIn, logout, login, isLoggedIn, userId, text, setText, gradientColor, setGradientColor, setImg, Img }}>
+            <AuthContext.Provider value={{ googleSignIn, logout, login, isLoggedIn, userId, text, setText, gradientColor, setGradientColor, setImg, Img, time, setTime }}>
                 <Routes>
                     <Route path="/" element={<Home />}></Route>
                     <Route path="/login" element={<Login />}></Route>

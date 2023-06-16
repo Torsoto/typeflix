@@ -16,7 +16,7 @@ const LevelSelection = () => {
   const [showBackButton, setShowBackButton] = useState(false);
   const [gameOpacity, setGameOpacity] = useState(0);
 
-  const { setText, setGradientColor, setImg } = useContext(AuthContext);
+  const { setText, setGradientColor, setImg, setTime } = useContext(AuthContext);
 
   useEffect(() => {
     fetchMovieList();
@@ -118,6 +118,7 @@ const LevelSelection = () => {
           console.log(data.text);
           setText(data.text);
           setImg(data.img);
+          setTime(data.time);
           setSelectedLevelIndex(level)
           setFadeOut(true);  // trigger the fade-out transition
 

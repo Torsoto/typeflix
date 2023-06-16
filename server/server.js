@@ -1,24 +1,24 @@
 import express from "express";
 import {
-    getAuth,
-    createUserWithEmailAndPassword,
-    GoogleAuthProvider,
-    signInWithPopup,
-    signInWithEmailAndPassword,
-    deleteUser,
-    updateProfile,
-    updateEmail,
-    updatePassword,
+  getAuth,
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  deleteUser,
+  updateProfile,
+  updateEmail,
+  updatePassword,
 } from "firebase/auth";
 import {
-    getFirestore,
-    doc,
-    setDoc,
-    getDoc,
-    getDocs,
-    collection,
-    deleteDoc,
-    writeBatch ,
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  getDocs,
+  collection,
+  deleteDoc,
+  writeBatch,
 } from "firebase/firestore";
 import "./db/firebase.mjs";
 import cors from "cors";
@@ -56,44 +56,42 @@ app.post("/signup", async (req, res) => {
     } else {
       try {
         createUserWithEmailAndPassword(auth, email, password)
-            .then((userRecord) => {
-              console.log("Successfully created new user:", userRecord.user.uid);
+          .then((userRecord) => {
+            console.log("Successfully created new user:", userRecord.user.uid);
 
-              const userDoc = doc(db, "users", lowercaseUsername);
-              const emailToUsernameDoc = doc(db, "emailToUsername", email);
+            const userDoc = doc(db, "users", lowercaseUsername);
+            const emailToUsernameDoc = doc(db, "emailToUsername", email);
 
-              const batch = writeBatch(db);
-              batch.set(userDoc, {
-                username: lowercaseUsername,
-                email: email,
-                userid: userRecord.user.uid,
-                friends: [],
-                bestwpm: 0,
-              });
+            const batch = writeBatch(db);
+            batch.set(userDoc, {
+              username: lowercaseUsername,
+              email: email,
+              userid: userRecord.user.uid,
+              friends: [],
+              bestwpm: 0,
+            });
 
-              batch.set(emailToUsernameDoc, {
-                username: lowercaseUsername,
-              });
+            batch.set(emailToUsernameDoc, {
+              username: lowercaseUsername,
+            });
 
-              console.log("User data stored in Firestore");
+            console.log("User data stored in Firestore");
 
-              const payload = {
-                uid: userRecord.user.uid,
-                username: lowercaseUsername,
-                email: email,
-              };
+            const payload = {
+              uid: userRecord.user.uid,
+              username: lowercaseUsername,
+              email: email,
+            };
 
-              const token = jwt.sign(payload, secretKey, {
-                expiresIn: "336h",
-              });
+            const token = jwt.sign(payload, secretKey, {
+              expiresIn: "336h",
+            });
 
-              res
-                  .status(200)
-                  .send({ token: token, uid: userRecord.user.uid });
+            res.status(200).send({ token: token, uid: userRecord.user.uid });
 
-              return batch.commit();
-            })
-            .catch((error) => {
+            return batch.commit();
+          })
+          .catch((error) => {
             console.log("Error creating new user:", error);
             res.status(500).send({ error: error.message });
           });
@@ -134,7 +132,9 @@ app.post("/login", async (req, res) => {
 
         const token = jwt.sign(payload, secretKey, { expiresIn: "336h" });
 
-        res.status(200).send({ token: token, username: userCredential.user.uid, });
+        res
+          .status(200)
+          .send({ token: token, username: userCredential.user.uid });
       })
       .catch((error) => {
         console.error("Error:", error.message);
@@ -144,39 +144,39 @@ app.post("/login", async (req, res) => {
   } else {
     // User not found by username, attempt to sign in with the identifier as email.
     signInWithEmailAndPassword(auth, lowercaseIdentifier, password)
-        .then((userCredential) => {
-          console.log("User logged in successfully");
+      .then((userCredential) => {
+        console.log("User logged in successfully");
 
-          // Get the username corresponding to this email.
-          getDoc(doc(db, "emailToUsername", lowercaseIdentifier))
-              .then((docSnapshot) => {
-                if (docSnapshot.exists()) {
-                  const username = docSnapshot.data().username;
+        // Get the username corresponding to this email.
+        getDoc(doc(db, "emailToUsername", lowercaseIdentifier))
+          .then((docSnapshot) => {
+            if (docSnapshot.exists()) {
+              const username = docSnapshot.data().username;
 
-                  const payload = {
-                    uid: userCredential.user.uid,
-                    username: username,
-                    email: lowercaseIdentifier,
-                  };
+              const payload = {
+                uid: userCredential.user.uid,
+                username: username,
+                email: lowercaseIdentifier,
+              };
 
-                  const token = jwt.sign(payload, secretKey, { expiresIn: "336h" });
+              const token = jwt.sign(payload, secretKey, { expiresIn: "336h" });
 
-                  res.status(200).send({ token: token, username: username });
-                } else {
-                  // Handle the case where no username was found for this email.
-                  // This should ideally never happen if your signup code is working correctly.
-                }
-              })
-              .catch((error) => {
-                console.error("Error getting username from email:", error);
-                res.status(500).send({ error: error.message });
-              });
-        })
-        .catch((error) => {
-          console.error("Error:", error.message);
-          console.error(lowercaseIdentifier, password);
-          res.status(400).send({ error: error.message });
-        });
+              res.status(200).send({ token: token, username: username });
+            } else {
+              // Handle the case where no username was found for this email.
+              // This should ideally never happen if your signup code is working correctly.
+            }
+          })
+          .catch((error) => {
+            console.error("Error getting username from email:", error);
+            res.status(500).send({ error: error.message });
+          });
+      })
+      .catch((error) => {
+        console.error("Error:", error.message);
+        console.error(lowercaseIdentifier, password);
+        res.status(400).send({ error: error.message });
+      });
   }
 });
 
@@ -216,27 +216,30 @@ app.get("/movies", async (req, res) => {
 });
 
 app.get("/movies/:movie", async (req, res) => {
-    try {
-        const { movie } = req.params;
-        const movieRef = doc(db, `movies/${movie}`);
-        const movieSnapshot = await getDoc(movieRef);
+  try {
+    const { movie } = req.params;
+    const movieRef = doc(db, `movies/${movie}`);
+    const movieSnapshot = await getDoc(movieRef);
 
-        if (!movieSnapshot.exists()) {
-            res.status(404).send({ error: `Movie ${movie} not found` });
-            return;
-        }
-
-        const gradientColor = movieSnapshot.data().gradientColor;
-
-        const levelsRef = collection(db, `movies/${movie}/levels`);
-        const levelsSnapshot = await getDocs(levelsRef);
-        const levelsCount = levelsSnapshot.size;
-
-        res.status(200).json({ count: levelsCount, color: gradientColor });
-    } catch (error) {
-        console.error(`Error retrieving levels or gradient color for movie ${movie}:`, error);
-        res.status(500).send({ error: error.message });
+    if (!movieSnapshot.exists()) {
+      res.status(404).send({ error: `Movie ${movie} not found` });
+      return;
     }
+
+    const gradientColor = movieSnapshot.data().gradientColor;
+
+    const levelsRef = collection(db, `movies/${movie}/levels`);
+    const levelsSnapshot = await getDocs(levelsRef);
+    const levelsCount = levelsSnapshot.size;
+
+    res.status(200).json({ count: levelsCount, color: gradientColor });
+  } catch (error) {
+    console.error(
+      `Error retrieving levels or gradient color for movie ${movie}:`,
+      error
+    );
+    res.status(500).send({ error: error.message });
+  }
 });
 
 function decodeMovieName(encodedMovieName) {
@@ -263,9 +266,25 @@ app.get("/movies/:movie/levels/:level", async (req, res) => {
     }
 
     const levelData = levelSnapshot.data();
-    const text = levelData.text;
+    const text = levelData.text || "There is no text for this level yet";
+    const img = levelData.img || "https://i.imgur.com/7byaekD.png";
+    const time = levelData.time || 60;
 
-    res.status(200).json({ text: text });
+    if (!text) {
+      res.status(404).send({ error: "Text field not found" });
+      return;
+    }
+
+    if (!img) {
+      res.status(404).send({ error: "Img field not found" });
+      return;
+    }
+
+    if (!time) {
+      res.status(404).send({ error: "Time field not found" });
+    }
+
+    res.status(200).json({ text: text, img: img, time: time });
   } catch (error) {
     console.error(`Error retrieving level for movie: `, error);
     res.status(500).send({ error: error.message });
@@ -366,68 +385,67 @@ app.delete("/delete", async (req, res) => {
   }
 });
 
-app.get('/weather/vienna', (req, res) => {
-    const options = {
-        hostname: 'weather.visualcrossing.com',
-        path: '/VisualCrossingWebServices/rest/services/timeline/Vienna?unitGroup=metric&key=UKYSD9QUBK9XXZVU3JVK9VTFG&contentType=json',
-        method: 'GET',
-    };
+app.get("/weather/vienna", (req, res) => {
+  const options = {
+    hostname: "weather.visualcrossing.com",
+    path: "/VisualCrossingWebServices/rest/services/timeline/Vienna?unitGroup=metric&key=UKYSD9QUBK9XXZVU3JVK9VTFG&contentType=json",
+    method: "GET",
+  };
 
-    const request = https.request(options, (response) => {
-        let data = '';
+  const request = https.request(options, (response) => {
+    let data = "";
 
-        response.on('data', (chunk) => {
-            data += chunk;
-        });
-
-        response.on('end', () => {
-            const weatherData = JSON.parse(data);
-            const currentConditions = weatherData.days[0].conditions;
-            const temperature = weatherData.days[0].temp;
-            const description = weatherData.days[0].description;
-
-            res.status(200).json({ currentConditions, temperature, description });
-        });
+    response.on("data", (chunk) => {
+      data += chunk;
     });
 
-    request.on('error', (error) => {
-        console.error('Error retrieving weather data:', error);
-        res.status(500).send({ error: error.message });
-    });
+    response.on("end", () => {
+      const weatherData = JSON.parse(data);
+      const currentConditions = weatherData.days[0].conditions;
+      const temperature = weatherData.days[0].temp;
+      const description = weatherData.days[0].description;
 
-    request.end();
+      res.status(200).json({ currentConditions, temperature, description });
+    });
+  });
+
+  request.on("error", (error) => {
+    console.error("Error retrieving weather data:", error);
+    res.status(500).send({ error: error.message });
+  });
+
+  request.end();
 });
 
-app.get('/time/vienna', (req, res) => {
-    const options = {
-        hostname: 'worldtimeapi.org',
-        path: '/api/timezone/Europe/Vienna',
-        method: 'GET',
-    };
+app.get("/time/vienna", (req, res) => {
+  const options = {
+    hostname: "worldtimeapi.org",
+    path: "/api/timezone/Europe/Vienna",
+    method: "GET",
+  };
 
-    const request = https.request(options, (response) => {
-        let data = '';
+  const request = https.request(options, (response) => {
+    let data = "";
 
-        response.on('data', (chunk) => {
-            data += chunk;
-        });
-
-        response.on('end', () => {
-            const timeData = JSON.parse(data);
-            const datetime = timeData.datetime;
-
-            res.status(200).json({ datetime });
-        });
+    response.on("data", (chunk) => {
+      data += chunk;
     });
 
-    request.on('error', (error) => {
-        console.error('Error retrieving time data:', error);
-        res.status(500).send({ error: error.message });
-    });
+    response.on("end", () => {
+      const timeData = JSON.parse(data);
+      const datetime = timeData.datetime;
 
-    request.end();
+      res.status(200).json({ datetime });
+    });
+  });
+
+  request.on("error", (error) => {
+    console.error("Error retrieving time data:", error);
+    res.status(500).send({ error: error.message });
+  });
+
+  request.end();
 });
-
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
