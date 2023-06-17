@@ -83,7 +83,7 @@ const LevelSelection = () => {
       );
       const data = await response.json();
       const levels = data.openedLevels;
-      setOpenedLevels(levels + 1);
+      setOpenedLevels(levels);
     } catch (error) {
       console.error(`Error fetching opened levels for user ${userData.username} and movie ${movieName}:`, error);
     }
@@ -126,7 +126,7 @@ const LevelSelection = () => {
   };
 
   const renderLevels = () => {
-    return levels.map((level) => {
+    return levels.map((level, index) => {
       const handleLevelSelection = async () => {
         try {
           const response = await fetch(
@@ -154,17 +154,19 @@ const LevelSelection = () => {
         }
       };
 
+      const isOpened = index < openedLevels;
+
       return (
-        <div
-          key={level}
-          className={`flex flex-col items-center m-2 ${fadeOut ? "fade-out" : "fade-in"
-            }`}
-        >
           <div
-            className="min-w-[376px] min-h-[224px] rounded-3xl cursor-pointer relative"
-            style={{ position: "relative", overflow: "hidden" }}
-            onClick={handleLevelSelection}
+              key={level}
+              className={`flex flex-col items-center m-2 ${fadeOut ? "fade-out" : "fade-in"
+              }`}
           >
+            <div
+                className={`min-w-[376px] min-h-[224px] rounded-3xl cursor-pointer relative ${isOpened ? '' : 'opacity-50'}`}
+                style={{ position: "relative", overflow: "hidden" }}
+                onClick={isOpened ? handleLevelSelection : null}
+            >
             <div
               className="absolute inset-0 bg-center bg-cover rounded-3xl"
               style={{
