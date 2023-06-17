@@ -94,10 +94,6 @@ function App() {
         }
     }, []);
 
-    const PrivateRoute = ({ path, element }) => {
-        return isLoggedIn ? element : <Navigate to="/login" />;
-    };
-
     return (
         <>
             <AuthContext.Provider

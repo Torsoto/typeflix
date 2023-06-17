@@ -1,37 +1,36 @@
 /* profile.css */
-p {
+.values-container p {
   color: #bfbfbf;
   font-size: large;
   margin-bottom: 10%;
+}
+
+.main-container {
+  margin-top: 32px;
 }
 
 .profil-box-bg {
   background-color: #414141;
 }
 
-h1 {
+.h1-s {
   color: white;
   font-size: 24px;
   padding-bottom: 15px;
   padding-left: 10px;
 }
 
-h2 {
+.h2-s {
   color: white;
   font-size: large;
   padding-top: 20px;
 }
 
-h3 {
+.h3-s {
   color: #bfbfbf;
   font-size: 10px;
   padding-top: 5px;
   padding-bottom: 15px;
-}
-
-.container {
-  width: 550px;
-  height: 400px;
 }
 
 .friends-container {
@@ -42,6 +41,6 @@ h3 {
   margin-bottom: 30px;
 }
 
-button {
+.button-s {
   width: 100%;
 }
