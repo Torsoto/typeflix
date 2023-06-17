@@ -87,8 +87,8 @@ const LevelSelection = () => {
     if (showHomeGame) {
       // If the game is currently being shown, go back to the level selection
       setShowHomeGame(false);
-      setShowLevels(true);
       setGameOpacity(0);
+      handleMovieClick(title, poster); // re-fetch the levels for the current movie
     } else {
       // If the level selection is being shown, go back to the movie selection
       setGradientColor('#313131')
@@ -99,6 +99,7 @@ const LevelSelection = () => {
       });
     }
   };
+
 
   const renderMovies = () => {
     return movies.map((movie, index) => (
