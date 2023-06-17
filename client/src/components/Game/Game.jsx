@@ -217,7 +217,7 @@ const Game = () => {
                       |
                     </span>
                   )}
-                  <letter
+                  <span
                     key={`${letter}-${letterIndex}`}
                     className={
                       letterIndex === currentLetterIndex
@@ -230,7 +230,7 @@ const Game = () => {
                     }
                   >
                     {letter}
-                  </letter>
+                  </span>
                 </React.Fragment>
               ))}
             </p>

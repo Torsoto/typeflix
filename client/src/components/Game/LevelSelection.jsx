@@ -21,7 +21,7 @@ const LevelSelection = () => {
 
   useEffect(() => {
     fetchMovieList().then((data) => {
-        setMovies(data);
+      setMovies(data);
     });
   }, []);
 
@@ -186,13 +186,13 @@ const LevelSelection = () => {
                   }}
                   onClick={handleBackClick}
                 >
-                  <div className="flex flex-row items-center justify-center text-xl font-normal">
+                  <span className="flex flex-row items-center justify-center text-xl font-normal">
                     <IoIosArrowBack className="mr-1" /> Back
-                  </div>
+                  </span>
                 </button>
               )}
             </div>
-            <p className="my-10 font-semibold text-2xl text-white">
+            <p className="my-10 text-2xl font-semibold text-white">
               {!showHomeGame
                 ? (showLevels ? `Select Level` : "Select Movie")
                 : `Level ${selectedLevelIndex}`
