@@ -1,5 +1,4 @@
 import React, { useState, useCallback, useEffect, useRef, useContext } from "react";
-import "../../styles/Home.css";
 import "../../styles/App.css";
 
 const TrainingGame = () => {
@@ -155,7 +154,7 @@ const TrainingGame = () => {
         let barColor = "bg-green-500";
 
         return (
-            <div className={`w-full border-2 border-black h-4 mb-14 mt-4 max-w-[300px] bg-white rounded-full`}>
+            <div className={`w-full border-2 border-black h-4 mb-8 mt-4 max-w-[300px] bg-white rounded-full`}>
                 <div
                     className={`h-full ${barColor} rounded-full`}
                 />
@@ -177,7 +176,7 @@ const TrainingGame = () => {
             <WinMessage isFinished={isFinished} timeTaken={timeTaken} wpm={wpm} />
             <FailMessage hasFailed={hasFailed} />
             <div>
-                <div className="flex gap-1 mb-8 place-content-center">
+                <div className="text-center">
                     <p className={`text-2xl font-bold align-middle ${timeLeft > 0 && !isBlurred && !isFinished && !hasFailed ? "opacity-100" : "invisible"}`}>
                         {timeLeft > 0 && !isBlurred ? `${timeLeft}` : "0"}
                     </p>
@@ -194,10 +193,10 @@ const TrainingGame = () => {
                         onKeyDown={handleKeyDown}
                         onClick={handleClickForBlur}
                         className={`max-w-[1200px] ${isBlurred ? "blur" : ""
-                            } overflow-hidden inline-block items-center h-[155px]  text-2xl m-auto focus:outline-none ${isFinished || hasFailed ? "hidden" : ""
+                            } overflow-hidden inline-block items-center h-[155px] text-2xl m-auto focus:outline-none ${isFinished || hasFailed ? "hidden" : ""
                             }`}
                     >
-                        <p ref={pRef} className={`relative leading-[50px] text-justify text-xl font-medium`} style={{ top: -50 * timesUpdatedCursor }}>
+                        <p ref={pRef} className={`relative leading-[50px] text-justify text-2xl font-medium`} style={{ top: -50 * timesUpdatedCursor }}>
                             {text.split('').map((letter, letterIndex) => (
                                 <React.Fragment key={letterIndex}>
                                     {letterIndex === currentLetterIndex && !isBlurred && (
