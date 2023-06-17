@@ -8,27 +8,21 @@ import { IoIosArrowBack } from "react-icons/io";
 const LevelSelection = () => {
   const [movies, setMovies] = useState([]);
   const [fadeOut, setFadeOut] = useState(false);
-  const [title, setTitle] = useState(null);
   const [poster, setPoster] = useState(null);
   const [levels, setLevels] = useState([]);
   const [showLevels, setShowLevels] = useState(false);
-  const [selectedLevelIndex, setSelectedLevelIndex] = useState(false);
   const [showHomeGame, setShowHomeGame] = useState(false);
   const [showBackButton, setShowBackButton] = useState(false);
   const [gameOpacity, setGameOpacity] = useState(0);
   const [openedLevels, setOpenedLevels] = useState(0);
 
-  const { setText, setGradientColor, setImg, setTime, userData } = useContext(AuthContext);
+  const { setText, setGradientColor, setImg, setTime, userData, title, setTitle, selectedLevelIndex, setSelectedLevelIndex } = useContext(AuthContext);
 
   useEffect(() => {
     fetchMovieList().then((data) => {
       setMovies(data);
     });
   }, []);
-
-  useEffect(() => {
-    console.log(openedLevels)
-  }, [openedLevels]);
 
   useEffect(() => {
     let timer1 = null;
@@ -135,7 +129,6 @@ const LevelSelection = () => {
             )}/levels/${level}`
           );
           const data = await response.json();
-          console.log(data.text);
           setText(data.text);
           setImg(data.img);
           setTime(data.time);

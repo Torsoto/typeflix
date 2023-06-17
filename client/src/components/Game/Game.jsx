@@ -25,11 +25,7 @@ const Game = () => {
   const [wpm, setWpm] = useState(0);
   const [hasFailed, setHasFailed] = useState(false);
 
-
-
-  useEffect(() => {
-    console.log(text)
-  }, [])
+  const { userData, title, selectedLevelIndex } = useContext(AuthContext);
 
   useEffect(() => {
     if (timeLeft > 0 && hasStartedTyping && !isFinished && !hasFailed) {
@@ -84,6 +80,7 @@ const Game = () => {
           setTimeTaken(timeTaken);
           const wpm = Math.round((text.split(" ").length / timeTaken) * 60);
           setWpm(wpm);
+          updateNextLevel(userData.username, title);
         }
         return;
       }
@@ -102,6 +99,7 @@ const Game = () => {
           setTimeTaken(timeTaken);
           const wpm = Math.round((text.split(" ").length / timeTaken) * 60);
           setWpm(wpm);
+          updateNextLevel(userData.username, title);
         }
         if (nextLetterIndex === text.length && incorrectLetters.length > 0) {
           setHasFailed(true);
@@ -137,9 +135,16 @@ const Game = () => {
     e.preventDefault();
   }, [setHasStartedTyping, text, currentLetterIndex, hasCalculated, timesCalculated, timesUpdatedCursor, incorrectLetters, timeLeft, time]);
 
-
-
-
+  const updateNextLevel = async (username, movie) => {
+    try {
+      const res = await fetch(`http://localhost:3000/setNextLevel/${username}/${movie}/${selectedLevelIndex}`, {
+        method: 'PUT'
+      });
+      const data = await res.json();
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const WinMessage = ({ isFinished, timeTaken, wpm }) => {
     if (!isFinished) return null;

@@ -20,6 +20,8 @@ function App() {
     const [Img, setImg] = useState("https://i.imgur.com/oQUOXS8.png");
     const [time, setTime] = useState(60);
     const [avatarUrl, setAvatarUrl] = useState("");
+    const [title, setTitle] = useState(null);
+    const [selectedLevelIndex, setSelectedLevelIndex] = useState(false);
 
     useEffect(() => {
         if (userId.length > 0) {
@@ -114,6 +116,10 @@ function App() {
                     userData,
                     avatarUrl,
                     setAvatarUrl,
+                    title,
+                    setTitle,
+                    selectedLevelIndex,
+                    setSelectedLevelIndex,
                 }}
             >
                 <Routes>
