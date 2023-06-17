@@ -56,13 +56,38 @@ app.post("/signup", async (req, res) => {
     } else {
       try {
         createUserWithEmailAndPassword(auth, email, password)
-          .then((userRecord) => {
+          .then(async (userRecord) => {
             console.log("Successfully created new user:", userRecord.user.uid);
 
             const userDoc = doc(db, "users", lowercaseUsername);
             const emailToUsernameDoc = doc(db, "emailToUsername", email);
 
             const batch = writeBatch(db);
+
+            // Retrieve the levels for each movie and add them to the themes object
+            const moviesRef = collection(db, "movies");
+            const moviesSnapshot = await getDocs(moviesRef);
+            const themes = {};
+
+            for (const movieDoc of moviesSnapshot.docs) {
+              const movieName = movieDoc.id;
+              const levelsRef = collection(db, "movies", movieName, "levels");
+              const levelsSnapshot = await getDocs(levelsRef);
+              const levels = {};
+
+              let firstLevel = true;
+              levelsSnapshot.forEach((levelDoc) => {
+                if (firstLevel) {
+                  levels[levelDoc.id] = true;
+                  firstLevel = false;
+                } else {
+                  levels[levelDoc.id] = false;
+                }
+              });
+
+              themes[movieName] = { levels: levels };
+            }
+
             batch.set(userDoc, {
               username: lowercaseUsername,
               email: email,
@@ -70,7 +95,11 @@ app.post("/signup", async (req, res) => {
               friends: [],
               avatar: `https://api.dicebear.com/6.x/adventurer-neutral/svg?seed=${lowercaseUsername}`,
               bestwpm: 0,
-              levels: [],
+              avgwpm: 0,
+              gamesplayed: 0,
+              bosses: 0,
+              lastplayed: [],
+              themes: themes,
             });
 
             batch.set(emailToUsernameDoc, {
@@ -502,12 +531,10 @@ app.get("/:username", async (req, res) => {
       res.status(200).json(sortedUserData);
     } else {
       // If the user doesn't exist, send a 404 error
-      res
-        .status(404)
-        .send({
-          error:
-            "User not found (You are sending request to /:username Endpoint)",
-        });
+      res.status(404).send({
+        error:
+          "User not found (You are sending request to /:username Endpoint)",
+      });
     }
   } catch (error) {
     console.error("Error getting user data:", error);
