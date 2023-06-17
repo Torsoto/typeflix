@@ -71,9 +71,9 @@ const LevelSelection = () => {
     try {
       const username = userData.username;
       const response = await fetch(
-          `http://localhost:3000/levelsOpened/${encodeURIComponent(
-              username
-          )}/${encodeURIComponent(movieName)}`
+        `http://localhost:3000/levelsOpened/${encodeURIComponent(
+          username
+        )}/${encodeURIComponent(movieName)}`
       );
       const data = await response.json();
       const levels = data.openedLevels;
@@ -151,16 +151,16 @@ const LevelSelection = () => {
       const isOpened = index < openedLevels;
 
       return (
+        <div
+          key={level}
+          className={`flex flex-col items-center m-2 ${fadeOut ? "fade-out" : "fade-in"
+            }`}
+        >
           <div
-              key={level}
-              className={`flex flex-col items-center m-2 ${fadeOut ? "fade-out" : "fade-in"
-              }`}
+            className={`min-w-[376px] min-h-[224px] rounded-3xl cursor-pointer relative ${isOpened ? '' : 'opacity-50'}`}
+            style={{ position: "relative", overflow: "hidden" }}
+            onClick={isOpened ? handleLevelSelection : null}
           >
-            <div
-                className={`min-w-[376px] min-h-[224px] rounded-3xl cursor-pointer relative ${isOpened ? '' : 'opacity-50'}`}
-                style={{ position: "relative", overflow: "hidden" }}
-                onClick={isOpened ? handleLevelSelection : null}
-            >
             <div
               className="absolute inset-0 bg-center bg-cover rounded-3xl"
               style={{
@@ -206,7 +206,7 @@ const LevelSelection = () => {
             </div>
             <p className="my-10 text-2xl font-semibold text-white">
               {!showHomeGame
-                ? (showLevels ? `Select Level` : "Select Movie")
+                ? (showLevels ? `Select Level` : "Select Theme")
                 : `Level ${selectedLevelIndex}`
               }
             </p>
