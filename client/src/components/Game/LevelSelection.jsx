@@ -16,14 +16,19 @@ const LevelSelection = () => {
   const [showHomeGame, setShowHomeGame] = useState(false);
   const [showBackButton, setShowBackButton] = useState(false);
   const [gameOpacity, setGameOpacity] = useState(0);
+  const [openedLevels, setOpenedLevels] = useState(0);
 
-  const { setText, setGradientColor, setImg, setTime } = useContext(AuthContext);
+  const { setText, setGradientColor, setImg, setTime, userData } = useContext(AuthContext);
 
   useEffect(() => {
     fetchMovieList().then((data) => {
       setMovies(data);
     });
   }, []);
+
+  useEffect(() => {
+    console.log(openedLevels)
+  }, [openedLevels]);
 
   useEffect(() => {
     let timer1 = null;
@@ -63,13 +68,24 @@ const LevelSelection = () => {
           .fill()
           .map((_, i) => i + 1)
       );
-
       setGradientColor(data.color)
-      console.log(data)
       setShowBackButton(true);
       setFadeOut(true);
     } catch (error) {
       console.error(`Error fetching levels for movie ${movieName}:`, error);
+    }
+    try {
+      const username = userData.username;
+      const response = await fetch(
+          `http://localhost:3000/levelsOpened/${encodeURIComponent(
+              username
+          )}/${encodeURIComponent(movieName)}`
+      );
+      const data = await response.json();
+      const levels = data.openedLevels;
+      setOpenedLevels(levels + 1);
+    } catch (error) {
+      console.error(`Error fetching opened levels for user ${userData.username} and movie ${movieName}:`, error);
     }
   };
 

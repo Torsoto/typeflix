@@ -251,6 +251,46 @@ app.put("/updateavatar", async (req, res) => {
   }
 });
 
+app.get("/levelsOpened/:username/:movie", async (req, res) => {
+  try {
+    const { username, movie } = req.params;
+    const lowercaseUsername = username.toLowerCase();
+
+    // Retrieve user data
+    const userDocRef = doc(db, "users", lowercaseUsername);
+    const userDocSnap = await getDoc(userDocRef);
+
+    // If user does not exist
+    if (!userDocSnap.exists()) {
+      console.log("User does not exist in /levelsOpened");
+      return res.status(404).send({ error: "User does not exist /levelsOpened" });
+    }
+
+    const userData = userDocSnap.data();
+
+    // If the user hasn't started on the specified movie yet
+    if (!(movie in userData.themes)) {
+      console.log("User has not started on this movie");
+      return res.status(404).send({ error: "User has not started on this movie" });
+    }
+
+    // Count the number of opened levels
+    let openedLevels = 0;
+    const levels = userData.themes[movie].levels;
+    for (let level in levels) {
+      if (levels[level] === true) {
+        openedLevels++;
+      }
+    }
+
+    res.status(200).send({ openedLevels: openedLevels });
+
+  } catch (e) {
+    console.log("Error retrieving levels:", e);
+    res.status(500).send({ error: e.message });
+  }
+});
+
 app.get("/movies", async (req, res) => {
   try {
     const moviesRef = collection(db, "movies");
