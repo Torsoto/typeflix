@@ -32,7 +32,7 @@ const Game = () => {
   }, [])
 
   useEffect(() => {
-    if (timeLeft > 0 && hasStartedTyping) {
+    if (timeLeft > 0 && hasStartedTyping && !isFinished && !hasFailed) {
       const timerId = setTimeout(() => {
         setTimeLeft(timeLeft - 1);
         if (timeLeft === 1) {
@@ -42,7 +42,8 @@ const Game = () => {
 
       return () => clearTimeout(timerId);
     }
-  }, [timeLeft, hasStartedTyping]);
+  }, [timeLeft, hasStartedTyping, isFinished, hasFailed]);
+
 
 
   const handleClickForBlur = useCallback(() => {
