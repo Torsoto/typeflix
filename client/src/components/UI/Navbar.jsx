@@ -1,13 +1,15 @@
 import logo from "../../assets/wide-logo.svg";
 import userIcon from "../../assets/profile.svg";
 import "../../styles/App.css";
-import { useState } from "react";
+import {useContext, useState} from "react";
 import DropdownMenu from "../UI/Dropdown";
+import AuthContext from "../context/AuthContext.jsx";
 
 const Navbar = () => {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
+    const { avatarUrl } = useContext(AuthContext);
 
-  const toggleDropdown = () => {
+    const toggleDropdown = () => {
     setDropdownOpen(!isDropdownOpen);
   };
 
@@ -33,7 +35,7 @@ const Navbar = () => {
       <div className="relative w-[152px] text-right">
         <div className="flex items-center justify-end gap-1">
           <img
-            src={userIcon}
+            src={avatarUrl ? avatarUrl : userIcon}
             alt="User Icon"
             className="w-8 h-8 rounded-full cursor-pointer"
             onClick={toggleDropdown}
