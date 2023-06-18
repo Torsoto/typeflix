@@ -64,64 +64,65 @@ function Settings() {
       <div className="main-bg">
         <div className="h-[90%] m-auto max-w-7xl">
           <Navbar />
-          <div className="container mx-auto">
-            <h1 className="mt-8 text-2xl font-medium text-white pb-7">Settings</h1>
-            <div className="max-w-[650px] max-h-[400px] flex flex-col p-8 mx-auto rounded-lg bg-neutral-700 md:flex-row">
-              <div className="flex flex-col items-start mb-4 md:mb-0 md:w-1/2">
-                <div className="w-40 h-40 overflow-hidden rounded-full">
-                  {avatarUrl && <img src={avatarUrl} alt="Avatar" />}
-                </div>
-                <button
-                  className="px-4 py-2 mt-4 font-semibold text-white bg-black rounded-full"
-                  onClick={handleToggleAvatarOptions}
-                >
-                  Change Avatar
-                </button>
-                <button
-                  className="px-4 py-2 mt-4 font-semibold text-white bg-red-500 rounded-full hover:bg-red-600"
-                  onClick={() => handleDeleteAccount()}
-                >
-                  Delete Account
-                </button>
-              </div>
-              <div className="flex flex-col md:w-1/2">
-                <div className="flex items-center">
-                  <p className="mr-2 text-lg text-white">
-                    Username: {userData && <span>{userData.username}</span>}
-                  </p>
+          {userData &&
+            <div className="container mx-auto">
+              <h1 className="mt-8 text-2xl font-medium text-white pb-7">Settings</h1>
+              <div className="max-w-[650px] max-h-[400px] flex flex-col p-8 mx-auto rounded-lg bg-neutral-700 md:flex-row">
+                <div className="flex flex-col items-start mb-4 md:mb-0 md:w-1/2">
+                  <div className="w-40 h-40 overflow-hidden rounded-full">
+                    {avatarUrl && <img src={avatarUrl} alt="Avatar" />}
+                  </div>
                   <button
-                    className="px-2 py-1 font-semibold text-white bg-black rounded-full"
-                    onClick={handleUpdateUsername}
+                    className="px-4 py-2 mt-4 font-semibold text-white bg-black rounded-full"
+                    onClick={handleToggleAvatarOptions}
                   >
-                    <BiEdit />
+                    Change Avatar
+                  </button>
+                  <button
+                    className="px-4 py-2 mt-4 font-semibold text-white bg-red-500 rounded-full hover:bg-red-600"
+                    onClick={() => handleDeleteAccount()}
+                  >
+                    Delete Account
                   </button>
                 </div>
+                <div className="flex flex-col md:w-1/2">
+                  <div className="flex items-center">
+                    <p className="mr-2 text-lg text-white">
+                      Username: {userData && <span>{userData.username}</span>}
+                    </p>
+                    <button
+                      className="px-2 py-1 font-semibold text-white bg-black rounded-full"
+                      onClick={handleUpdateUsername}
+                    >
+                      <BiEdit />
+                    </button>
+                  </div>
 
-                <div className="flex flex-col items-start mt-4">
-                  <p className="text-lg text-white">
-                    Email: {userData && <span>{userData.email}</span>}
-                  </p>
-                </div>
-                <div className="flex items-center mt-4">
-                  <p className="mr-2 text-lg text-white">Change password</p>
-                  <button
-                    className="px-2 py-1 font-semibold text-white bg-black rounded-full"
-                    onClick={handleUpdatePassword}
-                  >
-                    <BiEdit />
-                  </button>
+                  <div className="flex flex-col items-start mt-4">
+                    <p className="text-lg text-white">
+                      Email: {userData && <span>{userData.email}</span>}
+                    </p>
+                  </div>
+                  <div className="flex items-center mt-4">
+                    <p className="mr-2 text-lg text-white">Change password</p>
+                    <button
+                      className="px-2 py-1 font-semibold text-white bg-black rounded-full"
+                      onClick={handleUpdatePassword}
+                    >
+                      <BiEdit />
+                    </button>
+                  </div>
                 </div>
               </div>
+              {showAvatarOptions && (
+                <Avatars
+                  handleSelectAvatar={handleSelectAvatar}
+                  handleToggleAvatarOptions={handleToggleAvatarOptions}
+                  userId={userId}
+                />
+              )}
+              {error && <div className="mt-4 text-red-500">{error}</div>}
             </div>
-            {showAvatarOptions && (
-              <Avatars
-                handleSelectAvatar={handleSelectAvatar}
-                handleToggleAvatarOptions={handleToggleAvatarOptions}
-                userId={userId}
-              />
-            )}
-            {error && <div className="mt-4 text-red-500">{error}</div>}
-          </div>
         </div>
       </div>
     </>

@@ -20,8 +20,10 @@ function App() {
     const [avatarUrl, setAvatarUrl] = useState("");
     const [title, setTitle] = useState(null);
     const [selectedLevelIndex, setSelectedLevelIndex] = useState(false);
+    const [isLoadingJWT, setIsLoadingJWT] = useState(false);
 
     useEffect(() => {
+        console.log(isLoadingJWT)
         const token = localStorage.getItem("jwt");
         if (token) {
             fetch("http://localhost:3000/validate", {
@@ -51,9 +53,14 @@ function App() {
 
     useEffect(() => {
         if (userId.length > 0) {
+            let data = localStorage.getItem('userData');
+            data = JSON.parse(data);
+            setUserData(data);
+            setAvatarUrl(data.avatar);
             fetchData().then((data) => {
                 setUserData(data);
                 setAvatarUrl(data.avatar);
+                localStorage.setItem('userData', JSON.stringify(data));
             });
         }
     }, [userId]);
