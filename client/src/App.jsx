@@ -56,8 +56,8 @@ function App() {
         if (userId.length > 0) {
             let data = localStorage.getItem('userData');
             data = JSON.parse(data);
-            setUserData(data);
             if (data) {
+                setUserData(data);
                 setAvatarUrl(data.avatar);
             }
             fetchData().then((data) => {
