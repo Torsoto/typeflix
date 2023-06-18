@@ -98,12 +98,12 @@ function Settings() {
                 </div>
 
                 <div className="flex flex-col items-start mt-4">
-                  <p className="text-white text-lg">
+                  <p className="text-lg text-white">
                     Email: {userData && <span>{userData.email}</span>}
                   </p>
                 </div>
                 <div className="flex items-center mt-4">
-                  <p className="mr-2 text-white text-lg">Change password</p>
+                  <p className="mr-2 text-lg text-white">Change password</p>
                   <button
                     className="px-2 py-1 font-semibold text-white bg-black rounded-full"
                     onClick={handleUpdatePassword}
@@ -122,13 +122,6 @@ function Settings() {
             )}
             {error && <div className="mt-4 text-red-500">{error}</div>}
           </div>
-        </div>
-        <div>
-          <a href="/">
-            <span className="font-medium text-white transition-colors hover:text-gray-400 pl-14 ">
-              Go Back
-            </span>
-          </a>
         </div>
       </div>
     </>

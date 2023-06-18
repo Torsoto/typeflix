@@ -138,7 +138,7 @@ const Game = () => {
   const updateNextLevel = async (username, movie) => {
     try {
       const res = await fetch(`http://localhost:3000/setNextLevel/${username}/${movie}/${selectedLevelIndex}`, {
-        method: 'PUT'
+        method: 'PATCH'
       });
       const data = await res.json();
     } catch (e) {

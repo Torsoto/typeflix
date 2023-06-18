@@ -264,7 +264,9 @@ app.get("/levelsOpened/:username/:movie", async (req, res) => {
     // If user does not exist
     if (!userDocSnap.exists()) {
       console.log("User does not exist in /levelsOpened");
-      return res.status(404).send({ error: "User does not exist /levelsOpened" });
+      return res
+        .status(404)
+        .send({ error: "User does not exist /levelsOpened" });
     }
 
     const userData = userDocSnap.data();
@@ -272,7 +274,9 @@ app.get("/levelsOpened/:username/:movie", async (req, res) => {
     // If the user hasn't started on the specified movie yet
     if (!(movie in userData.themes)) {
       console.log("User has not started on this movie");
-      return res.status(404).send({ error: "User has not started on this movie" });
+      return res
+        .status(404)
+        .send({ error: "User has not started on this movie" });
     }
 
     // Count the number of opened levels
@@ -285,14 +289,13 @@ app.get("/levelsOpened/:username/:movie", async (req, res) => {
     }
 
     res.status(200).send({ openedLevels: openedLevels });
-
   } catch (e) {
     console.log("Error retrieving levels:", e);
     res.status(500).send({ error: e.message });
   }
 });
 
-app.put("/setNextLevel/:username/:movie/:currentLevel", async (req, res) => {
+app.patch("/setNextLevel/:username/:movie/:currentLevel", async (req, res) => {
   try {
     const { username, movie, currentLevel } = req.params;
     const lowercaseUsername = username.toLowerCase();
@@ -304,7 +307,9 @@ app.put("/setNextLevel/:username/:movie/:currentLevel", async (req, res) => {
     // If user does not exist
     if (!userDocSnap.exists()) {
       console.log("User does not exist in /setNextLevel");
-      return res.status(404).send({ error: "User does not exist /setNextLevel" });
+      return res
+        .status(404)
+        .send({ error: "User does not exist /setNextLevel" });
     }
 
     const userData = userDocSnap.data();
@@ -312,7 +317,9 @@ app.put("/setNextLevel/:username/:movie/:currentLevel", async (req, res) => {
     // If the user hasn't started on the specified movie yet
     if (!(movie in userData.themes)) {
       console.log("User has not started on this movie");
-      return res.status(404).send({ error: "User has not started on this movie" });
+      return res
+        .status(404)
+        .send({ error: "User has not started on this movie" });
     }
 
     // Get the next level based on the current level
@@ -322,16 +329,17 @@ app.put("/setNextLevel/:username/:movie/:currentLevel", async (req, res) => {
     // If nextLevel is already opened or there's no such level
     if (levels[nextLevel] === true || !levels.hasOwnProperty(nextLevel)) {
       console.log(`Level ${nextLevel} is already opened or does not exist`);
-      return res.status(200).send({ message: `Level ${nextLevel} is already opened or does not exist` });
+      return res.status(200).send({
+        message: `Level ${nextLevel} is already opened or does not exist`,
+      });
     }
 
     // Open the next level
     await updateDoc(userDocRef, {
-      [`themes.${movie}.levels.${nextLevel}`]: true
+      [`themes.${movie}.levels.${nextLevel}`]: true,
     });
 
     res.status(200).send({ message: `Level ${nextLevel} has been opened` });
-
   } catch (e) {
     console.log("Error setting next level:", e);
     res.status(500).send({ error: e.message });
@@ -434,6 +442,7 @@ app.get("/movies/:movie/levels/:level", async (req, res) => {
     res.status(500).send({ error: error.message });
   }
 });
+
 app.get("/training", (req, res) => {
   const options = {
     hostname: "random-word-api.herokuapp.com",
