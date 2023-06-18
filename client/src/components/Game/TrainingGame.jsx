@@ -20,23 +20,19 @@ const TrainingGame = () => {
     const [timeTaken, setTimeTaken] = useState(0);
     const [wpm, setWpm] = useState(0);
     const [hasFailed, setHasFailed] = useState(false);
-    const [text, setText] = useState("test yo");
+    const [text, setText] = useState("torpor combusting overnourishing hemstitches stipulate lairds tutoyered extrinsic erectnesses unideaed biometries saleswoman subvicars martyred appressed tussive velvets rashest midrashim oldness octadic wheeler tracings chautauqua lavash prediscoveries ripstop brooking superhelical mink hangover derrieres tallitim inlets preboom earthy aldehydes frugal stinkeroos sorrowfulness statesmanships mangled horned corallines informer dockers piacular bloomery floating airburst corticoid harlequins edentates homogeneities hardasses winterfeed encamps subtext trefoils revealed flatting snafued accusant erosion tump radiophone perpetrations hatbox marmorean factoidal flamingos sajou sleepily magnetographs larch crab myotonic supersleuth florence pilferable hists huswives tarantella protolanguage reobtaining reimburse procural skyward fluorimetries realistically cerebrate hatcher dissimulations fascisms gropers bluishness regency taffetas brewskis olecranon bookcases starving creeshing dethatch altazimuth heady reavailed pictorializing cliometric missuses legumins jocular depressurizing surrounded phytins sulphurous triaging neorealisms roamed graining wonderfully nude oxazine responder precentorial crestfallenly riffraffs uridines closenesses avouching brined unbeknownst zygosities occlude giddap celerities kanbans parabioses deviation dieter ripostes slipway chaetognath derated westerns preseason legers sleazier browridges halliard undotted jugged ekuele chewiest prostitutes cartages gavel vipers dapperer hominy ozonate syllabics pentahedron sextuplicate deformers wearables derivatized surfeiter borescopes savvied unexplained poofs necrotic pentode aviary pavings premodification guttier extrabold distinctiveness troponins upslope respools scrubwoman storyboards zlotys dews platinoids outcrawling ebonics manifolded carcels ruptured ergates patristics subsiding sycamines piosities deadbeats tuque");
     const [Img, setImg] = useState("https://i.imgur.com/gC8ZKJf.png")
 
-    useEffect(() => {
-        const fetchRandomWords = async () => {
-            try {
-                const response = await fetch("http://localhost:3000/training");
-                const responseBody = await response.text();
-                const data = JSON.parse(responseBody);
-                const words = data.words.join(" ");
-                setText(words);
-            } catch (error) {
-                console.error("Error retrieving random words:", error);
-            }
-        };
-
-        fetchRandomWords();
+    useEffect(async () => {
+        try {
+            const response = await fetch("http://localhost:3000/training");
+            const responseBody = await response.text();
+            const data = JSON.parse(responseBody);
+            const words = data.words.join(" ");
+            setText(words);
+        } catch (error) {
+            console.error("Error retrieving random words:", error);
+        }
     }, [setText]);
 
     useEffect(() => {
@@ -164,12 +160,12 @@ const TrainingGame = () => {
 
 
     return (
-        <div className="grid mx-auto text-white place-items-center ">
+        <div className="grid mx-auto text-white place-items-center mt-[112px]">
             <div className="">
                 <img
                     src={Img}
                     alt="pixel image of low level thug"
-                    className="w-[200px] h-[200px] stance mr-8"
+                    className="h-[200px] stance mr-8"
                 />
             </div>
             <HpBar />
