@@ -99,6 +99,7 @@ app.post("/signup", async (req, res) => {
               avgwpm: 0,
               gamesplayed: 0,
               bosses: 0,
+              themescompleted: 0,
               lastplayed: [],
               themes: themes,
             });

@@ -34,10 +34,10 @@ function Profile() {
                                 </div>
                                 <div style={{ display: "flex" }}>
                                   <div className="values-container" style={{ marginLeft: "50px" }}>
-                                    <p>Best WPM: </p>
-                                    <p>Avg. WPM: </p>
-                                    <p>Games Played: </p>
-                                    <p>Levels Completed: </p>
+                                    <p>Best WPM: {userData.bestwpm}</p>
+                                    <p>Avg. WPM: {userData.avgwpm}</p>
+                                    <p>Games Played: {userData.gamesplayed}</p>
+                                    <p>Levels Completed: {userData.themescompleted}</p>
                                   </div>
                                 </div>
                               </div>
