@@ -258,8 +258,31 @@ app.post("/updateLeaderboard", async (req, res) => {
 
     const leaderboardDocRef = doc(db, "leaderboard", "global");
     const leaderboardDocSnap = await getDoc(leaderboardDocRef);
+    const userDocRef = doc(db, "users", username);
+    const userDocSnap = await getDoc(userDocRef);
 
+    if (!userDocSnap.exists()) {
+      res.status(404).send({ error: "User not found" });
+      return;
+    }
+
+    let userDocData = userDocSnap.data();
     let leaderboardData = [];
+
+    // update bestwpm if wpm is greater
+    if (wpm > userDocData.bestwpm) {
+      userDocData.bestwpm = wpm;
+    }
+
+    // update avgwpm
+    if (userDocData.avgwpm > 0) {
+      userDocData.avgwpm = (userDocData.avgwpm + wpm) / 2;
+    } else {
+      userDocData.avgwpm = wpm;
+    }
+
+    // save the updated user data back to Firestore
+    await setDoc(userDocRef, userDocData);
 
     if (leaderboardDocSnap.exists()) {
       // Leaderboard exists
@@ -287,12 +310,13 @@ app.post("/updateLeaderboard", async (req, res) => {
     // Update the leaderboard in Firestore
     await setDoc(leaderboardDocRef, { leaderboard: leaderboardData });
 
-    res.status(200).send({ message: "Leaderboard updated successfully." });
+    res.status(200).send({ message: "Leaderboard and user stats updated successfully." });
   } catch (e) {
     console.log("Error updating leaderboard:", e);
     res.status(500).send({ error: e.message });
   }
 });
+
 
 app.get("/getLeaderboard", async (req, res) => {
   try {

@@ -1,6 +1,6 @@
 import Navbar from "../components/UI/Navbar.jsx";
 import React, { useEffect, useState } from 'react';
-import { CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@material-ui/core';
+import { CircularProgress } from '@material-ui/core';
 
 function Leaderboard() {
     const [leaderboardData, setLeaderboardData] = useState(null);
