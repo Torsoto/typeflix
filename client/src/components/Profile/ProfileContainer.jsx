@@ -17,15 +17,16 @@ export const ProfileContainer = (username) => {
             setIsSameProfile(true);
             setUserIcon(avatarUrl);
         } else {
-            fetchData(username.username)
-                .then((response) => {
-                    setCustomUserData(response);
-                    setIsSameProfile(false);
-                    if (userData.friends) {
-                        setIsFollowing(userData.friends.includes(username.username));
-                    }
-                });
+            setIsSameProfile(false);
         }
+        fetchData(username.username)
+            .then((response) => {
+                setCustomUserData(response);
+                setUserIcon(customUserData.avatar);
+                if (userData.friends) {
+                    setIsFollowing(userData.friends.includes(username.username));
+                }
+            });
     }, []);
 
     useEffect(() => {
@@ -88,7 +89,7 @@ export const ProfileContainer = (username) => {
                 <div className="flex">
                     <div className="min-w-[550px] min-h-[400px] p-8 rounded-lg profil-box-bg">
                         <div className="flex">
-                            <div className="text-center flex justify-between flex-col">
+                            <div className="text-center flex justify-around flex-col">
                                 <img
                                     src={avatarUrl ? userIcon : plainProfileImage}
                                     alt="Avatar"

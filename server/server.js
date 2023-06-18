@@ -57,77 +57,77 @@ app.post("/signup", async (req, res) => {
     } else {
       try {
         createUserWithEmailAndPassword(auth, email, password)
-          .then(async (userRecord) => {
-            console.log("Successfully created new user:", userRecord.user.uid);
+            .then(async (userRecord) => {
+              console.log("Successfully created new user:", userRecord.user.uid);
 
-            const userDoc = doc(db, "users", lowercaseUsername);
-            const emailToUsernameDoc = doc(db, "emailToUsername", email);
+              const userDoc = doc(db, "users", lowercaseUsername);
+              const emailToUsernameDoc = doc(db, "emailToUsername", email);
 
-            const batch = writeBatch(db);
+              const batch = writeBatch(db);
 
-            // Retrieve the levels for each movie and add them to the themes object
-            const moviesRef = collection(db, "movies");
-            const moviesSnapshot = await getDocs(moviesRef);
-            const themes = {};
+              // Retrieve the levels for each movie and add them to the themes object
+              const moviesRef = collection(db, "movies");
+              const moviesSnapshot = await getDocs(moviesRef);
+              const themes = {};
 
-            for (const movieDoc of moviesSnapshot.docs) {
-              const movieName = movieDoc.id;
-              const levelsRef = collection(db, "movies", movieName, "levels");
-              const levelsSnapshot = await getDocs(levelsRef);
-              const levels = {};
+              for (const movieDoc of moviesSnapshot.docs) {
+                const movieName = movieDoc.id;
+                const levelsRef = collection(db, "movies", movieName, "levels");
+                const levelsSnapshot = await getDocs(levelsRef);
+                const levels = {};
 
-              let firstLevel = true;
-              levelsSnapshot.forEach((levelDoc) => {
-                if (firstLevel) {
-                  levels[levelDoc.id] = true;
-                  firstLevel = false;
-                } else {
-                  levels[levelDoc.id] = false;
-                }
+                let firstLevel = true;
+                levelsSnapshot.forEach((levelDoc) => {
+                  if (firstLevel) {
+                    levels[levelDoc.id] = true;
+                    firstLevel = false;
+                  } else {
+                    levels[levelDoc.id] = false;
+                  }
+                });
+
+                themes[movieName] = { levels: levels };
+              }
+
+              batch.set(userDoc, {
+                username: lowercaseUsername,
+                email: email,
+                userid: userRecord.user.uid,
+                friends: [],
+                avatar: `https://api.dicebear.com/6.x/adventurer-neutral/svg?seed=${lowercaseUsername}`,
+                bestwpm: 0,
+                avgwpm: 0,
+                gamesplayed: 0,
+                bosses: 0,
+                themescompleted: 0,
+                lastplayed: [],
+                themes: themes,
               });
 
-              themes[movieName] = { levels: levels };
-            }
+              batch.set(emailToUsernameDoc, {
+                username: lowercaseUsername,
+              });
 
-            batch.set(userDoc, {
-              username: lowercaseUsername,
-              email: email,
-              userid: userRecord.user.uid,
-              friends: [],
-              avatar: `https://api.dicebear.com/6.x/adventurer-neutral/svg?seed=${lowercaseUsername}`,
-              bestwpm: 0,
-              avgwpm: 0,
-              gamesplayed: 0,
-              bosses: 0,
-              themescompleted: 0,
-              lastplayed: [],
-              themes: themes,
+              console.log("User data stored in Firestore");
+
+              const payload = {
+                uid: userRecord.user.uid,
+                username: lowercaseUsername,
+                email: email,
+              };
+
+              const token = jwt.sign(payload, secretKey, {
+                expiresIn: "336h",
+              });
+
+              res.status(200).send({ token: token, uid: userRecord.user.uid });
+
+              return batch.commit();
+            })
+            .catch((error) => {
+              console.log("Error creating new user:", error);
+              res.status(500).send({ error: error.message });
             });
-
-            batch.set(emailToUsernameDoc, {
-              username: lowercaseUsername,
-            });
-
-            console.log("User data stored in Firestore");
-
-            const payload = {
-              uid: userRecord.user.uid,
-              username: lowercaseUsername,
-              email: email,
-            };
-
-            const token = jwt.sign(payload, secretKey, {
-              expiresIn: "336h",
-            });
-
-            res.status(200).send({ token: token, uid: userRecord.user.uid });
-
-            return batch.commit();
-          })
-          .catch((error) => {
-            console.log("Error creating new user:", error);
-            res.status(500).send({ error: error.message });
-          });
       } catch (e) {
         res.status(500).send({ error: e.message });
       }
@@ -154,62 +154,62 @@ app.post("/login", async (req, res) => {
   if (email) {
     // User found by username, attempt to sign in with their email.
     signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        console.log("User logged in successfully");
+        .then((userCredential) => {
+          console.log("User logged in successfully");
 
-        const payload = {
-          uid: userCredential.user.uid,
-          username: lowercaseIdentifier,
-          email: email,
-        };
+          const payload = {
+            uid: userCredential.user.uid,
+            username: lowercaseIdentifier,
+            email: email,
+          };
 
-        const token = jwt.sign(payload, secretKey, { expiresIn: "336h" });
+          const token = jwt.sign(payload, secretKey, { expiresIn: "336h" });
 
-        res
-          .status(200)
-          .send({ token: token, username: userCredential.user.uid });
-      })
-      .catch((error) => {
-        console.error("Error:", error.message);
-        console.error(email, password);
-        res.status(400).send({ error: error.message });
-      });
+          res
+              .status(200)
+              .send({ token: token, username: userCredential.user.uid });
+        })
+        .catch((error) => {
+          console.error("Error:", error.message);
+          console.error(email, password);
+          res.status(400).send({ error: error.message });
+        });
   } else {
     // User not found by username, attempt to sign in with the identifier as email.
     signInWithEmailAndPassword(auth, lowercaseIdentifier, password)
-      .then((userCredential) => {
-        console.log("User logged in successfully");
+        .then((userCredential) => {
+          console.log("User logged in successfully");
 
-        // Get the username corresponding to this email.
-        getDoc(doc(db, "emailToUsername", lowercaseIdentifier))
-          .then((docSnapshot) => {
-            if (docSnapshot.exists()) {
-              const username = docSnapshot.data().username;
+          // Get the username corresponding to this email.
+          getDoc(doc(db, "emailToUsername", lowercaseIdentifier))
+              .then((docSnapshot) => {
+                if (docSnapshot.exists()) {
+                  const username = docSnapshot.data().username;
 
-              const payload = {
-                uid: userCredential.user.uid,
-                username: username,
-                email: lowercaseIdentifier,
-              };
+                  const payload = {
+                    uid: userCredential.user.uid,
+                    username: username,
+                    email: lowercaseIdentifier,
+                  };
 
-              const token = jwt.sign(payload, secretKey, { expiresIn: "336h" });
+                  const token = jwt.sign(payload, secretKey, { expiresIn: "336h" });
 
-              res.status(200).send({ token: token, username: username });
-            } else {
-              // Handle the case where no username was found for this email.
-              // This should ideally never happen if your signup code is working correctly.
-            }
-          })
-          .catch((error) => {
-            console.error("Error getting username from email:", error);
-            res.status(500).send({ error: error.message });
-          });
-      })
-      .catch((error) => {
-        console.error("Error:", error.message);
-        console.error(lowercaseIdentifier, password);
-        res.status(400).send({ error: error.message });
-      });
+                  res.status(200).send({ token: token, username: username });
+                } else {
+                  // Handle the case where no username was found for this email.
+                  // This should ideally never happen if your signup code is working correctly.
+                }
+              })
+              .catch((error) => {
+                console.error("Error getting username from email:", error);
+                res.status(500).send({ error: error.message });
+              });
+        })
+        .catch((error) => {
+          console.error("Error:", error.message);
+          console.error(lowercaseIdentifier, password);
+          res.status(400).send({ error: error.message });
+        });
   }
 });
 
@@ -294,7 +294,7 @@ app.post("/removeFriend", async (req, res) => {
         res.status(409).send({ message: "Friend not found" });
       } else {
         const updatedFriends = userData.friends.filter(
-          (friend) => friend !== friendUsername
+            (friend) => friend !== friendUsername
         );
         await updateDoc(userDoc, { friends: updatedFriends });
         res.status(200).send({ message: "Friend removed successfully" });
@@ -346,11 +346,16 @@ app.post("/updateLeaderboard", async (req, res) => {
     }
 
     // update avgwpm
-    if (userDocData.avgwpm > 0) {
-      userDocData.avgwpm = (userDocData.avgwpm + wpm) / 2;
+    if (userDocData.totalTests > 0) {
+      userDocData.totalWpm = userDocData.totalWpm + wpm;
+      userDocData.totalTests += 1;
+      userDocData.avgwpm = userDocData.totalWpm / userDocData.totalTests;
     } else {
+      userDocData.totalWpm = wpm;
+      userDocData.totalTests = 1;
       userDocData.avgwpm = wpm;
     }
+
 
     // save the updated user data back to Firestore
     await setDoc(userDocRef, userDocData);
@@ -384,8 +389,8 @@ app.post("/updateLeaderboard", async (req, res) => {
     await setDoc(leaderboardDocRef, { leaderboard: leaderboardData });
 
     res
-      .status(200)
-      .send({ message: "Leaderboard and user stats updated successfully." });
+        .status(200)
+        .send({ message: "Leaderboard and user stats updated successfully." });
   } catch (e) {
     console.log("Error updating leaderboard:", e);
     res.status(500).send({ error: e.message });
@@ -430,8 +435,8 @@ app.get("/levelsOpened/:username/:movie", async (req, res) => {
     if (!userDocSnap.exists()) {
       console.log("User does not exist in /levelsOpened");
       return res
-        .status(404)
-        .send({ error: "User does not exist /levelsOpened" });
+          .status(404)
+          .send({ error: "User does not exist /levelsOpened" });
     }
 
     const userData = userDocSnap.data();
@@ -440,8 +445,8 @@ app.get("/levelsOpened/:username/:movie", async (req, res) => {
     if (!(movie in userData.themes)) {
       console.log("User has not started on this movie");
       return res
-        .status(404)
-        .send({ error: "User has not started on this movie" });
+          .status(404)
+          .send({ error: "User has not started on this movie" });
     }
 
     // Count the number of opened levels
@@ -473,8 +478,8 @@ app.patch("/setNextLevel/:username/:movie/:currentLevel", async (req, res) => {
     if (!userDocSnap.exists()) {
       console.log("User does not exist in /setNextLevel");
       return res
-        .status(404)
-        .send({ error: "User does not exist /setNextLevel" });
+          .status(404)
+          .send({ error: "User does not exist /setNextLevel" });
     }
 
     const userData = userDocSnap.data();
@@ -483,8 +488,8 @@ app.patch("/setNextLevel/:username/:movie/:currentLevel", async (req, res) => {
     if (!(movie in userData.themes)) {
       console.log("User has not started on this movie");
       return res
-        .status(404)
-        .send({ error: "User has not started on this movie" });
+          .status(404)
+          .send({ error: "User has not started on this movie" });
     }
 
     // Get the next level based on the current level
@@ -552,8 +557,8 @@ app.get("/movies/:movie", async (req, res) => {
     res.status(200).json({ count: levelsCount, color: gradientColor });
   } catch (error) {
     console.error(
-      `Error retrieving levels or gradient color for movie ${movie}:`,
-      error
+        `Error retrieving levels or gradient color for movie ${movie}:`,
+        error
     );
     res.status(500).send({ error: error.message });
   }
@@ -779,10 +784,10 @@ app.get("/user/:username", async (req, res) => {
       // Sort the properties of the userData object
       const sortedUserData = {};
       Object.keys(userData)
-        .sort()
-        .forEach((key) => {
-          sortedUserData[key] = userData[key];
-        });
+          .sort()
+          .forEach((key) => {
+            sortedUserData[key] = userData[key];
+          });
 
       // If the user exists, send their data in the response
       res.status(200).json(sortedUserData);
@@ -790,7 +795,7 @@ app.get("/user/:username", async (req, res) => {
       // If the user doesn't exist, send a 404 error
       res.status(404).send({
         error:
-          "User not found (You are sending request to /:username Endpoint)",
+            "User not found (You are sending request to /:username Endpoint)",
       });
     }
   } catch (error) {
