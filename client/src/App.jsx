@@ -156,15 +156,15 @@ function App() {
                         path="/settings"
                         element={isLoggedIn ? <Settings /> : <Navigate to="/login" />}
                     />
-                    <Route
-                        path="/profile"
-                        element={isLoggedIn ? <Profile /> : <Navigate to="/login" />}
-                    />
                     <Route path="/training"
                         element={isLoggedIn ? <Training /> : <Navigate to="/login" />}
                     />
                     <Route path="/leaderboard"
                         element={isLoggedIn ? <Leaderboard /> : <Navigate to="/login" />}
+                    />
+                    <Route
+                        path="/:username"
+                        element={isLoggedIn ? <Profile /> : <Navigate to="/login" />}
                     />
                 </Routes>
             </AuthContext.Provider>

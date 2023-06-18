@@ -3,7 +3,7 @@ import AuthContext from "../context/AuthContext.jsx";
 import "../../styles/App.css";
 
 export const DropdownMenu = () => {
-    const { isLoggedIn, logout } = useContext(AuthContext);
+    const { isLoggedIn, logout, userData } = useContext(AuthContext);
 
   return (
     <div className="absolute w-[152px]">
@@ -16,11 +16,11 @@ export const DropdownMenu = () => {
         <div className="py-1" role="none">
           {isLoggedIn ? (
               <div>
-                <a
-                    href="/profile"
-                    className="text-white block px-4 py-2 text-sm"
-                    role="menuitem"
-                >
+                  <a
+                      href={`/${userData.username}`}
+                      className="text-white block px-4 py-2 text-sm"
+                      role="menuitem"
+                  >
                   Profile
                 </a>
                 <a href="/settings" className="text-white block px-4 py-2 text-sm">
