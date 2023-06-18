@@ -15,7 +15,7 @@ function Login() {
     show: false,
     message: "",
   });
-  const { googleSignIn, login, setUserId, isLoggedIn } = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -48,13 +48,6 @@ function Login() {
     } finally {
       setLoading(false); // stop loading regardless of success or error
     }
-  };
-
-  const handelGoogleLogin = () => {
-    setLoading(true); // start loading
-    googleSignIn(email).then(() => {
-      setLoading(false);
-    });
   };
 
   const closeNotification = () => {
@@ -109,32 +102,6 @@ function Login() {
               ) : (
                 "Login"
               )}
-            </button>
-            <div className="flex items-center justify-between mt-5">
-              <div className="flex-1 bg-gray-500">
-                <hr
-                  className="text-gray-500"
-                  style={{ height: "1px", borderColor: "transparent" }}
-                />
-              </div>
-              <span className="mx-5 text-gray-500">or continue with</span>
-              <div className="flex-1 w-1/4 bg-gray-500">
-                <hr
-                  className="text-gray-500"
-                  style={{ height: "1px", borderColor: "transparent" }}
-                />
-              </div>
-            </div>
-            <button
-              onClick={handelGoogleLogin}
-              className="flex items-center justify-center w-full py-3 my-5 text-black bg-white rounded-full"
-            >
-              <img
-                src={googleLogo}
-                alt="Google Logo"
-                className="w-6 h-6 mr-2"
-              />
-              Google
             </button>
             <div className="flex items-center justify-center mt-5">
               <span className="text-gray-500">Don’t have an account yet?</span>

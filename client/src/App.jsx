@@ -7,8 +7,6 @@ import Signup from "./pages/Signup";
 import Profile from "./pages/Profile.jsx";
 import Training from "./pages/Training";
 import { Route, Routes, Navigate } from "react-router-dom";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { auth } from "../db/firebase.js";
 import AuthContext from "../src/components/context/AuthContext.jsx";
 
 function App() {
@@ -60,40 +58,7 @@ function App() {
         }
     }, [userId]);
 
-    const googleSignIn = (email) => {
-        const provider = new GoogleAuthProvider();
-        signInWithPopup(auth, provider)
-            .then((result) => {
-                const user = result.user;
-                const idToken = user.getIdToken();
-
-                fetch("http://localhost:3000/googleLogin", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ email: email, id: user.uid }),
-                })
-                    .then((response) => response.json())
-                    .then((data) => {
-                        if (data.token) {
-                            localStorage.setItem("jwt", data.token);
-                            login(data.username);
-                        } else {
-                            throw new Error("Error generating JWT token");
-                        }
-                    })
-                    .catch((error) => {
-                        console.error("Error:", error);
-                    });
-            })
-            .catch((error) => {
-                console.error("Error:", error);
-            });
-    };
-
     const login = (newUser) => {
-        console.log(newUser)
         setUserId(newUser);
         setIsLoggedIn(true);
     };
@@ -120,7 +85,6 @@ function App() {
         <>
             <AuthContext.Provider
                 value={{
-                    googleSignIn,
                     logout,
                     login,
                     isLoggedIn,
