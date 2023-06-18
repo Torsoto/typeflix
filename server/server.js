@@ -252,6 +252,73 @@ app.put("/updateavatar", async (req, res) => {
   }
 });
 
+app.post("/updateLeaderboard", async (req, res) => {
+  try {
+    const { username, wpm } = req.body;
+
+    const leaderboardDocRef = doc(db, "leaderboard", "global");
+    const leaderboardDocSnap = await getDoc(leaderboardDocRef);
+
+    let leaderboardData = [];
+
+    if (leaderboardDocSnap.exists()) {
+      // Leaderboard exists
+      leaderboardData = leaderboardDocSnap.data().leaderboard;
+      const existingUserIndex = leaderboardData.findIndex(user => user.username === username);
+
+      if (existingUserIndex !== -1) {
+        // User exists in leaderboard
+        if (wpm > leaderboardData[existingUserIndex].wpm) {
+          // If the new wpm is higher, update it
+          leaderboardData[existingUserIndex].wpm = wpm;
+        }
+      } else {
+        // User does not exist in leaderboard, add new user
+        leaderboardData.push({ username, wpm });
+      }
+    } else {
+      // Leaderboard does not exist, create new doc with first user
+      leaderboardData = [{ username, wpm }];
+    }
+
+    // Sort the leaderboard by wpm in descending order
+    leaderboardData.sort((a, b) => b.wpm - a.wpm);
+
+    // Update the leaderboard in Firestore
+    await setDoc(leaderboardDocRef, { leaderboard: leaderboardData });
+
+    res.status(200).send({ message: "Leaderboard updated successfully." });
+  } catch (e) {
+    console.log("Error updating leaderboard:", e);
+    res.status(500).send({ error: e.message });
+  }
+});
+
+app.get("/getLeaderboard", async (req, res) => {
+  try {
+    const leaderboardDocRef = doc(db, "leaderboard", "global");
+    const leaderboardDocSnap = await getDoc(leaderboardDocRef);
+
+    if (!leaderboardDocSnap.exists()) {
+      console.log("Leaderboard does not exist");
+      return res.status(404).send({ error: "Leaderboard does not exist" });
+    }
+
+    const leaderboardData = leaderboardDocSnap.data().leaderboard;
+
+    // Convert the array to an object with usernames as keys and wpm as values
+    const leaderboardObject = {};
+    for (const user of leaderboardData) {
+      leaderboardObject[user.username] = user.wpm;
+    }
+
+    res.status(200).send(leaderboardObject);
+  } catch (e) {
+    console.log("Error retrieving leaderboard:", e);
+    res.status(500).send({ error: e.message });
+  }
+});
+
 app.get("/levelsOpened/:username/:movie", async (req, res) => {
   try {
     const { username, movie } = req.params;
@@ -265,8 +332,8 @@ app.get("/levelsOpened/:username/:movie", async (req, res) => {
     if (!userDocSnap.exists()) {
       console.log("User does not exist in /levelsOpened");
       return res
-        .status(404)
-        .send({ error: "User does not exist /levelsOpened" });
+          .status(404)
+          .send({ error: "User does not exist /levelsOpened" });
     }
 
     const userData = userDocSnap.data();
@@ -275,8 +342,8 @@ app.get("/levelsOpened/:username/:movie", async (req, res) => {
     if (!(movie in userData.themes)) {
       console.log("User has not started on this movie");
       return res
-        .status(404)
-        .send({ error: "User has not started on this movie" });
+          .status(404)
+          .send({ error: "User has not started on this movie" });
     }
 
     // Count the number of opened levels
@@ -446,7 +513,7 @@ app.get("/movies/:movie/levels/:level", async (req, res) => {
 app.get("/training", (req, res) => {
   const options = {
     hostname: "random-word-api.herokuapp.com",
-    path: "/word?number=200",
+    path: "/word?number=10",
     method: "GET",
   };
 
@@ -595,11 +662,7 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.listen(3000, () => {
-  console.log("Example app listening on port 3000!");
-});
-
-app.get("/:username", async (req, res) => {
+app.get("/user/:username", async (req, res) => {
   const { username } = req.params;
   const lowercaseUsername = username.toLowerCase();
 
@@ -618,10 +681,10 @@ app.get("/:username", async (req, res) => {
       // Sort the properties of the userData object
       const sortedUserData = {};
       Object.keys(userData)
-        .sort()
-        .forEach((key) => {
-          sortedUserData[key] = userData[key];
-        });
+          .sort()
+          .forEach((key) => {
+            sortedUserData[key] = userData[key];
+          });
 
       // If the user exists, send their data in the response
       res.status(200).json(sortedUserData);
@@ -629,11 +692,15 @@ app.get("/:username", async (req, res) => {
       // If the user doesn't exist, send a 404 error
       res.status(404).send({
         error:
-          "User not found (You are sending request to /:username Endpoint)",
+            "User not found (You are sending request to /:username Endpoint)",
       });
     }
   } catch (error) {
     console.error("Error getting user data:", error);
     res.status(500).send({ error: error.message });
   }
+});
+
+app.listen(3000, () => {
+  console.log("Example app listening on port 3000!");
 });

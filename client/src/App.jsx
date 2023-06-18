@@ -68,6 +68,28 @@ function App() {
         }
     }, [userId]);
 
+    const updateBestWpm = async (username, wpm) => {
+        try {
+            const response = await fetch('http://localhost:3000/updateLeaderboard', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, wpm }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log(data.message);
+            } else {
+                throw new Error('Failed to update leaderboard');
+            }
+        } catch (error) {
+            console.error('Error updating leaderboard:', error);
+            // Handle the error if needed
+        }
+    };
+
     const login = (newUser) => {
         setUserId(newUser);
         setIsLoggedIn(true);
@@ -81,7 +103,7 @@ function App() {
 
     const fetchData = async () => {
         try {
-            const response = await fetch(`http://localhost:3000/${userId}`);
+            const response = await fetch(`http://localhost:3000/user/${userId}`);
             if (!response.ok) {
                 throw new Error("Network response was not ok");
             }
@@ -114,6 +136,7 @@ function App() {
                     setTitle,
                     selectedLevelIndex,
                     setSelectedLevelIndex,
+                    updateBestWpm,
                 }}
             >
                 <Routes>

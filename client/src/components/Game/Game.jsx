@@ -25,7 +25,7 @@ const Game = () => {
   const [wpm, setWpm] = useState(0);
   const [hasFailed, setHasFailed] = useState(false);
 
-  const { userData, title, selectedLevelIndex } = useContext(AuthContext);
+  const { userData, title, selectedLevelIndex, updateBestWpm } = useContext(AuthContext);
 
   useEffect(() => {
     if (timeLeft > 0 && hasStartedTyping && !isFinished && !hasFailed) {
@@ -81,6 +81,7 @@ const Game = () => {
           const wpm = Math.round((text.split(" ").length / timeTaken) * 60);
           setWpm(wpm);
           updateNextLevel(userData.username, title);
+          updateBestWpm(userData.username, wpm)
         }
         return;
       }
@@ -100,6 +101,7 @@ const Game = () => {
           const wpm = Math.round((text.split(" ").length / timeTaken) * 60);
           setWpm(wpm);
           updateNextLevel(userData.username, title);
+          updateBestWpm(userData.username, wpm)
         }
         if (nextLetterIndex === text.length && incorrectLetters.length > 0) {
           setHasFailed(true);
