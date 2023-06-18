@@ -6,15 +6,19 @@ function Leaderboard() {
     const [leaderboardData, setLeaderboardData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(async () => {
-        try {
-            const response = await fetch("http://localhost:3000/getLeaderboard");
-            const data = await response.json();
-            setLeaderboardData(data);
-            setIsLoading(false);
-        } catch (error) {
-            console.error("Error fetching leaderboard:", error);
-        }
+    useEffect(() => {
+        const fetchLeaderboard = async () => {
+            try {
+                const response = await fetch("http://localhost:3000/getLeaderboard");
+                const data = await response.json();
+                setLeaderboardData(data);
+                setIsLoading(false);
+            } catch (error) {
+                console.error("Error fetching leaderboard:", error);
+            }
+        };
+
+        fetchLeaderboard();
     }, []);
 
     return (

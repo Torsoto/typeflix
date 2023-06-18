@@ -21,10 +21,8 @@ function App() {
     const [avatarUrl, setAvatarUrl] = useState("");
     const [title, setTitle] = useState(null);
     const [selectedLevelIndex, setSelectedLevelIndex] = useState(false);
-    const [isLoadingJWT, setIsLoadingJWT] = useState(false);
 
     useEffect(() => {
-        console.log(isLoadingJWT)
         const token = localStorage.getItem("jwt");
         if (token) {
             fetch("http://localhost:3000/validate", {

@@ -26,17 +26,22 @@ const TrainingGame = () => {
 
     const { updateBestWpm, userData } = useContext(AuthContext);
 
-    useEffect(async () => {
-        try {
-            const response = await fetch("http://localhost:3000/training");
-            const responseBody = await response.text();
-            const data = JSON.parse(responseBody);
-            const words = data.words.join(" ");
-            setText(words);
-        } catch (error) {
-            console.error("Error retrieving random words:", error);
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const response = await fetch("http://localhost:3000/training");
+                const responseBody = await response.text();
+                const data = JSON.parse(responseBody);
+                const words = data.words.join(" ");
+                setText(words);
+            } catch (error) {
+                console.error("Error retrieving random words:", error);
+            }
         }
-    }, [setText]);
+
+        fetchData();
+    }, []);
+
 
     useEffect(() => {
         if (timeLeft > 0 && hasStartedTyping) {
