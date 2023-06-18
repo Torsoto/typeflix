@@ -8,6 +8,7 @@ import Profile from "./pages/Profile.jsx";
 import Training from "./pages/Training";
 import { Route, Routes, Navigate } from "react-router-dom";
 import AuthContext from "../src/components/context/AuthContext.jsx";
+import Leaderboard from "./pages/Leaderboard.jsx";
 
 function App() {
     const [userId, setUserId] = useState("");
@@ -133,6 +134,9 @@ function App() {
                     />
                     <Route path="/training"
                            element={isLoggedIn ? <Training /> : <Navigate to="/login" />}
+                    />
+                    <Route path="/leaderboard"
+                           element={isLoggedIn ? <Leaderboard /> : <Navigate to="/login" />}
                     />
                 </Routes>
             </AuthContext.Provider>

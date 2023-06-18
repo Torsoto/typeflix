@@ -69,7 +69,7 @@ function Settings() {
             <div className="max-w-[650px] max-h-[400px] flex flex-col p-8 mx-auto rounded-lg bg-neutral-700 md:flex-row">
               <div className="flex flex-col items-start mb-4 md:mb-0 md:w-1/2">
                 <div className="w-40 h-40 overflow-hidden rounded-full">
-                  {avatarUrl && <img src={avatarUrl} alt="Avatar" />}
+                  {avatarUrl && <img className="bg-white" src={avatarUrl} alt="Avatar" />}
                 </div>
                 <button
                   className="px-4 py-2 mt-4 font-semibold text-white bg-black rounded-full"
