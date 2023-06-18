@@ -58,11 +58,7 @@ function App() {
                 setUserData(data);
                 setAvatarUrl(data.avatar);
             }
-            fetchData().then((data) => {
-                setUserData(data);
-                setAvatarUrl(data.avatar);
-                localStorage.setItem('userData', JSON.stringify(data));
-            });
+            updateUserData();
         }
     }, [userId]);
 
@@ -99,7 +95,15 @@ function App() {
         localStorage.removeItem("jwt");
     };
 
-    const fetchData = async () => {
+    const updateUserData = () => {
+        fetchData(userId).then((data) => {
+            setUserData(data);
+            setAvatarUrl(data.avatar);
+            localStorage.setItem('userData', JSON.stringify(data));
+        });
+    }
+
+    const fetchData = async (userId) => {
         try {
             const response = await fetch(`http://localhost:3000/user/${userId}`);
             if (!response.ok) {
@@ -135,6 +139,7 @@ function App() {
                     selectedLevelIndex,
                     setSelectedLevelIndex,
                     updateBestWpm,
+                    fetchData,
                 }}
             >
                 <Routes>
