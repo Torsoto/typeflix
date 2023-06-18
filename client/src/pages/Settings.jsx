@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext } from "react";
-import { BiTimeFive } from "react-icons/bi";
 import { BiEdit } from "react-icons/bi";
 import Navbar from "../components/UI/Navbar.jsx";
 import AuthContext from "../components/context/AuthContext.jsx";
@@ -15,6 +14,8 @@ function Settings() {
   const [newPassword, setNewPassword] = useState("");
   const { userId, userData, avatarUrl, setAvatarUrl } = useContext(AuthContext);
   const [modalIsOpen, setModalIsOpen] = useState(false);
+
+  Modal.setAppElement('#root');
 
   const updateAvatar = async (newAvatar) => {
     try {
@@ -53,10 +54,35 @@ function Settings() {
   };
 
 
-  const handleConfirmDelete = () => {
-    // Delete account
-    setModalIsOpen(false);
+  const handleConfirmDelete = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/delete', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: localStorage.getItem('jwt'),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete account');
+      }
+
+      const data = await response.json();
+      console.log(data.message);
+
+      // Close modal
+      setModalIsOpen(false);
+      // Delete user data from local storage
+      //localStorage.removeItem('userData');
+      //localStorage.removeItem('jwt');
+    } catch (error) {
+      console.error('Error deleting account:', error);
+    }
   };
+
 
   const handleCancelDelete = () => {
     setModalIsOpen(false);
@@ -72,14 +98,8 @@ function Settings() {
 
   const handleDeleteAccount = async () => {
     setModalIsOpen(true);
-    /*
-    if (window.confirm('Are you sure you want to delete your account?')) {
-      
-    } else {
-      
-    }
-    */
   };
+
 
   return (
     <>
@@ -112,12 +132,14 @@ function Settings() {
                   <div className="p-4 bg-white rounded-lg w-96">
                     <h2 className="text-lg font-medium text-center">Are you sure you want to delete your account?</h2>
                     <div className="flex mt-4 place-content-center ">
-                      <button
-                        className="px-4 py-2 mr-2 font-medium text-white bg-red-500 rounded-lg hover:bg-red-600"
-                        onClick={handleConfirmDelete}
-                      >
-                        Yes
-                      </button>
+                      <a href="/login">
+                        <button
+                          className="px-4 py-2 mr-2 font-medium text-white bg-red-500 rounded-lg hover:bg-red-600"
+                          onClick={handleConfirmDelete}
+                        >
+                          Yes
+                        </button>
+                      </a>
                       <button
                         className="px-4 py-2 font-medium text-white bg-gray-500 rounded-lg hover:bg-gray-600"
                         onClick={handleCancelDelete}

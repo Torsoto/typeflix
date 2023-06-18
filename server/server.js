@@ -294,7 +294,7 @@ app.post("/removeFriend", async (req, res) => {
         res.status(409).send({ message: "Friend not found" });
       } else {
         const updatedFriends = userData.friends.filter(
-            (friend) => friend !== friendUsername
+          (friend) => friend !== friendUsername
         );
         await updateDoc(userDoc, { friends: updatedFriends });
         res.status(200).send({ message: "Friend removed successfully" });
@@ -358,7 +358,9 @@ app.post("/updateLeaderboard", async (req, res) => {
     if (leaderboardDocSnap.exists()) {
       // Leaderboard exists
       leaderboardData = leaderboardDocSnap.data().leaderboard;
-      const existingUserIndex = leaderboardData.findIndex(user => user.username === username);
+      const existingUserIndex = leaderboardData.findIndex(
+        (user) => user.username === username
+      );
 
       if (existingUserIndex !== -1) {
         // User exists in leaderboard
@@ -381,7 +383,9 @@ app.post("/updateLeaderboard", async (req, res) => {
     // Update the leaderboard in Firestore
     await setDoc(leaderboardDocRef, { leaderboard: leaderboardData });
 
-    res.status(200).send({ message: "Leaderboard and user stats updated successfully." });
+    res
+      .status(200)
+      .send({ message: "Leaderboard and user stats updated successfully." });
   } catch (e) {
     console.log("Error updating leaderboard:", e);
     res.status(500).send({ error: e.message });
@@ -426,8 +430,8 @@ app.get("/levelsOpened/:username/:movie", async (req, res) => {
     if (!userDocSnap.exists()) {
       console.log("User does not exist in /levelsOpened");
       return res
-          .status(404)
-          .send({ error: "User does not exist /levelsOpened" });
+        .status(404)
+        .send({ error: "User does not exist /levelsOpened" });
     }
 
     const userData = userDocSnap.data();
@@ -436,8 +440,8 @@ app.get("/levelsOpened/:username/:movie", async (req, res) => {
     if (!(movie in userData.themes)) {
       console.log("User has not started on this movie");
       return res
-          .status(404)
-          .send({ error: "User has not started on this movie" });
+        .status(404)
+        .send({ error: "User has not started on this movie" });
     }
 
     // Count the number of opened levels
@@ -675,10 +679,10 @@ app.delete("/delete", async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, secretKey);
-    const { uid } = decoded;
+    const { username } = decoded;
 
     // Delete user document from Firestore
-    await deleteDoc(doc(db, "users", uid));
+    await deleteDoc(doc(db, "users", username));
 
     // Delete user account
     await deleteUser(auth.currentUser);
@@ -775,10 +779,10 @@ app.get("/user/:username", async (req, res) => {
       // Sort the properties of the userData object
       const sortedUserData = {};
       Object.keys(userData)
-          .sort()
-          .forEach((key) => {
-            sortedUserData[key] = userData[key];
-          });
+        .sort()
+        .forEach((key) => {
+          sortedUserData[key] = userData[key];
+        });
 
       // If the user exists, send their data in the response
       res.status(200).json(sortedUserData);
@@ -786,7 +790,7 @@ app.get("/user/:username", async (req, res) => {
       // If the user doesn't exist, send a 404 error
       res.status(404).send({
         error:
-            "User not found (You are sending request to /:username Endpoint)",
+          "User not found (You are sending request to /:username Endpoint)",
       });
     }
   } catch (error) {
