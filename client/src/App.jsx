@@ -57,7 +57,9 @@ function App() {
             let data = localStorage.getItem('userData');
             data = JSON.parse(data);
             setUserData(data);
-            setAvatarUrl(data.avatar);
+            if (data) {
+                setAvatarUrl(data.avatar);
+            }
             fetchData().then((data) => {
                 setUserData(data);
                 setAvatarUrl(data.avatar);
@@ -116,13 +118,13 @@ function App() {
             >
                 <Routes>
                     <Route path="/login"
-                           element={isLoggedIn ? <Navigate to="/" /> : <Login />}
+                        element={isLoggedIn ? <Navigate to="/" /> : <Login />}
                     />
                     <Route path="/signup"
-                           element={isLoggedIn ? null : <Signup />}
+                        element={isLoggedIn ? null : <Signup />}
                     />
                     <Route path="/"
-                           element={isLoggedIn ? <Home /> : <Navigate to="/login" />}
+                        element={isLoggedIn ? <Home /> : <Navigate to="/login" />}
                     />
                     <Route
                         path="/settings"
@@ -133,10 +135,10 @@ function App() {
                         element={isLoggedIn ? <Profile /> : <Navigate to="/login" />}
                     />
                     <Route path="/training"
-                           element={isLoggedIn ? <Training /> : <Navigate to="/login" />}
+                        element={isLoggedIn ? <Training /> : <Navigate to="/login" />}
                     />
                     <Route path="/leaderboard"
-                           element={isLoggedIn ? <Leaderboard /> : <Navigate to="/login" />}
+                        element={isLoggedIn ? <Leaderboard /> : <Navigate to="/login" />}
                     />
                 </Routes>
             </AuthContext.Provider>
