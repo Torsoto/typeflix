@@ -4,8 +4,7 @@ import AuthContext from "../context/AuthContext.jsx";
 import userIcon from "../../assets/profile.svg";
 
 export const ProfileContainer = (username) => {
-
-    const { fetchData, userData, avatarUrl } = useContext(AuthContext);
+    const { fetchData, userData, avatarUrl, updateUserData } = useContext(AuthContext);
     const [customUserData, setCustomUserData] = useState("");
     const [isSameProfile, setIsSameProfile] = useState(false);
     const [friends, setFriends] = useState([]);
@@ -55,6 +54,7 @@ export const ProfileContainer = (username) => {
         const responseData = await response.json();
         if (response.ok ||response.status === 409) {
             setIsFollowing(true);
+            updateUserData(userData.username);
         } else {
             alert(responseData.error);
         }
@@ -75,6 +75,7 @@ export const ProfileContainer = (username) => {
         const responseData = await response.json();
         if (response.ok ||response.status === 409) {
             setIsFollowing(false);
+            updateUserData(userData.username);
         } else {
             alert(responseData.error);
         }

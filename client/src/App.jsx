@@ -140,6 +140,7 @@ function App() {
                     setSelectedLevelIndex,
                     updateBestWpm,
                     fetchData,
+                    updateUserData,
                 }}
             >
                 <Routes>
