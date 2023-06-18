@@ -24,51 +24,6 @@ function App() {
     const [selectedLevelIndex, setSelectedLevelIndex] = useState(false);
 
     useEffect(() => {
-        if (userId.length > 0) {
-            fetchData().then((data) => {
-                setUserData(data);
-                setAvatarUrl(data.avatar);
-            });
-        }
-    }, [userId]);
-
-    const fetchData = async () => {
-        try {
-            const response = await fetch(`http://localhost:3000/${userId}`);
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-            return await response.json();
-        } catch (error) {
-            console.error("There has been a problem with your fetch operation: ", error.message);
-        }
-    };
-
-    const googleSignIn = () => {
-        const provider = new GoogleAuthProvider();
-        signInWithPopup(auth, provider)
-            .then(() => {
-                window.location.href = "/";
-            })
-            .then(() => {
-                login();
-            })
-            .then((r) => console.log(r))
-            .catch((e) => console.log(e));
-    };
-
-    const login = (newUser) => {
-        setUserId(newUser);
-        setIsLoggedIn(true);
-    };
-
-    const logout = () => {
-        setUserId("");
-        setIsLoggedIn(false);
-        localStorage.removeItem("jwt");
-    };
-
-    useEffect(() => {
         const token = localStorage.getItem("jwt");
         if (token) {
             fetch("http://localhost:3000/validate", {
@@ -95,6 +50,71 @@ function App() {
             logout();
         }
     }, []);
+
+    useEffect(() => {
+        if (userId.length > 0) {
+            fetchData().then((data) => {
+                setUserData(data);
+                setAvatarUrl(data.avatar);
+            });
+        }
+    }, [userId]);
+
+    const googleSignIn = (email) => {
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider)
+            .then((result) => {
+                const user = result.user;
+                const idToken = user.getIdToken();
+
+                fetch("http://localhost:3000/googleLogin", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ email: email, id: user.uid }),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.token) {
+                            localStorage.setItem("jwt", data.token);
+                            login(data.username);
+                        } else {
+                            throw new Error("Error generating JWT token");
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                    });
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+            });
+    };
+
+    const login = (newUser) => {
+        console.log(newUser)
+        setUserId(newUser);
+        setIsLoggedIn(true);
+    };
+
+    const logout = () => {
+        setUserId("");
+        setIsLoggedIn(false);
+        localStorage.removeItem("jwt");
+    };
+
+    const fetchData = async () => {
+        try {
+            const response = await fetch(`http://localhost:3000/${userId}`);
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            return await response.json();
+        } catch (error) {
+            console.error("There has been a problem with your fetch operation: ", error.message);
+        }
+    };
 
     return (
         <>

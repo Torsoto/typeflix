@@ -15,7 +15,7 @@ function Login() {
     show: false,
     message: "",
   });
-  const { googleSignIn, login, setUserId } = useContext(AuthContext);
+  const { googleSignIn, login, setUserId, isLoggedIn } = useContext(AuthContext);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -52,7 +52,7 @@ function Login() {
 
   const handelGoogleLogin = () => {
     setLoading(true); // start loading
-    googleSignIn().then(() => {
+    googleSignIn(email).then(() => {
       setLoading(false);
     });
   };

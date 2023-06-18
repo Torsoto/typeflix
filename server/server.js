@@ -212,6 +212,33 @@ app.post("/login", async (req, res) => {
   }
 });
 
+app.post("/googleLogin", async (req, res) => {
+  const { email, id } = req.body;
+
+  try {
+    const userDoc = await getDoc(doc(db, "emailToUsername", email));
+
+    if (userDoc.exists()) {
+      const username = userDoc.data().username;
+
+      const payload = {
+        uid: id,
+        username: username,
+        email: email,
+      };
+
+      const token = jwt.sign(payload, secretKey, { expiresIn: "336h" });
+
+      res.status(200).send({ token: token, username: username });
+    } else {
+      res.status(404).send({ error: "User not found" });
+    }
+  } catch (error) {
+    console.error("Error:", error.message);
+    res.status(500).send({ error: error.message });
+  }
+});
+
 app.post("/validate", async (req, res) => {
   const token = req.body.token;
   if (token) {
