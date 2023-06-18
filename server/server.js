@@ -253,6 +253,76 @@ app.put("/updateavatar", async (req, res) => {
   }
 });
 
+app.post("/addFriend", async (req, res) => {
+  const { username, friendUsername } = req.body;
+
+  try {
+    const userDoc = doc(db, "users", username);
+    const userSnapshot = await getDoc(userDoc);
+
+    if (!userSnapshot.exists()) {
+      res.status(404).send({ error: "User not found" });
+    } else {
+      const userData = userSnapshot.data();
+
+      if (userData.friends.includes(friendUsername)) {
+        res.status(409).send({ message: "Friend already added" });
+      } else {
+        userData.friends.push(friendUsername);
+        await updateDoc(userDoc, { friends: userData.friends });
+        res.status(200).send({ message: "Friend added successfully" });
+      }
+    }
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+});
+
+app.post("/removeFriend", async (req, res) => {
+  const { username, friendUsername } = req.body;
+
+  try {
+    const userDoc = doc(db, "users", username);
+    const userSnapshot = await getDoc(userDoc);
+
+    if (!userSnapshot.exists()) {
+      res.status(404).send({ error: "User not found" });
+    } else {
+      const userData = userSnapshot.data();
+
+      if (!userData.friends.includes(friendUsername)) {
+        res.status(409).send({ message: "Friend not found" });
+      } else {
+        const updatedFriends = userData.friends.filter(
+            (friend) => friend !== friendUsername
+        );
+        await updateDoc(userDoc, { friends: updatedFriends });
+        res.status(200).send({ message: "Friend removed successfully" });
+      }
+    }
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+});
+
+app.get("/getFriends", async (req, res) => {
+  try {
+    const { username } = req.query;
+
+    const userDocRef = doc(db, "users", username);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      res.status(404).send({ error: "User does not exist" });
+    } else {
+      const userData = userDoc.data();
+      res.status(200).send(userData.friends);
+    }
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+});
+
 app.post("/updateLeaderboard", async (req, res) => {
   try {
     const { username, wpm } = req.body;
@@ -317,7 +387,6 @@ app.post("/updateLeaderboard", async (req, res) => {
     res.status(500).send({ error: e.message });
   }
 });
-
 
 app.get("/getLeaderboard", async (req, res) => {
   try {

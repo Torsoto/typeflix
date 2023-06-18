@@ -58,11 +58,7 @@ function App() {
                 setUserData(data);
                 setAvatarUrl(data.avatar);
             }
-            fetchData().then((data) => {
-                setUserData(data);
-                setAvatarUrl(data.avatar);
-                localStorage.setItem('userData', JSON.stringify(data));
-            });
+            updateUserData();
         }
     }, [userId]);
 
@@ -99,7 +95,15 @@ function App() {
         localStorage.removeItem("jwt");
     };
 
-    const fetchData = async () => {
+    const updateUserData = () => {
+        fetchData(userId).then((data) => {
+            setUserData(data);
+            setAvatarUrl(data.avatar);
+            localStorage.setItem('userData', JSON.stringify(data));
+        });
+    }
+
+    const fetchData = async (userId) => {
         try {
             const response = await fetch(`http://localhost:3000/user/${userId}`);
             if (!response.ok) {
@@ -135,6 +139,8 @@ function App() {
                     selectedLevelIndex,
                     setSelectedLevelIndex,
                     updateBestWpm,
+                    fetchData,
+                    updateUserData,
                 }}
             >
                 <Routes>
@@ -151,15 +157,15 @@ function App() {
                         path="/settings"
                         element={isLoggedIn ? <Settings /> : <Navigate to="/login" />}
                     />
-                    <Route
-                        path="/profile"
-                        element={isLoggedIn ? <Profile /> : <Navigate to="/login" />}
-                    />
                     <Route path="/training"
                         element={isLoggedIn ? <Training /> : <Navigate to="/login" />}
                     />
                     <Route path="/leaderboard"
                         element={isLoggedIn ? <Leaderboard /> : <Navigate to="/login" />}
+                    />
+                    <Route
+                        path="/:username"
+                        element={isLoggedIn ? <Profile /> : <Navigate to="/login" />}
                     />
                 </Routes>
             </AuthContext.Provider>
