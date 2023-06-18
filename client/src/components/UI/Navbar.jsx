@@ -21,6 +21,11 @@ const Navbar = () => {
         </a>
       </div>
       <div className="flex gap-6">
+        <a href="/" className="navbar__link">
+          <span className="font-medium text-white transition-colors hover:text-gray-400">
+            Theme
+          </span>
+        </a>
         <a href="/training" className="navbar__link">
           <span className="font-medium text-white transition-colors hover:text-gray-400">
             Training

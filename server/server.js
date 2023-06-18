@@ -513,7 +513,7 @@ app.get("/movies/:movie/levels/:level", async (req, res) => {
 app.get("/training", (req, res) => {
   const options = {
     hostname: "random-word-api.herokuapp.com",
-    path: "/word?number=10",
+    path: "/word?number=200",
     method: "GET",
   };
 
