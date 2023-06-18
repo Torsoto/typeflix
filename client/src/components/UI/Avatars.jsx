@@ -16,14 +16,14 @@ export const Avatars = ({ handleSelectAvatar, handleToggleAvatarOptions, userId 
     ];
 
     return (
-        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
-            <div className="bg-white p-4 rounded-lg">
-                <h3 className="text-lg font-semibold mb-4">Select an Avatar</h3>
+        <div className="fixed top-0 bottom-0 left-0 right-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
+            <div className="p-4 text-center bg-white rounded-lg">
+                <h3 className="mb-4 text-lg font-semibold">Select an Avatar</h3>
                 <div className="flex flex-wrap">
                     {avatarNames.map((name, index) => (
                         <button
                             key={index}
-                            className="w-16 h-16 rounded-full overflow-hidden mr-2 mb-2"
+                            className="w-16 h-16 mb-2 mr-2 overflow-hidden border-2 border-black rounded-full"
                             onClick={() => handleSelectAvatar(name)}
                         >
                             <img
@@ -33,12 +33,14 @@ export const Avatars = ({ handleSelectAvatar, handleToggleAvatarOptions, userId 
                         </button>
                     ))}
                 </div>
-                <button
-                    className="mt-4 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded"
-                    onClick={handleToggleAvatarOptions}
-                >
-                    Cancel
-                </button>
+                <div className="text-center">
+                    <button
+                        className="px-4 py-1 mt-4 font-semibold text-white bg-gray-500 rounded hover:bg-gray-600"
+                        onClick={handleToggleAvatarOptions}
+                    >
+                        Cancel
+                    </button>
+                </div>
             </div>
         </div>
     )
