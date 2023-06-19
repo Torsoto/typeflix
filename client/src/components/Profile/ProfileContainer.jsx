@@ -12,7 +12,22 @@ export const ProfileContainer = (username) => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [userIcon, setUserIcon] = useState("");
   const [followingAvatars, setFollowingAvatars] = useState([]);
+  const [validFollowing, setValidFollowing] = useState([]);
 
+  //check if the following-user still exists
+  useEffect(() => {
+    Promise.all(
+      following.map((followingUser) =>
+        fetch(`http://localhost:3000/checkUserExists?username=${followingUser}`)
+          .then((response) => response.json())
+          .then((data) => data.exists && followingUser)
+      )
+    ).then((data) => {
+      setValidFollowing(data.filter((item) => item));
+    });
+  }, [following]);
+
+  // Initializes component state based on the provided username and the currently logged-in user.
   useEffect(() => {
     if (userData.username === username.username) {
       setCustomUserData(userData);
@@ -30,6 +45,7 @@ export const ProfileContainer = (username) => {
     });
   }, []);
 
+  // Fetches the list of users that the specified user is following and updates the 'following' state.
   useEffect(() => {
     fetch("http://localhost:3000/getFollowing?username=" + username.username)
       .then((response) => response.json())
@@ -37,10 +53,12 @@ export const ProfileContainer = (username) => {
       .catch((e) => console.error(e));
   }, []);
 
+  // Updates the user icon state whenever the customUserData state changes.
   useEffect(() => {
     setUserIcon(customUserData.avatar);
   }, [customUserData]);
 
+  // Sends a request to the server to follow the specified user and updates the component state accordingly.
   const handleFollow = async () => {
     const response = await fetch("http://localhost:3000/follow", {
       method: "POST",
@@ -62,6 +80,7 @@ export const ProfileContainer = (username) => {
     }
   };
 
+  // Sends a request to the server to unfollow the specified user and updates the component state accordingly.
   const handleUnfollow = async () => {
     const response = await fetch("http://localhost:3000/unfollow", {
       method: "POST",
@@ -83,6 +102,7 @@ export const ProfileContainer = (username) => {
     }
   };
 
+  // Fetches the avatars of all users that the specified user is following and updates the 'followingAvatars' state.
   useEffect(() => {
     Promise.all(
       following.map((followingUser) =>
@@ -143,11 +163,11 @@ export const ProfileContainer = (username) => {
           </div>
         </div>
       </div>
-      {following.length > 0 && (
+      {validFollowing.length > 0 && (
         <div className="following-container">
           <h1 className="h1-s font-medium">Following</h1>
           <div className="following">
-            {following.map((followingUser) => {
+            {validFollowing.map((followingUser) => {
               const followingAvatar = followingAvatars.find(
                 (item) => item.following === followingUser
               )?.avatar;

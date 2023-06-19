@@ -6,11 +6,13 @@ import {
   setDoc,
   updateDoc,
   getDocs,
-  collection, writeBatch,
+  collection,
+  writeBatch,
 } from "firebase/firestore";
 import {
   deleteUser,
-  getAuth, signInWithEmailAndPassword,
+  getAuth,
+  signInWithEmailAndPassword,
   updateEmail,
   updatePassword,
   updateProfile,
@@ -211,6 +213,19 @@ app.post("/edit", async (req, res) => {
   }
 });
 
+app.get("/checkUserExists", async (req, res) => {
+  const { username } = req.query;
+
+  try {
+    const userDocRef = doc(db, "users", username);
+    const userDoc = await getDoc(userDocRef);
+
+    res.status(200).send({ exists: userDoc.exists() });
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+});
+
 app.delete("/deleteAccount", async (req, res) => {
   try {
     const { token, password, username, email } = req.body;
@@ -220,7 +235,11 @@ app.delete("/deleteAccount", async (req, res) => {
       return;
     }
 
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
 
     if (!userCredential) {
       res.status(403).send({ error: "Invalid credentials" });
@@ -244,7 +263,7 @@ app.delete("/deleteAccount", async (req, res) => {
       // Leaderboard exists
       let leaderboardData = leaderboardDocSnap.data().leaderboard;
       const existingUserIndex = leaderboardData.findIndex(
-          (user) => user.username === username
+        (user) => user.username === username
       );
 
       if (existingUserIndex !== -1) {
@@ -266,6 +285,5 @@ app.delete("/deleteAccount", async (req, res) => {
     res.status(500).send({ error: e.message });
   }
 });
-
 
 export default app;
