@@ -2,6 +2,8 @@ import React, { useState, useCallback, useEffect, useRef, useContext } from "rea
 import "../../styles/Home.css";
 import AuthContext from "../context/AuthContext.jsx";
 import "../../styles/App.css";
+import FailMessage from "../UI/FailMessage";
+import WinMessage from "../UI/WinMessage"
 
 const Game = () => {
   const [isBlurred, setIsBlurred] = useState(true);
@@ -10,7 +12,6 @@ const Game = () => {
   const [correctLetters, setCorrectLetters] = useState([]);
   const [incorrectLetters, setIncorrectLetters] = useState([]);
   const [hasStartedTyping, setHasStartedTyping] = useState(false);
-  const [lineCount, setLineCount] = useState(0);
   const [nextCursorY, setNextCursorY] = useState(0);
   const [hasCalculated, sethasCalculated] = useState(false);
   const [timesCalculated, setTimesCalculated] = useState(0);
@@ -25,7 +26,7 @@ const Game = () => {
   const [wpm, setWpm] = useState(0);
   const [hasFailed, setHasFailed] = useState(false);
 
-  const { userData, title, selectedLevelIndex, updateBestWpm } = useContext(AuthContext);
+  const { userData, title, selectedLevelIndex, updateBestWpm, setSelectedLevelIndex, SelectedLevelIndex } = useContext(AuthContext);
 
   useEffect(() => {
     if (timeLeft > 0 && hasStartedTyping && !isFinished && !hasFailed) {
@@ -148,22 +149,6 @@ const Game = () => {
     }
   };
 
-  const WinMessage = ({ isFinished, timeTaken, wpm }) => {
-    if (!isFinished) return null;
-
-    return (
-      <div className="text-2xl">
-        Congratulations! You beat this level in {timeTaken} seconds with {wpm} WPM!
-      </div>
-    );
-  };
-
-  const FailMessage = ({ hasFailed }) => {
-    if (!hasFailed) return null;
-
-    return <div className="text-2xl">Sorry! You failed this level.</div>;
-  };
-
   const HpBar = ({ hp }) => {
     let barColor = "bg-green-500";
     if (hpPercentage < 20) {
@@ -182,19 +167,27 @@ const Game = () => {
     );
   };
 
+  const handleNextLevel = () => {
+
+  }
+
+  const handleRetry = () => {
+
+  }
+
 
   return (
     <div className="grid mx-auto text-white place-items-center ">
-      <div className="">
+      <div className="mr-8">
         <img
           src={Img}
           alt="pixel image of low level thug"
-          className="h-[200px] stance mr-8"
+          className="h-[200px] stance"
         />
       </div>
       <HpBar hp={hp} />
-      <WinMessage isFinished={isFinished} timeTaken={timeTaken} wpm={wpm} />
-      <FailMessage hasFailed={hasFailed} />
+      <WinMessage isFinished={isFinished} onRetry={handleRetry} timeTaken={timeTaken} wpm={wpm} onNextLevel={handleNextLevel} />
+      <FailMessage hasFailed={hasFailed} onRetry={handleRetry} />
       <div>
         <div className="flex gap-1 place-content-center">
           <p className={`text-2xl font-bold align-middle mb-8 ${timeLeft > 0 && !isBlurred && !isFinished && !hasFailed ? "opacity-100" : "invisible"}`}>
