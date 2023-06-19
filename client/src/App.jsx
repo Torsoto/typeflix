@@ -91,6 +91,7 @@ function App() {
 
     const logout = () => {
         setUserId("");
+        setUserData(null);
         setIsLoggedIn(false);
         localStorage.removeItem("jwt");
     };

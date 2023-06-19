@@ -8,9 +8,10 @@ export const ProfileContainer = (username) => {
     useContext(AuthContext);
   const [customUserData, setCustomUserData] = useState("");
   const [isSameProfile, setIsSameProfile] = useState(false);
-  const [friends, setFriends] = useState([]);
+  const [following, setFollowing] = useState([]);
   const [isFollowing, setIsFollowing] = useState(false);
   const [userIcon, setUserIcon] = useState("");
+  const [followingAvatars, setFollowingAvatars] = useState([]);
 
   useEffect(() => {
     if (userData.username === username.username) {
@@ -23,16 +24,16 @@ export const ProfileContainer = (username) => {
     fetchData(username.username).then((response) => {
       setCustomUserData(response);
       setUserIcon(customUserData.avatar);
-      if (userData.friends) {
-        setIsFollowing(userData.friends.includes(username.username));
+      if (userData.following) {
+        setIsFollowing(userData.following.includes(username.username));
       }
     });
   }, []);
 
   useEffect(() => {
-    fetch("http://localhost:3000/getFriends?username=" + username.username)
+    fetch("http://localhost:3000/getFollowing?username=" + username.username)
       .then((response) => response.json())
-      .then((data) => setFriends(data))
+      .then((data) => setFollowing(data))
       .catch((e) => console.error(e));
   }, []);
 
@@ -40,15 +41,15 @@ export const ProfileContainer = (username) => {
     setUserIcon(customUserData.avatar);
   }, [customUserData]);
 
-  const handleAddFriend = async () => {
-    const response = await fetch("http://localhost:3000/addFriend", {
+  const handleFollow = async () => {
+    const response = await fetch("http://localhost:3000/follow", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         username: userData.username,
-        friendUsername: customUserData.username,
+        toFollowUsername: customUserData.username,
       }),
     });
 
@@ -61,15 +62,15 @@ export const ProfileContainer = (username) => {
     }
   };
 
-  const handleRemoveFriend = async () => {
-    const response = await fetch("http://localhost:3000/removeFriend", {
+  const handleUnfollow = async () => {
+    const response = await fetch("http://localhost:3000/unfollow", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         username: userData.username,
-        friendUsername: customUserData.username,
+        toUnfollowUsername: customUserData.username,
       }),
     });
 
@@ -81,6 +82,19 @@ export const ProfileContainer = (username) => {
       alert(responseData.error);
     }
   };
+
+  useEffect(() => {
+    Promise.all(
+      following.map((followingUser) =>
+        fetch(`http://localhost:3000/getAvatar?username=${followingUser}`)
+          .then((response) => response.text())
+          .then((data) => ({ following: followingUser, avatar: data }))
+      )
+    ).then((data) => {
+      setFollowingAvatars(data);
+      console.log(data);
+    });
+  }, [following]);
 
   return (
     <div className="flex main-container justify-center">
@@ -103,7 +117,7 @@ export const ProfileContainer = (username) => {
                         ? "bg-white text-black"
                         : "bg-black text-white"
                     } rounded-full`}
-                    onClick={isFollowing ? handleRemoveFriend : handleAddFriend}
+                    onClick={isFollowing ? handleUnfollow : handleFollow}
                   >
                     {isFollowing ? "Unfollow" : "Follow"}
                   </button>
@@ -112,7 +126,12 @@ export const ProfileContainer = (username) => {
               <div className="flex">
                 <div className="values-container ml-[50px]">
                   <p>Best WPM: {customUserData.bestwpm}</p>
-                  <p>Avg. WPM: {customUserData.avgwpm}</p>
+                  <p>
+                    Avg. WPM:{" "}
+                    {customUserData.avgwpm !== undefined
+                      ? customUserData.avgwpm.toFixed(2)
+                      : "0"}
+                  </p>
                   <p>Games Played: {customUserData.gamesplayed}</p>
                   <p>Levels Completed: {customUserData.themescompleted}</p>
                 </div>
@@ -124,23 +143,30 @@ export const ProfileContainer = (username) => {
           </div>
         </div>
       </div>
-      {friends.length > 0 && (
+      {following.length > 0 && (
         <div className="friends-container">
-          <h1 className="h1-s font-medium">Friends</h1>
+          <h1 className="h1-s font-medium">Following</h1>
           <div className="friends">
-            {friends.map((friend) => (
-              <div
-                key={friend}
-                className="user-avatar flex text-white gap-[12px]"
-              >
-                <img
-                  src={plainProfileImage}
-                  alt="Avatar"
-                  className="rounded-full w-[40px] h-[40px]"
-                />
-                <h1 className="-mt-[-6.5px]">{friend}</h1>
-              </div>
-            ))}
+            {following.map((followingUser) => {
+              const followingAvatar = followingAvatars.find(
+                (item) => item.following === followingUser
+              )?.avatar;
+              return (
+                <div
+                  key={followingUser}
+                  className="user-avatar flex text-white gap-[12px]"
+                >
+                  <img
+                    src={followingAvatar || plainProfileImage}
+                    alt="Avatar"
+                    className="rounded-full w-[50px] h-[50px] bg-white"
+                  />
+                  <a href={`/${followingUser}`}>
+                    <p className="mt-[9px] text-xl">{followingUser}</p>
+                  </a>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
