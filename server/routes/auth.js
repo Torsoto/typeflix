@@ -3,6 +3,7 @@ import {
     getAuth,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
+    deleteUser
 } from "firebase/auth";
 import {
     getFirestore,
@@ -133,7 +134,6 @@ app.post("/login", async (req, res) => {
             email = doc.data().email;
         }
     });
-
     if (email) {
         // User found by username, attempt to sign in with their email.
         signInWithEmailAndPassword(auth, email, password)
@@ -209,5 +209,45 @@ app.post("/validate", async (req, res) => {
         res.status(400).send({ valid: false, error: "No token provided" });
     }
 });
+
+app.delete("/deleteAccount", async (req, res) => {
+    try {
+        const { token, password, username, email } = req.body;
+
+        if(!jwt.verify(token, secretKey)){
+            res.status(403).send({ error: "Invalid JWT" });
+            return;
+        }
+
+        // Authenticate the user again before deleting
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        if (!userCredential) {
+            res.status(403).send({ error: "Invalid credentials" });
+            return;
+        }
+
+        // Delete the user
+        await deleteUser(userCredential.user);
+        console.log("User deleted successfully");
+
+        // Delete the user's data from Firestore
+        const userDoc = doc(db, "users", username);
+        const emailToUsernameDoc = doc(db, "emailToUsername", email);
+        const batch = writeBatch(db);
+
+        batch.delete(userDoc);
+        batch.delete(emailToUsernameDoc);
+
+        await batch.commit();
+        console.log("User data deleted from Firestore");
+
+        res.status(200).send({ message: "Account deleted successfully" });
+    } catch (e) {
+        console.error("Error deleting user:", e);
+        res.status(500).send({ error: e.message });
+    }
+});
+
+
 
 export default app;

@@ -12,8 +12,8 @@ function Settings() {
   const [newUsername, setNewUsername] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const { userId, userData, avatarUrl, setAvatarUrl } = useContext(AuthContext);
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const { userId, userData, avatarUrl, setAvatarUrl, logout } = useContext(AuthContext);
 
   Modal.setAppElement('#root');
 
@@ -54,35 +54,42 @@ function Settings() {
   };
 
 
-  const handleConfirmDelete = async () => {
-    try {
-      const response = await fetch('http://localhost:3000/delete', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          token: localStorage.getItem('jwt'),
-        }),
-      });
+  const handleConfirmDelete = () => {
+    fetch('http://localhost:3000/deleteAccount', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        token: localStorage.getItem('jwt'),
+        password: "123123",
+        username: userData.username,
+        uid: userData.uid,
+        email: userData.email,
+      }),
+    })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to delete account');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log(data);
 
-      if (!response.ok) {
-        throw new Error('Failed to delete account');
-      }
+          // Close modal
+          setModalIsOpen(false);
 
-      const data = await response.json();
-      console.log(data.message);
-
-      // Close modal
-      setModalIsOpen(false);
-      // Delete user data from local storage
-      //localStorage.removeItem('userData');
-      //localStorage.removeItem('jwt');
-    } catch (error) {
-      console.error('Error deleting account:', error);
-    }
+          // Delete user data from local storage
+          localStorage.removeItem('userData');
+          localStorage.removeItem('jwt');
+          console.log("here")
+          logout();
+        })
+        .catch(error => {
+          console.error('Error deleting account:', error);
+        });
   };
-
 
   const handleCancelDelete = () => {
     setModalIsOpen(false);
@@ -132,14 +139,12 @@ function Settings() {
                   <div className="p-4 bg-white rounded-lg w-96">
                     <h2 className="text-lg font-medium text-center">Are you sure you want to delete your account?</h2>
                     <div className="flex mt-4 place-content-center ">
-                      <a href="/login">
-                        <button
+                      <button
                           className="px-4 py-2 mr-2 font-medium text-white bg-red-500 rounded-lg hover:bg-red-600"
                           onClick={handleConfirmDelete}
-                        >
-                          Yes
-                        </button>
-                      </a>
+                      >
+                        Yes
+                      </button>
                       <button
                         className="px-4 py-2 font-medium text-white bg-gray-500 rounded-lg hover:bg-gray-600"
                         onClick={handleCancelDelete}

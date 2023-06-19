@@ -1,5 +1,4 @@
 import LogoNav from "../components/UI/LogoNav";
-import googleLogo from "../assets/google-logo.svg";
 import React, { useContext, useState } from "react";
 import { BeatLoader } from "react-spinners";
 import Notification from "../components/Notification/Notification.jsx";
@@ -46,7 +45,7 @@ function Login() {
           "An error occurred during login. Please try again.",
       });
     } finally {
-      setLoading(false); // stop loading regardless of success or error
+      setLoading(false);
     }
   };
 
