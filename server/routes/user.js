@@ -5,13 +5,12 @@ import {
   getDoc,
   setDoc,
   updateDoc,
-  deleteDoc,
   getDocs,
-  collection,
+  collection, writeBatch,
 } from "firebase/firestore";
 import {
   deleteUser,
-  getAuth,
+  getAuth, signInWithEmailAndPassword,
   updateEmail,
   updatePassword,
   updateProfile,
@@ -212,23 +211,40 @@ app.post("/edit", async (req, res) => {
   }
 });
 
-app.delete("/delete", async (req, res) => {
-  const { token } = req.body;
-
+app.delete("/deleteAccount", async (req, res) => {
   try {
-    const decoded = jwt.verify(token, secretKey);
-    const { username } = decoded;
+    const { token, password, username, email } = req.body;
 
-    // Delete user document from Firestore
-    await deleteDoc(doc(db, "users", username));
+    if (!jwt.verify(token, secretKey)) {
+      res.status(403).send({ error: "Invalid JWT" });
+      return;
+    }
 
-    // Delete user account
-    await deleteUser(auth.currentUser);
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
-    res.status(200).send({ message: "User account deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting user account:", error);
-    res.status(500).send({ error: error.message });
+    if (!userCredential) {
+      res.status(403).send({ error: "Invalid credentials" });
+      return;
+    }
+
+    await deleteUser(userCredential.user);
+    console.log("User deleted successfully");
+
+    const userDoc = doc(db, "users", username);
+    const emailToUsernameDoc = doc(db, "emailToUsername", email);
+    const batch = writeBatch(db);
+
+    batch.delete(userDoc);
+    batch.delete(emailToUsernameDoc);
+
+    await batch.commit();
+    console.log("User data deleted from Firestore");
+
+    res.status(200).send({ message: "Account deleted successfully" });
+  } catch (e) {
+    console.error("Error deleting user:", e);
+    res.status(500).send({ error: e.message });
   }
 });
+
 export default app;
