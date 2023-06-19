@@ -144,9 +144,9 @@ export const ProfileContainer = (username) => {
         </div>
       </div>
       {following.length > 0 && (
-        <div className="friends-container">
+        <div className="following-container">
           <h1 className="h1-s font-medium">Following</h1>
-          <div className="friends">
+          <div className="following">
             {following.map((followingUser) => {
               const followingAvatar = followingAvatars.find(
                 (item) => item.following === followingUser
