@@ -211,40 +211,4 @@ app.post("/edit", async (req, res) => {
   }
 });
 
-app.delete("/deleteAccount", async (req, res) => {
-  try {
-    const { token, password, username, email } = req.body;
-
-    if (!jwt.verify(token, secretKey)) {
-      res.status(403).send({ error: "Invalid JWT" });
-      return;
-    }
-
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-
-    if (!userCredential) {
-      res.status(403).send({ error: "Invalid credentials" });
-      return;
-    }
-
-    await deleteUser(userCredential.user);
-    console.log("User deleted successfully");
-
-    const userDoc = doc(db, "users", username);
-    const emailToUsernameDoc = doc(db, "emailToUsername", email);
-    const batch = writeBatch(db);
-
-    batch.delete(userDoc);
-    batch.delete(emailToUsernameDoc);
-
-    await batch.commit();
-    console.log("User data deleted from Firestore");
-
-    res.status(200).send({ message: "Account deleted successfully" });
-  } catch (e) {
-    console.error("Error deleting user:", e);
-    res.status(500).send({ error: e.message });
-  }
-});
-
 export default app;
