@@ -15,7 +15,7 @@ function App() {
     const [userData, setUserData] = useState(null);
     const [text, setText] = useState(`TEST TEST TEST TEST TEST TEST TEST TEST TEST`);
     const [isLoggedIn, setIsLoggedIn] = useState({});
-    const [gradientColor, setGradientColor] = React.useState('#313131');
+    const [gradientColor, setGradientColor] = React.useState('#0c0c0c');
     const [Img, setImg] = useState("https://i.imgur.com/oQUOXS8.png");
     const [time, setTime] = useState(60);
     const [avatarUrl, setAvatarUrl] = useState("");

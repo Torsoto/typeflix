@@ -91,7 +91,7 @@ const LevelSelection = () => {
       handleMovieClick(title, poster); // re-fetch the levels for the current movie
     } else {
       // If the level selection is being shown, go back to the movie selection
-      setGradientColor('#313131')
+      setGradientColor('#0c0c0c')
       setShowLevels(false);
       setShowBackButton(false);
       fetchMovieList().then((data) => {

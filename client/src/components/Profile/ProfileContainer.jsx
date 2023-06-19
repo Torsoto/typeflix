@@ -98,51 +98,53 @@ export const ProfileContainer = (username) => {
 
   return (
       <div className="flex main-container justify-center">
-        <div>
-          <h1 className="h1-s font-medium">{customUserData.username}</h1>
-          <div className="flex">
-            <div className="min-w-[550px] min-h-[400px] p-8 rounded-lg profil-box-bg">
+        {customUserData && (
+            <div>
+              <h1 className="h1-s font-medium">{customUserData.username}</h1>
               <div className="flex">
-                <div className="text-center flex justify-around flex-col">
-                  <img
-                      src={avatarUrl ? userIcon : plainProfileImage}
-                      alt="Avatar"
-                      className="rounded-full w-[120px] h-[120px] bg-white"
-                  />
-                  <h3 className="h3-s py-[10px]">0 followers</h3>
-                  {!isSameProfile && (
-                      <button
-                          className={`button-s px-2 py-1 font-semibold ${
-                              isFollowing
-                                  ? "bg-white text-black"
-                                  : "bg-black text-white"
-                          } rounded-full`}
-                          onClick={isFollowing ? handleUnfollow : handleFollow}
-                      >
-                        {isFollowing ? "Unfollow" : "Follow"}
-                      </button>
-                  )}
-                </div>
-                <div className="flex">
-                  <div className="values-container ml-[50px]">
-                    <p>Best WPM: {customUserData.bestwpm}</p>
-                    <p>
-                      Avg. WPM:{" "}
-                      {customUserData.avgwpm !== undefined
-                          ? customUserData.avgwpm.toFixed(2)
-                          : "0"}
-                    </p>
-                    <p>Games Played: {customUserData.gamesplayed}</p>
-                    <p>Levels Completed: {customUserData.themescompleted}</p>
+                <div className="min-w-[550px] min-h-[400px] p-8 rounded-lg profil-box-bg">
+                  <div className="flex">
+                    <div className="text-center flex justify-around flex-col">
+                      <img
+                          src={avatarUrl ? userIcon : plainProfileImage}
+                          alt="Avatar"
+                          className="rounded-full w-[120px] h-[120px] bg-white"
+                      />
+                      <h3 className="h3-s py-[10px]">0 followers</h3>
+                      {!isSameProfile && (
+                          <button
+                              className={`button-s px-2 py-1 font-semibold ${
+                                  isFollowing
+                                      ? "bg-white text-black"
+                                      : "bg-black text-white"
+                              } rounded-full`}
+                              onClick={isFollowing ? handleUnfollow : handleFollow}
+                          >
+                            {isFollowing ? "Unfollow" : "Follow"}
+                          </button>
+                      )}
+                    </div>
+                    <div className="flex">
+                      <div className="values-container ml-[50px]">
+                        <p>Best WPM: {customUserData.bestwpm}</p>
+                        <p>
+                          Avg. WPM:{" "}
+                          {customUserData.avgwpm !== undefined
+                              ? customUserData.avgwpm.toFixed(2)
+                              : "0"}
+                        </p>
+                        <p>Games Played: {customUserData.gamesplayed}</p>
+                        <p>Levels Completed: {customUserData.themescompleted}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h2 className="h2-s">Last Played:</h2>
                   </div>
                 </div>
               </div>
-              <div>
-                <h2 className="h2-s">Last Played:</h2>
-              </div>
             </div>
-          </div>
-        </div>
+        )}
         {following.length > 0 && (
             <div className="following-container">
               <h1 className="h1-s font-medium">Following</h1>

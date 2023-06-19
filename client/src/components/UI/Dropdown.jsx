@@ -8,7 +8,7 @@ export const DropdownMenu = () => {
   return (
     <div className="absolute w-[152px]">
       <div
-        className="absolute z-10 mt-2 w-40 origin-top-right rounded-md bg-neutral-900 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none text-left"
+        className="absolute z-10 mt-2 w-40 origin-top-right rounded-md bg-black shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none text-left"
         role="menu"
         aria-orientation="vertical"
         aria-labelledby="menu-button"

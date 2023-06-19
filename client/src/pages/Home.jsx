@@ -9,9 +9,7 @@ function Home() {
     const { gradientColor } = useContext(AuthContext);
 
     const style = {
-        backgroundColor: 'black',
-        backgroundImage: `url("/src/assets/bg-texture.png"), linear-gradient(170deg, ${gradientColor} 0%, #000000 100%)`,
-        backgroundRepeat: 'repeat, no-repeat',
+        backgroundColor: `${gradientColor}`,
         backgroundBlendMode: 'normal',
         backgroundSize: 'auto, cover',
         minHeight: '100vh',
