@@ -4,9 +4,7 @@
 @tailwind utilities;
 
 body {
-  background-color: black;
-  background-image: url("../assets/bg-texture.png"),
-    linear-gradient(170deg, #313131 0%, #000000 100%);
+  background-color: #0c0c0c;
   background-repeat: repeat, no-repeat;
   background-blend-mode: normal;
   background-size: auto, 100vw 100vh;
