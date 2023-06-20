@@ -158,7 +158,7 @@ const Game = () => {
     }
 
     return (
-      <div className={`w-full border-2 border-black h-4 mb-14 mt-4 max-w-[300px] bg-white rounded-full`}>
+      <div className={`w-full border-2 border-black h-4 mb-14 mt-4 max-w-[500px] bg-white rounded-full`}>
         <div
           className={`h-full ${barColor} rounded-full`}
           style={{ width: `${hpPercentage}%` }}
@@ -182,7 +182,7 @@ const Game = () => {
         <img
           src={Img}
           alt="pixel image of low level thug"
-          className="h-[200px] stance"
+          className="h-[275px] stance"
         />
       </div>
       <HpBar hp={hp} />
@@ -190,7 +190,7 @@ const Game = () => {
       <FailMessage hasFailed={hasFailed} onRetry={handleRetry} />
       <div>
         <div className="flex gap-1 place-content-center">
-          <p className={`text-2xl font-bold align-middle mb-8 ${timeLeft > 0 && !isBlurred && !isFinished && !hasFailed ? "opacity-100" : "invisible"}`}>
+          <p className={`text-2xl font-bold align-middle mb-4 ${timeLeft > 0 && !isBlurred && !isFinished && !hasFailed ? "opacity-100" : "invisible"}`}>
             {timeLeft > 0 && !isBlurred ? `${timeLeft}` : "0"}
           </p>
         </div>
