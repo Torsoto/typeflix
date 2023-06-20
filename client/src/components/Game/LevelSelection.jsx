@@ -4,6 +4,10 @@ import "../../styles/App.css";
 import Game from "./Game.jsx";
 import AuthContext from "../context/AuthContext.jsx";
 import { IoIosArrowBack } from "react-icons/io";
+import { GiDaemonSkull } from "react-icons/Gi"
+import { IoSkullSharp } from "react-icons/io5"
+import { AiFillWarning } from "react-icons/Ai"
+
 
 const LevelSelection = () => {
   const [movies, setMovies] = useState([]);
@@ -122,6 +126,8 @@ const LevelSelection = () => {
 
   const renderLevels = () => {
     return levels.map((level, index) => {
+      const isMiniBoss = level % 3 === 0 && level !== 10;
+      const isBigBoss = level === 10;
       const handleLevelSelection = async () => {
         try {
           const response = await fetch(
@@ -161,6 +167,16 @@ const LevelSelection = () => {
             style={{ position: "relative", overflow: "hidden" }}
             onClick={isOpened ? handleLevelSelection : null}
           >
+            {isMiniBoss && (
+              <div className="absolute top-0 right-0 z-50 p-2 text-white">
+                <IoSkullSharp size={28} />
+              </div>
+            )}
+            {isBigBoss && (
+              <div className="absolute top-0 right-0 z-50 p-2 text-white">
+                <GiDaemonSkull size={30} />
+              </div>
+            )}
             <div
               className="absolute inset-0 bg-center bg-cover rounded-3xl"
               style={{
@@ -179,10 +195,21 @@ const LevelSelection = () => {
               Level {level}
             </p>
           </div>
+          {isMiniBoss && (
+            <p className="flex items-center gap-1 text-base text-red-500">
+              <AiFillWarning className="text-red-500" size={16} /> Mini Boss! <AiFillWarning size={16} />
+            </p>
+          )}
+          {isBigBoss && (
+            <p className="flex items-center gap-1 text-red-500 text-md">
+              <AiFillWarning className="text-red-500" size={16} /> Boss! <AiFillWarning size={16} />
+            </p>
+          )}
         </div>
       );
     });
   };
+
 
   return (
     <div className="h-[100%]">

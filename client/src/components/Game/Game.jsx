@@ -25,6 +25,7 @@ const Game = () => {
   const [timeTaken, setTimeTaken] = useState(0);
   const [wpm, setWpm] = useState(0);
   const [hasFailed, setHasFailed] = useState(false);
+  const [chatBubble, setChatBubble] = useState({ visible: false, text: `` });
 
   const { userData, title, selectedLevelIndex, updateBestWpm, setSelectedLevelIndex, SelectedLevelIndex } = useContext(AuthContext);
 
@@ -41,6 +42,24 @@ const Game = () => {
     }
   }, [timeLeft, hasStartedTyping, isFinished, hasFailed]);
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      if (!isFinished && !hasFailed && timeLeft > 0) {
+        setChatBubble({
+          visible: true,
+          text: 'Thats all you got?'
+        });
+        setTimeout(() => {
+          setChatBubble({
+            visible: false,
+            text: ''
+          });
+        }, 3000);
+      }
+    }, (Math.random() * (10 - 5) + 5) * 1000);
+
+    return () => clearInterval(intervalId);
+  }, [isFinished, hasFailed, timeLeft]);
 
 
   const handleClickForBlur = useCallback(() => {
@@ -158,7 +177,7 @@ const Game = () => {
     }
 
     return (
-      <div className={`w-full border-2 border-black h-4 mb-14 mt-4 max-w-[500px] bg-white rounded-full`}>
+      <div className={`w-full border-2 border-black h-4 mb-10 mt-4 max-w-[500px] bg-white rounded-full`}>
         <div
           className={`h-full ${barColor} rounded-full`}
           style={{ width: `${hpPercentage}%` }}
@@ -178,11 +197,16 @@ const Game = () => {
 
   return (
     <div className="grid mx-auto text-white place-items-center ">
-      <div className="mr-8">
+      <div className="relative mr-8">
+        {chatBubble.visible && (
+          <div className="absolute top-0 z-50 p-2 text-black bg-white rounded-md -left-20 chat-bubble">
+            {chatBubble.text}
+          </div>
+        )}
         <img
           src={Img}
-          alt="pixel image of low level thug"
-          className="h-[275px] stance"
+          alt="image of enemy"
+          className="h-[250px] z-10 stance"
         />
       </div>
       <HpBar hp={hp} />
@@ -196,7 +220,7 @@ const Game = () => {
         </div>
         <div className="relative">
           <div
-            className={`absolute text-2xl font-mono top-0 bottom-0 left-0 right-0 flex items-center justify-center text-center ${isMessageVisible ? "" : "hidden"
+            className={`absolute text-2xl font-mono top-0 bottom-24 left-0 right-0 flex items-center justify-center text-center ${isMessageVisible ? "" : "hidden"
               }`}
           >
             click here to start typing
