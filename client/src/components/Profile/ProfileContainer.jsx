@@ -13,6 +13,9 @@ export const ProfileContainer = (username) => {
   const [userIcon, setUserIcon] = useState("");
   const [followingAvatars, setFollowingAvatars] = useState([]);
   const [validFollowing, setValidFollowing] = useState([]);
+  const [showFollowers, setShowFollowers] = useState(false);
+  const [followers, setFollowers] = useState([]);
+  const [followersCount, setFollowersCount] = useState(0);
 
   //check if the following-user still exists
   useEffect(() => {
@@ -102,6 +105,30 @@ export const ProfileContainer = (username) => {
     }
   };
 
+  // Fetches the list of followers for the specified user and updates the 'followers' state.
+  const handleShowFollowers = () => {
+    setShowFollowers(true);
+    fetch(`http://localhost:3000/getFollowers?username=${username.username}`)
+      .then((response) => response.json())
+      .then((data) => setFollowers(data))
+      .catch((e) => console.error(e));
+  };
+
+  // Hides the list of followers.
+  const handleCloseFollowers = () => {
+    setShowFollowers(false);
+  };
+
+  // Fetches the number of followers for the specified user and updates the 'followersCount' state.
+  useEffect(() => {
+    fetch(
+      `http://localhost:3000/getFollowersCount?username=${username.username}`
+    )
+      .then((response) => response.json())
+      .then((data) => setFollowersCount(data.count))
+      .catch((e) => console.error(e));
+  }, [username]);
+
   // Fetches the avatars of all users that the specified user is following and updates the 'followingAvatars' state.
   useEffect(() => {
     Promise.all(
@@ -129,7 +156,28 @@ export const ProfileContainer = (username) => {
                   alt="Avatar"
                   className="rounded-full w-[120px] h-[120px] bg-white"
                 />
-                <h3 className="h3-s py-[10px]">0 followers</h3>
+                <div className="h-[35px] flex justify-center items-center">
+                  <h3
+                    className="followAccount h3-s py-[10px]"
+                    onClick={handleShowFollowers}
+                  >
+                    {followersCount} followers
+                  </h3>
+                </div>
+                {showFollowers && (
+                  <div className="popup ">
+                    <div className="popup-content rounded-lg">
+                      <span className="close" onClick={handleCloseFollowers}>
+                        &times;
+                      </span>
+                      <ul>
+                        {followers.map((follower) => (
+                          <li key={follower}>{follower}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
                 {!isSameProfile && (
                   <button
                     className={`button-s px-2 py-1 font-semibold ${
@@ -145,15 +193,32 @@ export const ProfileContainer = (username) => {
               </div>
               <div className="flex">
                 <div className="values-container ml-[50px]">
-                  <p>Best WPM: {customUserData.bestwpm}</p>
+                  <p>
+                    Best WPM:{" "}
+                    <span className="text-white">{customUserData.bestwpm}</span>
+                  </p>
                   <p>
                     Avg. WPM:{" "}
-                    {customUserData.avgwpm !== undefined
-                      ? customUserData.avgwpm.toFixed(2)
-                      : "0"}
+                    <span className="text-white">
+                      {customUserData.avgwpm !== undefined
+                        ? Number.isInteger(customUserData.avgwpm)
+                          ? customUserData.avgwpm
+                          : customUserData.avgwpm.toFixed(2)
+                        : "0"}
+                    </span>
                   </p>
-                  <p>Games Played: {customUserData.gamesplayed}</p>
-                  <p>Levels Completed: {customUserData.themescompleted}</p>
+                  <p>
+                    Games Played:{" "}
+                    <span className="text-white">
+                      {customUserData.gamesplayed}
+                    </span>
+                  </p>
+                  <p>
+                    Levels Completed:{" "}
+                    <span className="text-white">
+                      {customUserData.themescompleted}
+                    </span>
+                  </p>
                 </div>
               </div>
             </div>

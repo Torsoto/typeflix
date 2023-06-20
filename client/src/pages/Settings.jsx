@@ -172,12 +172,6 @@ function Settings() {
                   <p className="text-lg text-white">
                     Email: {userData && <span>{userData.email}</span>}
                   </p>
-                  <button
-                    className="px-2 py-1 font-semibold text-white bg-black rounded-full"
-                    onClick={handleUpdateEmail}
-                  >
-                    <BiEdit />
-                  </button>
                 </div>
                 <div className="flex items-center ">
                   <p className="mr-2 text-lg text-white">Change password</p>

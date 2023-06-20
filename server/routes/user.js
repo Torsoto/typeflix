@@ -177,6 +177,38 @@ app.get("/getFollowing", async (req, res) => {
   }
 });
 
+app.get("/getFollowers", async (req, res) => {
+  const { username } = req.query;
+
+  try {
+    const usersCollectionRef = collection(db, "users");
+    const usersSnapshot = await getDocs(usersCollectionRef);
+    const followers = usersSnapshot.docs
+      .filter((doc) => doc.data().following.includes(username))
+      .map((doc) => doc.id);
+
+    res.status(200).send(followers);
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+});
+
+app.get("/getFollowersCount", async (req, res) => {
+  const { username } = req.query;
+
+  try {
+    const usersCollectionRef = collection(db, "users");
+    const usersSnapshot = await getDocs(usersCollectionRef);
+    const followers = usersSnapshot.docs.filter((doc) =>
+      doc.data().following.includes(username)
+    );
+
+    res.status(200).send({ count: followers.length });
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+});
+
 app.post("/edit", async (req, res) => {
   const { token, username, email, password } = req.body;
 
