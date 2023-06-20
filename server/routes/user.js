@@ -124,6 +124,16 @@ app.post("/follow", async (req, res) => {
       } else {
         userData.following.push(toFollowUsername);
         await updateDoc(userDoc, { following: userData.following });
+
+        // Add the username to the toFollowUsername's followers array
+        const toFollowUserDoc = doc(db, "users", toFollowUsername);
+        const toFollowUserSnapshot = await getDoc(toFollowUserDoc);
+        const toFollowUserData = toFollowUserSnapshot.data();
+        toFollowUserData.followers.push(username);
+        await updateDoc(toFollowUserDoc, {
+          followers: toFollowUserData.followers,
+        });
+
         res.status(200).send({ message: "Following added successfully" });
       }
     }
@@ -151,11 +161,57 @@ app.post("/unfollow", async (req, res) => {
           (friend) => friend !== toUnfollowUsername
         );
         await updateDoc(userDoc, { following: updatedFollowing });
+
+        // Remove the username from the toUnfollowUsername's followers array
+        const toUnfollowUserDoc = doc(db, "users", toUnfollowUsername);
+        const toUnfollowUserSnapshot = await getDoc(toUnfollowUserDoc);
+        const toUnfollowUserData = toUnfollowUserSnapshot.data();
+        const updatedFollowers = toUnfollowUserData.followers.filter(
+          (follower) => follower !== username
+        );
+        await updateDoc(toUnfollowUserDoc, { followers: updatedFollowers });
+
         res.status(200).send({ message: "Friend removed successfully" });
       }
     }
   } catch (error) {
     res.status(500).send({ error: error.message });
+  }
+});
+
+app.get("/getFollowers", async (req, res) => {
+  const { username } = req.query;
+
+  try {
+    const userDocRef = doc(db, "users", username);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      res.status(404).send({ error: "User does not exist" });
+    } else {
+      const userData = userDoc.data();
+      res.status(200).send(userData.followers);
+    }
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+});
+
+app.get("/getFollowersCount", async (req, res) => {
+  const { username } = req.query;
+
+  try {
+    const userDocRef = doc(db, "users", username);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      res.status(404).send({ error: "User does not exist" });
+    } else {
+      const userData = userDoc.data();
+      res.status(200).send({ count: userData.followers.length });
+    }
+  } catch (e) {
+    res.status(500).send({ error: e.message });
   }
 });
 
@@ -172,38 +228,6 @@ app.get("/getFollowing", async (req, res) => {
       const userData = userDoc.data();
       res.status(200).send(userData.following);
     }
-  } catch (e) {
-    res.status(500).send({ error: e.message });
-  }
-});
-
-app.get("/getFollowers", async (req, res) => {
-  const { username } = req.query;
-
-  try {
-    const usersCollectionRef = collection(db, "users");
-    const usersSnapshot = await getDocs(usersCollectionRef);
-    const followers = usersSnapshot.docs
-      .filter((doc) => doc.data().following.includes(username))
-      .map((doc) => doc.id);
-
-    res.status(200).send(followers);
-  } catch (e) {
-    res.status(500).send({ error: e.message });
-  }
-});
-
-app.get("/getFollowersCount", async (req, res) => {
-  const { username } = req.query;
-
-  try {
-    const usersCollectionRef = collection(db, "users");
-    const usersSnapshot = await getDocs(usersCollectionRef);
-    const followers = usersSnapshot.docs.filter((doc) =>
-      doc.data().following.includes(username)
-    );
-
-    res.status(200).send({ count: followers.length });
   } catch (e) {
     res.status(500).send({ error: e.message });
   }
