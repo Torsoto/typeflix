@@ -1,16 +1,18 @@
 import express from "express";
 import {
-    getAuth,
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  deleteUser,
 } from "firebase/auth";
 import {
-    getFirestore,
-    doc,
-    getDoc,
-    getDocs,
-    collection,
-    writeBatch,
+  getFirestore,
+  doc,
+  getDoc,
+  getDocs,
+  collection,
+  writeBatch,
+    updateDoc
 } from "firebase/firestore";
 import "../db/firebase.mjs";
 import jwt from "jsonwebtoken";
@@ -20,146 +22,294 @@ const auth = getAuth();
 const db = getFirestore();
 const app = express.Router();
 
-const usernameExists = async (username) => {
-    const userDoc = await getDocs(collection(db, "users"));
-    return userDoc.docs.some(doc => doc.data().username === username);
-};
-
-const getThemes = async () => {
-    const moviesSnapshot = await getDocs(collection(db, "movies"));
-    const themes = {};
-
-    for (const movieDoc of moviesSnapshot.docs) {
-        const movieName = movieDoc.id;
-        const levelsSnapshot = await getDocs(collection(db, "movies", movieName, "levels"));
-        const levels = {};
-
-        levelsSnapshot.docs.forEach((levelDoc, index) => {
-            levels[levelDoc.id] = index === 0;
-        });
-
-        themes[movieName] = { levels: levels };
-    }
-
-    return themes;
-};
-
-const getUserByEmail = async (email) => {
-    const userDoc = await getDocs(collection(db, "users"));
-    return userDoc.docs.find(doc => doc.data().email === email);
-};
-
 app.post("/signup", async (req, res) => {
-    try {
-        const { username, email, password } = req.body;
-        const lowercaseUsername = username.toLowerCase();
+  try {
+    const { username, email, password } = req.body;
+    const lowercaseUsername = username.toLowerCase();
 
-        if (await usernameExists(lowercaseUsername)) {
-            console.log("Username already exists");
-            return res.status(401).send({ error: "Username already exists" });
-        }
+    const userDoc = await getDocs(collection(db, "users"));
+    let usernameExists = false;
 
-        try {
-            const userRecord = await createUserWithEmailAndPassword(auth, email, password);
+    userDoc.forEach((doc) => {
+      if (doc.data().username === lowercaseUsername) {
+        usernameExists = true;
+      }
+    });
+
+    if (usernameExists) {
+      console.log("Username already exists");
+      res.status(401).send({ error: "Username already exists" });
+    } else {
+      try {
+        createUserWithEmailAndPassword(auth, email, password)
+          .then(async (userRecord) => {
             console.log("Successfully created new user:", userRecord.user.uid);
 
             const userDoc = doc(db, "users", lowercaseUsername);
             const emailToUsernameDoc = doc(db, "emailToUsername", email);
 
             const batch = writeBatch(db);
-            const themes = await getThemes();
+
+            // Retrieve the levels for each movie and add them to the themes object
+            const moviesRef = collection(db, "movies");
+            const moviesSnapshot = await getDocs(moviesRef);
+            const themes = {};
+
+            for (const movieDoc of moviesSnapshot.docs) {
+              const movieName = movieDoc.id;
+              const levelsRef = collection(db, "movies", movieName, "levels");
+              const levelsSnapshot = await getDocs(levelsRef);
+              const levels = {};
+
+              let firstLevel = true;
+              levelsSnapshot.forEach((levelDoc) => {
+                if (firstLevel) {
+                  levels[levelDoc.id] = true;
+                  firstLevel = false;
+                } else {
+                  levels[levelDoc.id] = false;
+                }
+              });
+
+              themes[movieName] = { levels: levels };
+            }
 
             batch.set(userDoc, {
-                username: lowercaseUsername,
-                email: email,
-                userid: userRecord.user.uid,
-                following: [],
-                followers: [],
-                avatar: `https://api.dicebear.com/6.x/adventurer-neutral/svg?seed=${lowercaseUsername}`,
-                bestwpm: 0,
-                avgwpm: 0,
-                gamesplayed: 0,
-                bosses: 0,
-                themescompleted: 0,
-                lastplayed: [],
-                themes: themes,
+              username: lowercaseUsername,
+              email: email,
+              userid: userRecord.user.uid,
+              following: [],
+              followers: [],
+              avatar: `https://api.dicebear.com/6.x/adventurer-neutral/svg?seed=${lowercaseUsername}`,
+              bestwpm: 0,
+              avgwpm: 0,
+              gamesplayed: 0,
+              bosses: 0,
+              themescompleted: 0,
+              lastplayed: [],
+              themes: themes,
             });
 
             batch.set(emailToUsernameDoc, {
-                username: lowercaseUsername,
+              username: lowercaseUsername,
             });
 
             console.log("User data stored in Firestore");
 
             const payload = {
-                uid: userRecord.user.uid,
-                username: lowercaseUsername,
-                email: email,
+              uid: userRecord.user.uid,
+              username: lowercaseUsername,
+              email: email,
             };
 
             const token = jwt.sign(payload, secretKey, {
-                expiresIn: "336h",
+              expiresIn: "336h",
             });
 
-            await batch.commit();
-            return res.status(200).send({ token: token, uid: userRecord.user.uid });
-        } catch (error) {
+            res.status(200).send({ token: token, uid: userRecord.user.uid });
+
+            return batch.commit();
+          })
+          .catch((error) => {
             console.log("Error creating new user:", error);
-            return res.status(500).send({ error: error.message });
-        }
-    } catch (e) {
-        return res.status(500).send({ error: e.message });
+            res.status(500).send({ error: error.message });
+          });
+      } catch (e) {
+        res.status(500).send({ error: e.message });
+      }
     }
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
 });
 
 app.post("/login", async (req, res) => {
-  const { identifier, password } = req.body;
-  const lowercaseIdentifier = identifier.toLowerCase();
+    const { identifier, password } = req.body;
+    const lowercaseIdentifier = identifier.toLowerCase();
 
-  let userDoc = await getUserByEmail(lowercaseIdentifier);
-  let email = userDoc ? userDoc.data().email : null;
+    // First, attempt to find the user by username.
+    const userDoc = await getDocs(collection(db, "users"));
+    let email;
 
-  if (!email) {
-    // If email is null, user not found by username, attempt to sign in with the identifier as email.
-    email = lowercaseIdentifier;
-  }
+    userDoc.forEach((doc) => {
+        if (doc.data().username === lowercaseIdentifier) {
+            email = doc.data().email;
+        }
+    });
 
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    console.log("User logged in successfully");
+    const completeUserParameters = async (user) => {
+        // List of user parameters that should exist.
+        const parameters = [
+            "username",
+            "email",
+            "userid",
+            "following",
+            "followers",
+            "avatar",
+            "bestwpm",
+            "avgwpm",
+            "gamesplayed",
+            "bosses",
+            "themescompleted",
+            "lastplayed",
+            "themes",
+        ];
 
-    let username = lowercaseIdentifier;
-    if (!userDoc) {
-      const docSnapshot = await getDoc(doc(db, "emailToUsername", lowercaseIdentifier));
-      if (docSnapshot.exists()) {
-        username = docSnapshot.data().username;
-      }
-    }
+        const userDoc = doc(db, "users", lowercaseIdentifier);
 
-    const payload = {
-      uid: userCredential.user.uid,
-      username: username,
-      email: email,
+        const userData = (await getDoc(userDoc)).data() || {};
+        const missingParameters = parameters.filter((param) => !(param in userData));
+
+        if (missingParameters.length > 0) {
+            // If there are any missing parameters, create them with default values.
+            const updates = {};
+            for (const param of missingParameters) {
+                switch (param) {
+                    case "following":
+                    case "followers":
+                    case "lastplayed":
+                        updates[param] = [];
+                        break;
+                    case "avatar":
+                        updates[param] = `https://api.dicebear.com/6.x/adventurer-neutral/svg?seed=${lowercaseIdentifier}`;
+                        break;
+                    case "username":
+                        updates[param] = lowercaseIdentifier;
+                        break;
+                    case "email":
+                        updates[param] = email;
+                        break;
+                    case "userid":
+                        updates[param] = user.uid;
+                        break;
+                    default:
+                        updates[param] = 0;
+                }
+            }
+
+            await updateDoc(userDoc, updates);
+        }
+
+        // Check if all movies exist in the user's data.
+        const moviesRef = collection(db, "movies");
+        const moviesSnapshot = await getDocs(moviesRef);
+
+        for (const movieDoc of moviesSnapshot.docs) {
+            const movieName = movieDoc.id;
+            if (!userData.themes || !(movieName in userData.themes)) {
+                // If the movie doesn't exist in the user's data, add it.
+                const levelsRef = collection(db, "movies", movieName, "levels");
+                const levelsSnapshot = await getDocs(levelsRef);
+                const levels = {};
+
+                let firstLevel = true;
+                levelsSnapshot.forEach((levelDoc) => {
+                    if (firstLevel) {
+                        levels[levelDoc.id] = true;
+                        firstLevel = false;
+                    } else {
+                        levels[levelDoc.id] = false;
+                    }
+                });
+
+                const updates = {
+                    [`themes.${movieName}`]: { levels: levels },
+                };
+
+                await updateDoc(userDoc, updates);
+            }
+        }
     };
 
-    const token = jwt.sign(payload, secretKey, { expiresIn: "336h" });
-    res.status(200).send({ token: token, username: username });
-  } catch (error) {
-    console.error("Error:", error.message);
-    res.status(400).send({ error: error.message });
-  }
+
+    const signInUser = (email, password, identifier) => {
+        signInWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                console.log("User logged in successfully");
+
+                completeUserParameters(userCredential.user).catch((error) => {
+                    console.error("Error completing user parameters:", error);
+                    res.status(500).send({ error: error.message });
+                });
+
+                const payload = {
+                    uid: userCredential.user.uid,
+                    username: identifier,
+                    email: email,
+                };
+
+                const token = jwt.sign(payload, secretKey, { expiresIn: "336h" });
+
+                res
+                    .status(200)
+                    .send({ token: token, username: userCredential.user.uid });
+            })
+            .catch((error) => {
+                console.error("Error:", error.message);
+                console.error(email, password);
+                res.status(400).send({ error: error.message });
+            });
+    };
+
+    if (email) {
+        // User found by username, attempt to sign in with their email.
+        signInUser(email, password, lowercaseIdentifier);
+    } else {
+        // User not found by username, attempt to sign in with the identifier as email.
+        signInWithEmailAndPassword(auth, lowercaseIdentifier, password)
+            .then((userCredential) => {
+                console.log("User logged in successfully");
+
+                // Get the username corresponding to this email.
+                getDoc(doc(db, "emailToUsername", lowercaseIdentifier))
+                    .then((docSnapshot) => {
+                        if (docSnapshot.exists()) {
+                            const username = docSnapshot.data().username;
+
+                            completeUserParameters(userCredential.user).catch((error) => {
+                                console.error("Error completing user parameters:", error);
+                                res.status(500).send({ error: error.message });
+                            });
+
+                            const payload = {
+                                uid: userCredential.user.uid,
+                                username: username,
+                                email: lowercaseIdentifier,
+                            };
+
+                            const token = jwt.sign(payload, secretKey, { expiresIn: "336h" });
+
+                            res.status(200).send({ token: token, username: username });
+                        } else {
+                            // Handle the case where no username was found for this email.
+                            // This should ideally never happen if your signup code is working correctly.
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error getting username from email:", error);
+                        res.status(500).send({ error: error.message });
+                    });
+            })
+            .catch((error) => {
+                console.error("Error:", error.message);
+                console.error(lowercaseIdentifier, password);
+                res.status(400).send({ error: error.message });
+            });
+    }
 });
+
 
 app.post("/validate", async (req, res) => {
   const token = req.body.token;
-  if (!token) {
-    return res.status(400).send({ valid: false, error: "No token provided" });
-  }
-  try {
-    const decoded = jwt.verify(token, secretKey);
-    res.status(200).send({ valid: true, username: decoded.username });
-  } catch (e) {
-    res.status(401).send({ valid: false, error: e.message });
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, secretKey);
+      res.status(200).send({ valid: true, username: decoded.username });
+    } catch (e) {
+      res.status(401).send({ valid: false, error: e.message });
+    }
+  } else {
+    res.status(400).send({ valid: false, error: "No token provided" });
   }
 });
 
