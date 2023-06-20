@@ -6,8 +6,8 @@ function Training() {
 
     return (
         <div className="my-auto">
+            <Navbar />
             <div className="m-auto max-w-7xl">
-                <Navbar />
                 <TrainingGame />
             </div>
         </div>

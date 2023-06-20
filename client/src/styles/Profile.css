@@ -27,7 +27,7 @@
 
 .h3-s {
   color: #bfbfbf;
-  font-size: 10px;
+  font-size: 15px;
 }
 
 .following-container {
@@ -89,5 +89,7 @@
 
 .followAccount:hover {
   color: white;
-  font-size: 10.5px;
+  font-size: 16px;
+  transition: ease-in-out;
+  transition-duration: 100;
 }

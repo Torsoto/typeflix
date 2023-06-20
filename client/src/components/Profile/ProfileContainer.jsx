@@ -144,13 +144,13 @@ export const ProfileContainer = (username) => {
   }, [following]);
 
   return (
-    <div className="flex main-container justify-center">
+    <div className="flex justify-center main-container">
       <div>
-        <h1 className="h1-s font-medium">{customUserData.username}</h1>
+        <h1 className="font-medium h1-s">{customUserData.username}</h1>
         <div className="flex">
           <div className="min-w-[550px] min-h-[400px] p-8 rounded-lg profil-box-bg">
             <div className="flex">
-              <div className="text-center flex justify-around flex-col">
+              <div className="flex flex-col justify-around text-center">
                 <img
                   src={avatarUrl ? userIcon : plainProfileImage}
                   alt="Avatar"
@@ -166,7 +166,7 @@ export const ProfileContainer = (username) => {
                 </div>
                 {showFollowers && (
                   <div className="popup ">
-                    <div className="popup-content rounded-lg">
+                    <div className="rounded-lg popup-content">
                       <span className="close" onClick={handleCloseFollowers}>
                         &times;
                       </span>
@@ -180,11 +180,10 @@ export const ProfileContainer = (username) => {
                 )}
                 {!isSameProfile && (
                   <button
-                    className={`button-s px-2 py-1 font-semibold ${
-                      isFollowing
-                        ? "bg-white text-black"
-                        : "bg-black text-white"
-                    } rounded-full`}
+                    className={`button-s px-2 py-1 font-semibold ${isFollowing
+                      ? "bg-white text-black"
+                      : "bg-black text-white"
+                      } rounded-full`}
                     onClick={isFollowing ? handleUnfollow : handleFollow}
                   >
                     {isFollowing ? "Unfollow" : "Follow"}
@@ -230,7 +229,7 @@ export const ProfileContainer = (username) => {
       </div>
       {validFollowing.length > 0 && (
         <div className="following-container">
-          <h1 className="h1-s font-medium">Following</h1>
+          <h1 className="font-medium h1-s">Following</h1>
           <div className="following">
             {validFollowing.map((followingUser) => {
               const followingAvatar = followingAvatars.find(

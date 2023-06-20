@@ -3,7 +3,8 @@ import "../styles/App.css";
 import Navbar from "../components/UI/Navbar.jsx";
 import LevelSelection from "../components/Game/LevelSelection.jsx";
 import AuthContext from "../components/context/AuthContext.jsx";
-import {useContext} from "react";
+import { useContext } from "react";
+import { Footer } from "../components/UI/Footer";
 
 function Home() {
     const { gradientColor } = useContext(AuthContext);
@@ -19,13 +20,14 @@ function Home() {
 
 
     return (
-      <div className="my-auto" style={style}>
-          <div className="m-auto max-w-7xl">
-              <Navbar />
-              <LevelSelection />
-          </div>
-      </div>
-  );
+        <div className="my-auto" style={style}>
+            <Navbar />
+            <div className="m-auto max-w-7xl">
+                <LevelSelection />
+            </div>
+            {/*<Footer />*/}
+        </div>
+    );
 }
 
 export default Home;

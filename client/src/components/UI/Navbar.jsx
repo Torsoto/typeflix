@@ -14,8 +14,8 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="flex items-center justify-between p-6 bg-transparent">
-      <div className="navbar__logo">
+    <nav className="flex items-center justify-between h-16 p-6 bg-transparent shadow-md shadow-black">
+      <div className="ml-5 transition-all duration-100 ease-in-out navbar__logo hover:scale-105">
         <a href="/">
           <img src={logo} alt="Logo" />
         </a>
@@ -23,7 +23,7 @@ const Navbar = () => {
       <div className="flex gap-6">
         <a href="/" className="navbar__link">
           <span className="font-medium text-white transition-colors hover:text-gray-400">
-            Theme
+            Themes
           </span>
         </a>
         <a href="/training" className="navbar__link">
@@ -42,7 +42,7 @@ const Navbar = () => {
           <img
             src={avatarUrl ? avatarUrl : userIcon}
             alt="User Icon"
-            className="w-8 h-8 bg-white rounded-full cursor-pointer"
+            className="w-10 h-10 mr-5 transition-all duration-100 ease-in-out bg-white rounded-full cursor-pointer hover:scale-110"
             onClick={toggleDropdown}
           />
         </div>

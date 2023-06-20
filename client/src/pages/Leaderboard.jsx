@@ -49,45 +49,45 @@ function Leaderboard() {
 
     return (
         <div className="main-bg">
+            <Navbar />
             <div className="m-auto max-w-7xl">
-                <Navbar />
-                <div className="flex justify-center items-center">
+                <div className="flex items-center justify-center">
                     {isLoading ? (
-                        <div className="mt-8 flex justify-center items-center">
+                        <div className="flex items-center justify-center mt-8">
                             <CircularProgress />
                         </div>
                     ) : (
-                        <div className="flex flex-col w-full px-4 py-2 mt-8 max-w-md">
+                        <div className="flex flex-col w-full max-w-md px-4 py-2 mt-8">
                             <div className="overflow-hidden rounded-lg shadow">
                                 <table className="min-w-full divide-y divide-gray-200">
                                     <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase tracking-wider">
-                                            Username
-                                        </th>
-                                        <th className="px-6 py-3 text-xs font-medium text-right text-gray-500 uppercase tracking-wider">
-                                            WPM
-                                        </th>
-                                    </tr>
+                                        <tr>
+                                            <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                                Username
+                                            </th>
+                                            <th className="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase">
+                                                WPM
+                                            </th>
+                                        </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
-                                    {Object.entries(leaderboardData).map(([username, wpm], i) => (
-                                        <tr key={username} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                            <td className="px-6 py-4 text-sm text-gray-900 flex items-center">
-                                                <img
-                                                    src={leaderboardAvatars[username]}
-                                                    alt="Avatar"
-                                                    className="rounded-full w-8 h-8 bg-white"
-                                                />
-                                                <div className="ml-2">
-                                                    <Link to={`/${username}`}>
-                                                        {username}
-                                                    </Link>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-gray-500 text-right">{wpm}</td>
-                                        </tr>
-                                    ))}
+                                        {Object.entries(leaderboardData).map(([username, wpm], i) => (
+                                            <tr key={username} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                                <td className="flex items-center px-6 py-4 text-sm text-gray-900">
+                                                    <img
+                                                        src={leaderboardAvatars[username]}
+                                                        alt="Avatar"
+                                                        className="w-8 h-8 bg-white rounded-full"
+                                                    />
+                                                    <div className="ml-2">
+                                                        <Link to={`/${username}`}>
+                                                            {username}
+                                                        </Link>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-right text-gray-500">{wpm}</td>
+                                            </tr>
+                                        ))}
                                     </tbody>
                                 </table>
                             </div>

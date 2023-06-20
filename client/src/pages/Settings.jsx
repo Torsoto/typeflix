@@ -68,27 +68,27 @@ function Settings() {
         email: userData.email,
       }),
     })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Failed to delete account');
-          }
-          return response.json();
-        })
-        .then(data => {
-          console.log(data);
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to delete account');
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log(data);
 
-          // Close modal
-          setModalIsOpen(false);
+        // Close modal
+        setModalIsOpen(false);
 
-          // Delete user data from local storage
-          localStorage.removeItem('userData');
-          localStorage.removeItem('jwt');
-          console.log("here")
-          logout();
-        })
-        .catch(error => {
-          console.error('Error deleting account:', error);
-        });
+        // Delete user data from local storage
+        localStorage.removeItem('userData');
+        localStorage.removeItem('jwt');
+        console.log("here")
+        logout();
+      })
+      .catch(error => {
+        console.error('Error deleting account:', error);
+      });
   };
 
   const handleCancelDelete = () => {
@@ -111,8 +111,8 @@ function Settings() {
   return (
     <>
       <div className="main-bg">
+        <Navbar />
         <div className="h-[90%] m-auto max-w-7xl">
-          <Navbar />
           <div className="container mx-auto mt-24">
             <div className="max-w-[650px] max-h-[400px] flex flex-col p-8 mx-auto rounded-lg bg-neutral-700 md:flex-row">
               <div className="flex flex-col items-start mb-4 md:mb-0 md:w-1/2">
@@ -140,8 +140,8 @@ function Settings() {
                     <h2 className="text-lg font-medium text-center">Are you sure you want to delete your account?</h2>
                     <div className="flex mt-4 place-content-center ">
                       <button
-                          className="px-4 py-2 mr-2 font-medium text-white bg-red-500 rounded-lg hover:bg-red-600"
-                          onClick={handleConfirmDelete}
+                        className="px-4 py-2 mr-2 font-medium text-white bg-red-500 rounded-lg hover:bg-red-600"
+                        onClick={handleConfirmDelete}
                       >
                         Yes
                       </button>

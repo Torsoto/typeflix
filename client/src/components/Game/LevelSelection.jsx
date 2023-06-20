@@ -108,11 +108,11 @@ const LevelSelection = () => {
         className={`flex flex-col items-center m-2 ${fadeOut ? "fade-out" : "fade-in"
           }`}
       >
-        <div
-          className="min-w-[376px] min-h-[224px] bg-cover bg-center rounded-3xl border-4 border-white cursor-pointer"
+        <main
+          className="min-w-[376px] transition-all duration-100 ease-in-out hover:scale-105 min-h-[224px] bg-cover bg-center rounded-3xl border-4 border-white cursor-pointer"
           style={{ backgroundImage: `url('${movie.poster}')` }}
           onClick={() => handleMovieClick(movie.title, movie.poster)}
-        ></div>
+        ></main>
         <p className="mt-4 text-xl font-medium text-center text-white">
           {movie.title}
         </p>
@@ -157,7 +157,7 @@ const LevelSelection = () => {
             }`}
         >
           <div
-            className={`min-w-[376px] min-h-[224px] rounded-3xl cursor-pointer relative ${isOpened ? '' : 'opacity-50'}`}
+            className={`min-w-[376px] transition-all duration-100 ease-in-out hover:scale-105 min-h-[224px] rounded-3xl cursor-pointer relative ${isOpened ? '' : 'opacity-50'}`}
             style={{ position: "relative", overflow: "hidden" }}
             onClick={isOpened ? handleLevelSelection : null}
           >
