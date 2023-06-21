@@ -112,11 +112,11 @@ const LevelSelection = () => {
         className={`flex flex-col items-center m-2 ${fadeOut ? "fade-out" : "fade-in"
           }`}
       >
-        <main
+        <div
           className="min-w-[376px] transition-all duration-100 ease-in-out hover:scale-105 min-h-[224px] bg-cover bg-center rounded-3xl border-4 border-white cursor-pointer"
           style={{ backgroundImage: `url('${movie.poster}')` }}
           onClick={() => handleMovieClick(movie.title, movie.poster)}
-        ></main>
+        ></div>
         <p className="mt-4 text-xl font-medium text-center text-white">
           {movie.title}
         </p>

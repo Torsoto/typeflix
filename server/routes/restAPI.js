@@ -4,7 +4,7 @@ import https from "https";
 
 const app = express.Router();
 
-app.get("/weather/vienna", (req, res) => {
+app.get("/weather/vienna", async (req, res) => {
     const options = {
         hostname: "weather.visualcrossing.com",
         path: "/VisualCrossingWebServices/rest/services/timeline/Vienna?unitGroup=metric&key=UKYSD9QUBK9XXZVU3JVK9VTFG&contentType=json",
@@ -36,7 +36,7 @@ app.get("/weather/vienna", (req, res) => {
     request.end();
 });
 
-app.get("/time/vienna", (req, res) => {
+app.get("/time/vienna", async (req, res) => {
     const options = {
         hostname: "worldtimeapi.org",
         path: "/api/timezone/Europe/Vienna",

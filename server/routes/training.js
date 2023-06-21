@@ -4,7 +4,7 @@ import https from "https";
 
 const app = express.Router();
 
-app.get("/training", (req, res) => {
+app.get("/training", async (req, res) => {
     const options = {
         hostname: "random-word-api.herokuapp.com",
         path: "/word?number=200",
