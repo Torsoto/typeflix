@@ -21,104 +21,101 @@ const db = getFirestore();
 const app = express.Router();
 
 app.post("/signup", async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
-    const lowercaseUsername = username.toLowerCase();
+    try {
+        const { username, email, password } = req.body;
+        const lowercaseUsername = username.toLowerCase();
 
-    const userDoc = await getDocs(collection(db, "users"));
-    let usernameExists = false;
+        const userDoc = await getDocs(collection(db, "users"));
+        let usernameExists = false;
 
-    userDoc.forEach((doc) => {
-      if (doc.data().username === lowercaseUsername) {
-        usernameExists = true;
-      }
-    });
-
-    if (usernameExists) {
-      console.log("Username already exists");
-      res.status(401).send({ error: "Username already exists" });
-    } else {
-      try {
-        createUserWithEmailAndPassword(auth, email, password)
-          .then(async (userRecord) => {
-            console.log("Successfully created new user:", userRecord.user.uid);
-
-            const userDoc = doc(db, "users", lowercaseUsername);
-            const emailToUsernameDoc = doc(db, "emailToUsername", email);
-
-            const batch = writeBatch(db);
-
-            // Retrieve the levels for each movie and add them to the themes object
-            const moviesRef = collection(db, "movies");
-            const moviesSnapshot = await getDocs(moviesRef);
-            const themes = {};
-
-            for (const movieDoc of moviesSnapshot.docs) {
-              const movieName = movieDoc.id;
-              const levelsRef = collection(db, "movies", movieName, "levels");
-              const levelsSnapshot = await getDocs(levelsRef);
-              const levels = {};
-
-              let firstLevel = true;
-              levelsSnapshot.forEach((levelDoc) => {
-                if (firstLevel) {
-                  levels[levelDoc.id] = true;
-                  firstLevel = false;
-                } else {
-                  levels[levelDoc.id] = false;
-                }
-              });
-
-              themes[movieName] = { levels: levels };
+        userDoc.forEach((doc) => {
+            if (doc.data().username === lowercaseUsername) {
+                usernameExists = true;
             }
+        });
 
-            batch.set(userDoc, {
-              username: lowercaseUsername,
-              email: email,
-              userid: userRecord.user.uid,
-              following: [],
-              followers: [],
-              avatar: `https://api.dicebear.com/6.x/adventurer-neutral/svg?seed=${lowercaseUsername}`,
-              bestwpm: 0,
-              avgwpm: 0,
-              gamesplayed: 0,
-              bosses: 0,
-              themescompleted: 0,
-              lastplayed: [],
-              themes: themes,
-            });
+        if (usernameExists) {
+            console.log("Username already exists");
+            res.status(401).send({ error: "Username already exists" });
+        } else {
+            try {
+                createUserWithEmailAndPassword(auth, email, password)
+                    .then(async (userRecord) => {
+                        console.log("Successfully created new user:", userRecord.user.uid);
 
-            batch.set(emailToUsernameDoc, {
-              username: lowercaseUsername,
-            });
+                        const userDoc = doc(db, "users", lowercaseUsername);
+                        const emailToUsernameDoc = doc(db, "emailToUsername", email);
 
-            console.log("User data stored in Firestore");
+                        const batch = writeBatch(db);
 
-            const payload = {
-              uid: userRecord.user.uid,
-              username: lowercaseUsername,
-              email: email,
-            };
+                        // Retrieve the levels for each movie and add them to the user's document
+                        const moviesRef = collection(db, "movies");
+                        const moviesSnapshot = await getDocs(moviesRef);
 
-            const token = jwt.sign(payload, secretKey, {
-              expiresIn: "336h",
-            });
+                        for (const movieDoc of moviesSnapshot.docs) {
+                            const movieName = movieDoc.id;
+                            const levelsRef = collection(db, "movies", movieName, "levels");
+                            const levelsSnapshot = await getDocs(levelsRef);
+                            const movieCollection = collection(db, "users", lowercaseUsername, movieName);
+                            let firstLevel = true;
+                            levelsSnapshot.forEach((levelDoc, index) => {
+                                const levelDocRef = doc(movieCollection, levelDoc.id);
+                                if (firstLevel) {
+                                    batch.set(levelDocRef, { completed: true });
+                                    firstLevel = false;
+                                } else {
+                                    console.log(index)
+                                    batch.set(levelDocRef, { completed: false });
+                                }
+                            });
+                        }
 
-            res.status(200).send({ token: token, uid: userRecord.user.uid });
+                        batch.set(userDoc, {
+                            username: lowercaseUsername,
+                            email: email,
+                            userid: userRecord.user.uid,
+                            following: [],
+                            followers: [],
+                            avatar: `https://api.dicebear.com/6.x/adventurer-neutral/svg?seed=${lowercaseUsername}`,
+                            bestwpm: 0,
+                            avgwpm: 0,
+                            gamesplayed: 0,
+                            bosses: 0,
+                            themescompleted: 0,
+                            lastplayed: [],
+                        });
 
-            return batch.commit();
-          })
-          .catch((error) => {
-            console.log("Error creating new user:", error);
-            res.status(500).send({ error: error.message });
-          });
-      } catch (e) {
+                        batch.set(emailToUsernameDoc, {
+                            username: lowercaseUsername,
+                        });
+
+                        console.log("User data stored in Firestore");
+
+                        const payload = {
+                            uid: userRecord.user.uid,
+                            username: lowercaseUsername,
+                            email: email,
+                        };
+
+                        const token = jwt.sign(payload, secretKey, {
+                            expiresIn: "336h",
+                        });
+
+                        res.status(200).send({ token: token, uid: userRecord.user.uid });
+
+                        return batch.commit();
+                    })
+                    .catch((error) => {
+                        console.log("Error creating new user:", error);
+                        res.status(500).send({ error: error.message });
+                    });
+            } catch (e) {
+                res.status(500).send({ error: e.message });
+            }
+        }
+    } catch (e) {
         res.status(500).send({ error: e.message });
-      }
     }
-  } catch (e) {
-    res.status(500).send({ error: e.message });
-  }
 });
 
 app.post("/login", async (req, res) => {
