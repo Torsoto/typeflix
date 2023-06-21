@@ -13,6 +13,8 @@ function Settings() {
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [secondModalIsOpen, setSecondModalIsOpen] = useState(false);
+  const [password, setPassword] = useState("");
   const { userId, userData, avatarUrl, setAvatarUrl, logout } = useContext(AuthContext);
 
   Modal.setAppElement('#root');
@@ -59,7 +61,7 @@ function Settings() {
       },
       body: JSON.stringify({
         token: localStorage.getItem('jwt'),
-        password: "123123",
+        password: password,
         username: userData.username,
         uid: userData.uid,
         email: userData.email,
@@ -86,6 +88,14 @@ function Settings() {
       .catch(error => {
         console.error('Error deleting account:', error);
       });
+  };
+
+  const handleOpenSecondModal = () => {
+    setSecondModalIsOpen(true)
+  }
+
+  const handleCloseSecondModal = () => {
+    setSecondModalIsOpen(false);
   };
 
   const handleCancelDelete = () => {
@@ -138,15 +148,15 @@ function Settings() {
                     <div className="flex mt-4 place-content-center ">
                       <button
                         className="px-4 py-2 mr-2 font-medium text-white bg-red-500 rounded-lg hover:bg-red-600"
-                        onClick={handleConfirmDelete}
+                        onClick={handleOpenSecondModal}
                       >
-                        Yes
+                        Confirm
                       </button>
                       <button
                         className="px-4 py-2 font-medium text-white bg-gray-500 rounded-lg hover:bg-gray-600"
                         onClick={handleCancelDelete}
                       >
-                        No
+                        Cancel
                       </button>
                     </div>
                   </div>
@@ -192,6 +202,34 @@ function Settings() {
           </div>
         </div>
       </div>
+      <Modal
+        isOpen={secondModalIsOpen}
+        onRequestClose={handleCloseSecondModal}
+        className="flex items-center justify-center w-full h-full bg-gray-800 bg-opacity-80"
+      >
+        <div className="p-4 bg-white rounded-lg w-96">
+          <h2 className="text-lg font-medium text-center">Enter your password to confirm account deletion:</h2>
+          <input
+            type="password"
+            className="w-full px-4 py-2 mt-4 border rounded-lg"
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <div className="flex mt-4 place-content-center ">
+            <button
+              className="px-4 py-2 mr-2 font-medium text-white bg-red-500 rounded-lg hover:bg-red-600"
+              onClick={handleConfirmDelete}
+            >
+              Confirm
+            </button>
+            <button
+              className="px-4 py-2 font-medium text-white bg-gray-500 rounded-lg hover:bg-gray-600"
+              onClick={handleCloseSecondModal}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </Modal>
     </>
   );
 }
