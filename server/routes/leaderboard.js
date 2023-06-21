@@ -33,13 +33,13 @@ app.post("/updateLeaderboard", async (req, res) => {
         }
 
         // update avgwpm
-        if (userDocData.totalTests > 0) {
-            userDocData.totalWpm = userDocData.totalWpm + wpm;
-            userDocData.totalTests += 1;
-            userDocData.avgwpm = userDocData.totalWpm / userDocData.totalTests;
+        if (userDocData.gamesplayed > 0) {
+            userDocData.cumulativeWpm = userDocData.cumulativeWpm + wpm;
+            userDocData.gamesplayed += 1;
+            userDocData.avgwpm = userDocData.cumulativeWpm / userDocData.gamesplayed;
         } else {
-            userDocData.totalWpm = wpm;
-            userDocData.totalTests = 1;
+            userDocData.cumulativeWpm = wpm;
+            userDocData.gamesplayed = 1;
             userDocData.avgwpm = wpm;
         }
 
