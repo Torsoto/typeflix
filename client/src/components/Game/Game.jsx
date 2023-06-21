@@ -62,14 +62,14 @@ const Game = () => {
   }, [isFinished, hasFailed, timeLeft]);
 
 
-  const updateLastActivity = async (username, movie, wpm) => {
+  const updateLastActivity = async (username, movie, level, wpm) => {
     try {
       const response = await fetch('http://localhost:3000/setLastActivity', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, movie, wpm }),
+        body: JSON.stringify({ username, movie, level,  wpm}),
       });
 
       if (response.ok) {
@@ -123,7 +123,7 @@ const Game = () => {
           setWpm(wpm);
           updateNextLevel(userData.username, title);
           updateBestWpm(userData.username, wpm)
-          updateLastActivity(userData.username, title, wpm)
+          updateLastActivity(userData.username, title, selectedLevelIndex, wpm)
         }
         return;
       }
@@ -144,7 +144,7 @@ const Game = () => {
           setWpm(wpm);
           updateNextLevel(userData.username, title);
           updateBestWpm(userData.username, wpm)
-          updateLastActivity(userData.username, title, wpm)
+          updateLastActivity(userData.username, title, selectedLevelIndex, wpm)
         }
         if (nextLetterIndex === text.length && incorrectLetters.length > 0) {
           setHasFailed(true);

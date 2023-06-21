@@ -13,7 +13,7 @@ const app = express.Router();
 
 app.post("/setLastActivity", async (req, res) => {
     try {
-        const { username, movie, wpm } = req.body;
+        const { username, movie, level, wpm } = req.body;
 
         if (!username || typeof username !== 'string') {
             res.status(400).send({ error: "Invalid or missing username" });
@@ -31,8 +31,12 @@ app.post("/setLastActivity", async (req, res) => {
 
         let userDocData = userDocSnap.data();
         let lastActivity = userDocData.lastActivity || [];
+
         // Add new activity to lastActivity array
-        lastActivity.push({ movie, wpm });
+        lastActivity.unshift({ movie, level, wpm }); // unshift will add the new activity at the start
+
+        // Keep only the first two activities
+        lastActivity = lastActivity.slice(0, 3);
 
         userDocData.lastActivity = lastActivity;
 
@@ -44,27 +48,6 @@ app.post("/setLastActivity", async (req, res) => {
             .send({ message: "User's last activity updated successfully." });
     } catch (e) {
         console.log("Error updating user's last activity:", e);
-        res.status(500).send({ error: e.message });
-    }
-});
-
-app.get("/getLastActivity/:username", async (req, res) => {
-    try {
-        const { username } = req.params;
-
-        const userDocRef = doc(db, "users", username);
-        const userDocSnap = await getDoc(userDocRef);
-
-        if (!userDocSnap.exists()) {
-            res.status(404).send({ error: "User not found" });
-            return;
-        }
-
-        let userDocData = userDocSnap.data();
-
-        res.status(200).send(userDocData.lastActivity || []);
-    } catch (e) {
-        console.log("Error getting last activity:", e);
         res.status(500).send({ error: e.message });
     }
 });

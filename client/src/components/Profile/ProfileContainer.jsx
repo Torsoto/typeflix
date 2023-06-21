@@ -17,19 +17,6 @@ export const ProfileContainer = (username) => {
   const [followers, setFollowers] = useState([]);
   const [followersCount, setFollowersCount] = useState(0);
 
-  //check if the following-user still exists
-  useEffect(() => {
-    Promise.all(
-      following.map((followingUser) =>
-        fetch(`http://localhost:3000/checkUserExists?username=${followingUser}`)
-          .then((response) => response.json())
-          .then((data) => data.exists && followingUser)
-      )
-    ).then((data) => {
-      setValidFollowing(data.filter((item) => item));
-    });
-  }, [following]);
-
   // Initializes component state based on the provided username and the currently logged-in user.
   useEffect(() => {
     if (userData.username === username.username) {
@@ -60,6 +47,29 @@ export const ProfileContainer = (username) => {
   useEffect(() => {
     setUserIcon(customUserData.avatar);
   }, [customUserData]);
+
+  // Fetches the number of followers for the specified user and updates the 'followersCount' state.
+  useEffect(() => {
+    fetch(
+        `http://localhost:3000/getFollowersCount?username=${username.username}`
+    )
+        .then((response) => response.json())
+        .then((data) => setFollowersCount(data.count))
+        .catch((e) => console.error(e));
+  }, [username]);
+
+  // Fetches the avatars of all users that the specified user is following and updates the 'followingAvatars' state.
+  useEffect(() => {
+    Promise.all(
+        following.map((followingUser) =>
+            fetch(`http://localhost:3000/getAvatar?username=${followingUser}`)
+                .then((response) => response.text())
+                .then((data) => ({ following: followingUser, avatar: data }))
+        )
+    ).then((data) => {
+      setFollowingAvatars(data);
+    });
+  }, [following]);
 
   // Sends a request to the server to follow the specified user and updates the component state accordingly.
   const handleFollow = async () => {
@@ -118,30 +128,6 @@ export const ProfileContainer = (username) => {
   const handleCloseFollowers = () => {
     setShowFollowers(false);
   };
-
-  // Fetches the number of followers for the specified user and updates the 'followersCount' state.
-  useEffect(() => {
-    fetch(
-      `http://localhost:3000/getFollowersCount?username=${username.username}`
-    )
-      .then((response) => response.json())
-      .then((data) => setFollowersCount(data.count))
-      .catch((e) => console.error(e));
-  }, [username]);
-
-  // Fetches the avatars of all users that the specified user is following and updates the 'followingAvatars' state.
-  useEffect(() => {
-    Promise.all(
-      following.map((followingUser) =>
-        fetch(`http://localhost:3000/getAvatar?username=${followingUser}`)
-          .then((response) => response.text())
-          .then((data) => ({ following: followingUser, avatar: data }))
-      )
-    ).then((data) => {
-      setFollowingAvatars(data);
-      console.log(data);
-    });
-  }, [following]);
 
   return (
     <div className="flex justify-center main-container">
@@ -221,9 +207,20 @@ export const ProfileContainer = (username) => {
                 </div>
               </div>
             </div>
-            <div>
-              <h2 className="h2-s">Last Played:</h2>
-            </div>
+            {customUserData.lastActivity && (
+                <div>
+                  <h2 className="text-xl h2-s pb-3">Last Played:</h2>
+                  {customUserData.lastActivity.map((activity, index) => (
+                      <div className="flex text-[#bfbfbf] pb-1" key={index}>
+                        <p>{activity.movie}</p>
+                        <p className="mx-2"> - </p>
+                        <p> Level {activity.level}</p>
+                        <p className="mx-2"> - </p>
+                        <p> {activity.wpm} WPM</p>
+                      </div>
+                  ))}
+                </div>
+            )}
           </div>
         </div>
       </div>
