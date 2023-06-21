@@ -47,12 +47,9 @@ function Settings() {
 
   const handleUpdatePassword = async () => { };
 
-  const handleUpdateEmail = async () => { };
-
   const handleToggleAvatarOptions = () => {
     setShowAvatarOptions(!showAvatarOptions);
   };
-
 
   const handleConfirmDelete = () => {
     fetch('http://localhost:3000/deleteAccount', {
