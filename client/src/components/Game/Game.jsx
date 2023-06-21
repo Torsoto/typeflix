@@ -6,6 +6,7 @@ import FailMessage from "../UI/FailMessage";
 import WinMessage from "../UI/WinMessage"
 
 const Game = () => {
+  const { setImg, setText, setTime, userData, title, selectedLevelIndex, updateBestWpm, setSelectedLevelIndex, text, Img, time } = useContext(AuthContext);
   const [isBlurred, setIsBlurred] = useState(true);
   const [isMessageVisible, setIsMessageVisible] = useState(true);
   const [currentLetterIndex, setCurrentLetterIndex] = useState(0);
@@ -17,7 +18,6 @@ const Game = () => {
   const [timesCalculated, setTimesCalculated] = useState(0);
   const [timesUpdatedCursor, setTimesUpdatedCursor] = useState(0);
   const pRef = useRef();
-  const { text, Img, time } = useContext(AuthContext);
   const [hp, setHp] = useState(text.length);
   const [isFinished, setIsFinished] = useState(false);
   const [timeLeft, setTimeLeft] = useState(time);
@@ -26,8 +26,6 @@ const Game = () => {
   const [wpm, setWpm] = useState(0);
   const [hasFailed, setHasFailed] = useState(false);
   const [chatBubble, setChatBubble] = useState({ visible: false, text: `` });
-
-  const { userData, title, selectedLevelIndex, updateBestWpm, setSelectedLevelIndex, SelectedLevelIndex } = useContext(AuthContext);
 
   useEffect(() => {
     if (timeLeft > 0 && hasStartedTyping && !isFinished && !hasFailed) {
@@ -60,7 +58,6 @@ const Game = () => {
 
     return () => clearInterval(intervalId);
   }, [isFinished, hasFailed, timeLeft]);
-
 
   const updateLastActivity = async (username, movie, level, wpm) => {
     try {
@@ -121,9 +118,11 @@ const Game = () => {
           setTimeTaken(timeTaken);
           const wpm = Math.round((text.split(" ").length / timeTaken) * 60);
           setWpm(wpm);
-          updateNextLevel(userData.username, title);
-          updateBestWpm(userData.username, wpm)
-          updateLastActivity(userData.username, title, selectedLevelIndex, wpm)
+          updateNextLevel(userData.username, title).then(() => {
+            updateLastActivity(userData.username, title, selectedLevelIndex, wpm).then(() => {
+              updateBestWpm(userData.username, wpm)
+            });
+          });
         }
         return;
       }
@@ -142,9 +141,11 @@ const Game = () => {
           setTimeTaken(timeTaken);
           const wpm = Math.round((text.split(" ").length / timeTaken) * 60);
           setWpm(wpm);
-          updateNextLevel(userData.username, title);
-          updateBestWpm(userData.username, wpm)
-          updateLastActivity(userData.username, title, selectedLevelIndex, wpm)
+          updateNextLevel(userData.username, title).then(() => {
+            updateLastActivity(userData.username, title, selectedLevelIndex, wpm).then(() => {
+              updateBestWpm(userData.username, wpm)
+            });
+          });
         }
         if (nextLetterIndex === text.length && incorrectLetters.length > 0) {
           setHasFailed(true);
@@ -215,13 +216,44 @@ const Game = () => {
     );
   };
 
-  const handleNextLevel = () => {
-
+  const handleNextLevel = async () => {
+    try {
+      const response = await fetch(
+          `http://localhost:3000/movies/${title}/levels/${selectedLevelIndex+1}`
+      );
+      await response.json().then((data) => {
+        handleRetry();
+        setText(data.text);
+        setImg(data.img);
+        setTime(data.time);
+        setHp(data.text.length);
+        setTimeLeft(data.time);
+        setSelectedLevelIndex(selectedLevelIndex + 1);
+      });
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   const handleRetry = () => {
-
-  }
+    setIsBlurred(true);
+    setIsMessageVisible(true);
+    setCurrentLetterIndex(0);
+    setCorrectLetters([]);
+    setIncorrectLetters([]);
+    setHasStartedTyping(false);
+    setNextCursorY(0);
+    sethasCalculated(false);
+    setTimesCalculated(0);
+    setTimesUpdatedCursor(0);
+    setHp(text.length);
+    setIsFinished(false);
+    setTimeLeft(time);
+    setTimeTaken(0);
+    setWpm(0);
+    setHasFailed(false);
+    setChatBubble({ visible: false, text: `` });
+  };
 
 
   return (

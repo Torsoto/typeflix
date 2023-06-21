@@ -41,11 +41,15 @@ app.post("/setLastActivity", async (req, res) => {
         userDocData.lastActivity = lastActivity;
 
         // Save the updated user data back to Firestore
-        await setDoc(userDocRef, userDocData);
-
-        res
-            .status(200)
-            .send({ message: "User's last activity updated successfully." });
+        await setDoc(userDocRef, userDocData)
+            .then(() => {
+                console.log("User's last activity updated successfully.");
+                res.status(200).send({ message: "User's last activity updated successfully." });
+            })
+            .catch((e) => {
+                console.log("Error updating user's last activity:", e);
+                res.status(500).send({ error: e.message });
+            });
     } catch (e) {
         console.log("Error updating user's last activity:", e);
         res.status(500).send({ error: e.message });

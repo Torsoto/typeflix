@@ -151,7 +151,7 @@ app.post("/login", async (req, res) => {
                     const userMovieCollectionSnapshot = await getDocs(userMovieCollectionRef);
 
                     // If the user movie collection does not exist or is empty, create it.
-                    if (!userMovieCollectionSnapshot.exists || userMovieCollectionSnapshot.empty) {
+                    if (userMovieCollectionSnapshot.empty) {
                         const levelsRef = collection(db, "movies", movieName, "levels");
                         const levelsSnapshot = await getDocs(levelsRef);
                         let firstLevel = true;
@@ -210,7 +210,7 @@ app.post("/login", async (req, res) => {
                                 const userMovieCollectionSnapshot = await getDocs(userMovieCollectionRef);
 
                                 // If the user movie collection does not exist or is empty, create it.
-                                if (!userMovieCollectionSnapshot.exists || userMovieCollectionSnapshot.empty) {
+                                if (userMovieCollectionSnapshot.empty) {
                                     const levelsRef = collection(db, "movies", movieName, "levels");
                                     const levelsSnapshot = await getDocs(levelsRef);
                                     let firstLevel = true;

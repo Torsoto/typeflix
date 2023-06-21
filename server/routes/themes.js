@@ -150,7 +150,6 @@ app.patch("/unlockNextLevel", async (req, res) => {
         const lowercaseUsername = username.toLowerCase();
         const level = String("lvl" +  (selectedLevelIndex + 1));
 
-        console.log(level)
         // Reference to the level document
         const levelDocRef = doc(db, "users", lowercaseUsername, movie, level);
 
@@ -160,7 +159,6 @@ app.patch("/unlockNextLevel", async (req, res) => {
         });
 
         console.log(`Successfully updated level: ${level} for movie: ${movie} and user: ${username}`);
-
         res.status(200).send({ message: `Successfully updated level: ${level} for movie: ${movie} and user: ${username}` });
 
     } catch (e) {
