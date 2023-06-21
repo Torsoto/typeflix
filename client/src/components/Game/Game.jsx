@@ -62,6 +62,27 @@ const Game = () => {
   }, [isFinished, hasFailed, timeLeft]);
 
 
+  const updateLastActivity = async (username, movie, wpm) => {
+    try {
+      const response = await fetch('http://localhost:3000/setLastActivity', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, movie, wpm }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data.message);
+      } else {
+        throw new Error('Failed to update leaderboard');
+      }
+    } catch (error) {
+      console.error('Error updating leaderboard:', error);
+    }
+  };
+
   const handleClickForBlur = useCallback(() => {
     setIsBlurred(false);
     setIsMessageVisible(false);
@@ -102,6 +123,7 @@ const Game = () => {
           setWpm(wpm);
           updateNextLevel(userData.username, title);
           updateBestWpm(userData.username, wpm)
+          updateLastActivity(userData.username, title, wpm)
         }
         return;
       }
@@ -122,6 +144,7 @@ const Game = () => {
           setWpm(wpm);
           updateNextLevel(userData.username, title);
           updateBestWpm(userData.username, wpm)
+          updateLastActivity(userData.username, title, wpm)
         }
         if (nextLetterIndex === text.length && incorrectLetters.length > 0) {
           setHasFailed(true);

@@ -219,6 +219,7 @@ const LevelSelection = () => {
             <div className="flex items-center">
               {showBackButton && (
                 <button
+                    disabled={fadeOut}
                   style={{
                     opacity: fadeOut ? "0" : "1",
                     transition: "opacity 0.5s",
