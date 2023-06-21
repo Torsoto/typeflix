@@ -180,11 +180,17 @@ const Game = () => {
     e.preventDefault();
   }, [setHasStartedTyping, text, currentLetterIndex, hasCalculated, timesCalculated, timesUpdatedCursor, incorrectLetters, timeLeft, time]);
 
+
   const updateNextLevel = async (username, movie) => {
     try {
-      const res = await fetch(`http://localhost:3000/setNextLevel/${username}/${movie}/${selectedLevelIndex}`, {
-        method: 'PATCH'
+      const res = await fetch(`http://localhost:3000/unlockNextLevel/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, movie, selectedLevelIndex}),
       });
+
       const data = await res.json();
     } catch (e) {
       console.error(e);

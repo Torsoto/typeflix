@@ -5,7 +5,7 @@ import {
     getDoc,
     updateDoc,
     collection,
-    getDocs,
+    getDocs, setDoc,
 } from "firebase/firestore";
 import "../db/firebase.mjs";
 
@@ -114,22 +114,14 @@ app.get("/levelsOpened/:username/:movie", async (req, res) => {
         const { username, movie } = req.params;
         const lowercaseUsername = username.toLowerCase();
 
-        // Retrieve user data
-        const userDocRef = doc(db, "users", lowercaseUsername);
-        const userDocSnap = await getDoc(userDocRef);
+        // Reference to the movie collection
+        const movieCollectionRef = collection(db, "users", lowercaseUsername, movie);
 
-        // If user does not exist
-        if (!userDocSnap.exists()) {
-            console.log("User does not exist in /levelsOpened");
-            return res
-                .status(404)
-                .send({ error: "User does not exist /levelsOpened" });
-        }
-
-        const userData = userDocSnap.data();
+        // Get all level documents in the movie collection
+        const levelDocsSnapshot = await getDocs(movieCollectionRef);
 
         // If the user hasn't started on the specified movie yet
-        if (!(movie in userData.themes)) {
+        if (levelDocsSnapshot.empty) {
             console.log("User has not started on this movie");
             return res
                 .status(404)
@@ -138,12 +130,11 @@ app.get("/levelsOpened/:username/:movie", async (req, res) => {
 
         // Count the number of opened levels
         let openedLevels = 0;
-        const levels = userData.themes[movie].levels;
-        for (let level in levels) {
-            if (levels[level] === true) {
+        levelDocsSnapshot.forEach(levelDoc => {
+            if (levelDoc.data().completed === true) {
                 openedLevels++;
             }
-        }
+        });
 
         res.status(200).send({ openedLevels: openedLevels });
     } catch (e) {
@@ -152,54 +143,31 @@ app.get("/levelsOpened/:username/:movie", async (req, res) => {
     }
 });
 
-app.patch("/setNextLevel/:username/:movie/:currentLevel", async (req, res) => {
+
+app.patch("/unlockNextLevel", async (req, res) => {
     try {
-        const { username, movie, currentLevel } = req.params;
+        const { username, movie, selectedLevelIndex } = req.body;
         const lowercaseUsername = username.toLowerCase();
+        const level = String("lvl" +  (selectedLevelIndex + 1));
 
-        // Retrieve user data
-        const userDocRef = doc(db, "users", lowercaseUsername);
-        const userDocSnap = await getDoc(userDocRef);
+        console.log(level)
+        // Reference to the level document
+        const levelDocRef = doc(db, "users", lowercaseUsername, movie, level);
 
-        // If user does not exist
-        if (!userDocSnap.exists()) {
-            console.log("User does not exist in /setNextLevel");
-            return res
-                .status(404)
-                .send({ error: "User does not exist /setNextLevel" });
-        }
-
-        const userData = userDocSnap.data();
-
-        // If the user hasn't started on the specified movie yet
-        if (!(movie in userData.themes)) {
-            console.log("User has not started on this movie");
-            return res
-                .status(404)
-                .send({ error: "User has not started on this movie" });
-        }
-
-        // Get the next level based on the current level
-        const nextLevel = "lvl" + (Number(currentLevel.replace("lvl", "")) + 1);
-        const levels = userData.themes[movie].levels;
-
-        // If nextLevel is already opened or there's no such level
-        if (levels[nextLevel] === true || !levels.hasOwnProperty(nextLevel)) {
-            console.log(`Level ${nextLevel} is already opened or does not exist`);
-            return res.status(200).send({
-                message: `Level ${nextLevel} is already opened or does not exist`,
-            });
-        }
-
-        // Open the next level
-        await updateDoc(userDocRef, {
-            [`themes.${movie}.levels.${nextLevel}`]: true,
+        // Update the 'completed' field to true
+        await updateDoc(levelDocRef, {
+            completed: true
         });
 
-        res.status(200).send({ message: `Level ${nextLevel} has been opened` });
+        console.log(`Successfully updated level: ${level} for movie: ${movie} and user: ${username}`);
+
+        res.status(200).send({ message: `Successfully updated level: ${level} for movie: ${movie} and user: ${username}` });
+
     } catch (e) {
-        console.log("Error setting next level:", e);
+        console.log("Error updating level:", e);
         res.status(500).send({ error: e.message });
     }
 });
+
+
 export default app;
