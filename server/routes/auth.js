@@ -83,6 +83,7 @@ app.post("/signup", async (req, res) => {
                             bosses: 0,
                             themescompleted: 0,
                             lastplayed: [],
+                            lastActivity: [],
                         });
 
                         batch.set(emailToUsernameDoc, {
