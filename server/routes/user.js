@@ -234,7 +234,7 @@ app.get("/getFollowing", async (req, res) => {
 });
 
 app.post("/edit", async (req, res) => {
-  const { token, username, email, password } = req.body;
+  const { token, username, password } = req.body;
 
   try {
     const decoded = jwt.verify(token, secretKey);
@@ -244,11 +244,6 @@ app.post("/edit", async (req, res) => {
     await updateProfile(auth.currentUser, {
       displayName: username,
     });
-
-    // Update user email
-    if (email) {
-      await updateEmail(auth.currentUser, email);
-    }
 
     // Update user password
     if (password) {
