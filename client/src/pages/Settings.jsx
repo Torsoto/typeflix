@@ -129,11 +129,13 @@ function Settings() {
   };
 
   const handleOpenSecondModal = () => {
+    setModalIsOpen(false)
     setSecondModalIsOpen(true)
   }
 
   const handleCloseSecondModal = () => {
     setSecondModalIsOpen(false);
+    setModalIsOpen(false);
   };
 
   const handleCancelDelete = () => {
