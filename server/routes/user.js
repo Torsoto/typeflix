@@ -310,6 +310,17 @@ app.delete("/deleteAccount", async (req, res) => {
     batch.delete(userDoc);
     batch.delete(emailToUsernameDoc);
 
+    // Delete all movie collections
+    const moviesCollectionRef = collection(db, "movies");
+    const moviesSnapshot = await getDocs(moviesCollectionRef);
+    for (const movieDoc of moviesSnapshot.docs) {
+      const movieCollectionRef = collection(db, "users", username, movieDoc.id);
+      const movieCollectionSnapshot = await getDocs(movieCollectionRef);
+      movieCollectionSnapshot.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+    }
+
     if (leaderboardDocSnap.exists()) {
       // Leaderboard exists
       let leaderboardData = leaderboardDocSnap.data().leaderboard;
