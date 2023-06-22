@@ -20,6 +20,66 @@ const auth = getAuth();
 const db = getFirestore();
 const app = express.Router();
 
+
+const generateToken = (user, username, email) => {
+    const payload = {
+        uid: user.uid,
+        username: username,
+        email: email,
+    };
+
+    return jwt.sign(payload, secretKey, { expiresIn: "336h" });
+};
+
+
+const createThemesCollection = async (username, batch) => {
+    // Here we start to check and add missing movie collections
+    const moviesRef = collection(db, "movies");
+    const moviesSnapshot = await getDocs(moviesRef);
+
+    for (const movieDoc of moviesSnapshot.docs) {
+        const movieName = movieDoc.id;
+        const userMovieCollectionRef = collection(db, "users", username, movieName);
+        const userMovieCollectionSnapshot = await getDocs(userMovieCollectionRef);
+
+        // If the user movie collection does not exist or is empty, create it.
+        if (userMovieCollectionSnapshot.empty) {
+            const levelsRef = collection(db, "movies", movieName, "levels");
+            const levelsSnapshot = await getDocs(levelsRef);
+            let firstLevel = true;
+            levelsSnapshot.forEach((levelDoc) => {
+                const levelDocRef = doc(userMovieCollectionRef, levelDoc.id);
+                if (firstLevel) {
+                    batch.set(levelDocRef, { completed: true });
+                    firstLevel = false;
+                } else {
+                    batch.set(levelDocRef, { completed: false });
+                }
+            });
+        }
+    }
+
+    await batch.commit();
+};
+
+const handleLogin = async (email, username, password, res) => {
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        console.log("User logged in successfully");
+
+        const batch = writeBatch(db);
+        await createThemesCollection(username, batch);
+        console.log("Themes collections recreated successfully");
+
+        const token = generateToken(userCredential.user, username, email);
+        res.status(200).send({ token: token, username: userCredential.user.uid });
+    } catch (error) {
+        console.error("Error:", error.message);
+        console.error(email, password);
+        res.status(400).send({ error: error.message });
+    }
+};
+
 app.post("/signup", async (req, res) => {
     try {
         const { username, email, password } = req.body;
@@ -48,28 +108,6 @@ app.post("/signup", async (req, res) => {
 
                         const batch = writeBatch(db);
 
-                        // Retrieve the levels for each movie and add them to the user's document
-                        const moviesRef = collection(db, "movies");
-                        const moviesSnapshot = await getDocs(moviesRef);
-
-                        for (const movieDoc of moviesSnapshot.docs) {
-                            const movieName = movieDoc.id;
-                            const levelsRef = collection(db, "movies", movieName, "levels");
-                            const levelsSnapshot = await getDocs(levelsRef);
-                            const movieCollection = collection(db, "users", lowercaseUsername, movieName);
-                            let firstLevel = true;
-                            levelsSnapshot.forEach((levelDoc, index) => {
-                                const levelDocRef = doc(movieCollection, levelDoc.id);
-                                if (firstLevel) {
-                                    batch.set(levelDocRef, { completed: true });
-                                    firstLevel = false;
-                                } else {
-                                    console.log(index)
-                                    batch.set(levelDocRef, { completed: false });
-                                }
-                            });
-                        }
-
                         batch.set(userDoc, {
                             username: lowercaseUsername,
                             email: email,
@@ -90,21 +128,11 @@ app.post("/signup", async (req, res) => {
                             username: lowercaseUsername,
                         });
 
-                        console.log("User data stored in Firestore");
-
-                        const payload = {
-                            uid: userRecord.user.uid,
-                            username: lowercaseUsername,
-                            email: email,
-                        };
-
-                        const token = jwt.sign(payload, secretKey, {
-                            expiresIn: "336h",
+                        createThemesCollection(lowercaseUsername, batch).then(()=>{
+                            console.log("User data stored in Firestore");
+                            const token = generateToken(userRecord.user, lowercaseUsername, email);
+                            res.status(200).send({ token: token, uid: userRecord.user.uid });
                         });
-
-                        res.status(200).send({ token: token, uid: userRecord.user.uid });
-
-                        return batch.commit();
                     })
                     .catch((error) => {
                         console.log("Error creating new user:", error);
@@ -123,7 +151,6 @@ app.post("/login", async (req, res) => {
     const { identifier, password } = req.body;
     const lowercaseIdentifier = identifier.toLowerCase();
 
-    // First, attempt to find the user by username.
     const userDoc = await getDocs(collection(db, "users"));
     let email;
 
@@ -134,124 +161,20 @@ app.post("/login", async (req, res) => {
     });
 
     if (email) {
-        // User found by username, attempt to sign in with their email.
-        signInWithEmailAndPassword(auth, email, password)
-            .then(async (userCredential) => {
-                console.log("User logged in successfully");
-
-                // Here we start to check and add missing movie collections
-                const moviesRef = collection(db, "movies");
-                const moviesSnapshot = await getDocs(moviesRef);
-
-                const batch = writeBatch(db);
-
-                for (const movieDoc of moviesSnapshot.docs) {
-                    const movieName = movieDoc.id;
-                    const userMovieCollectionRef = collection(db, "users", lowercaseIdentifier, movieName);
-                    const userMovieCollectionSnapshot = await getDocs(userMovieCollectionRef);
-
-                    // If the user movie collection does not exist or is empty, create it.
-                    if (userMovieCollectionSnapshot.empty) {
-                        const levelsRef = collection(db, "movies", movieName, "levels");
-                        const levelsSnapshot = await getDocs(levelsRef);
-                        let firstLevel = true;
-                        levelsSnapshot.forEach((levelDoc) => {
-                            const levelDocRef = doc(userMovieCollectionRef, levelDoc.id);
-                            if (firstLevel) {
-                                batch.set(levelDocRef, { completed: true });
-                                firstLevel = false;
-                            } else {
-                                batch.set(levelDocRef, { completed: false });
-                            }
-                        });
-                    }
-                }
-
-                await batch.commit();
-
-                const payload = {
-                    uid: userCredential.user.uid,
-                    username: lowercaseIdentifier,
-                    email: email,
-                };
-
-                const token = jwt.sign(payload, secretKey, { expiresIn: "336h" });
-
-                res
-                    .status(200)
-                    .send({ token: token, username: userCredential.user.uid });
-            })
-            .catch((error) => {
-                console.error("Error:", error.message);
-                console.error(email, password);
-                res.status(400).send({ error: error.message });
-            });
+        // User found by username
+        await handleLogin(email, lowercaseIdentifier, password, res);
     } else {
-        // User not found by username, attempt to sign in with the identifier as email.
-        signInWithEmailAndPassword(auth, lowercaseIdentifier, password)
-            .then(async (userCredential) => {
-                console.log("User logged in successfully");
-
-                // Get the username corresponding to this email.
-                getDoc(doc(db, "emailToUsername", lowercaseIdentifier))
-                    .then(async (docSnapshot) => {
-                        if (docSnapshot.exists()) {
-                            const username = docSnapshot.data().username;
-
-                            // Here we start to check and add missing movie collections
-                            const moviesRef = collection(db, "movies");
-                            const moviesSnapshot = await getDocs(moviesRef);
-
-                            const batch = writeBatch(db);
-
-                            for (const movieDoc of moviesSnapshot.docs) {
-                                const movieName = movieDoc.id;
-                                const userMovieCollectionRef = collection(db, "users", username, movieName);
-                                const userMovieCollectionSnapshot = await getDocs(userMovieCollectionRef);
-
-                                // If the user movie collection does not exist or is empty, create it.
-                                if (userMovieCollectionSnapshot.empty) {
-                                    const levelsRef = collection(db, "movies", movieName, "levels");
-                                    const levelsSnapshot = await getDocs(levelsRef);
-                                    let firstLevel = true;
-                                    levelsSnapshot.forEach((levelDoc) => {
-                                        const levelDocRef = doc(userMovieCollectionRef, levelDoc.id);
-                                        if (firstLevel) {
-                                            batch.set(levelDocRef, { completed: true });
-                                            firstLevel = false;
-                                        } else {
-                                            batch.set(levelDocRef, { completed: false });
-                                        }
-                                    });
-                                }
-                            }
-
-                            await batch.commit();
-
-                            const payload = {
-                                uid: userCredential.user.uid,
-                                username: username,
-                                email: lowercaseIdentifier,
-                            };
-
-                            const token = jwt.sign(payload, secretKey, { expiresIn: "336h" });
-
-                            res.status(200).send({ token: token, username: username });
-                        } else {
-                            // Handle the case where no username was found for this email.
-                            // This should ideally never happen if your signup code is working correctly.
-                        }
-                    })
-                    .catch((error) => {
-                        console.error("Error getting username from email:", error);
-                        res.status(500).send({ error: error.message });
-                    });
-            })
-            .catch((error) => {
-                console.error("Error:", error.message);
-                console.error(lowercaseIdentifier, password);
-                res.status(400).send({ error: error.message });
-            });
+        // User not found by username, attempt to sign in with the identifier as email
+        try {
+            const docSnapshot = await getDoc(doc(db, "emailToUsername", lowercaseIdentifier));
+            if (docSnapshot.exists()) {
+                const username = docSnapshot.data().username;
+                await handleLogin(lowercaseIdentifier, username, password, res);
+            }
+        } catch (error) {
+            console.error("Error getting username from email:", error);
+            res.status(500).send({ error: error.message });
+        }
     }
 });
 
