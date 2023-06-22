@@ -17,7 +17,7 @@ const Navbar = () => {
     <nav className="flex items-center justify-between h-16 p-6 bg-transparent shadow-md shadow-black">
       <div className="ml-5 transition-all duration-100 ease-in-out navbar__logo hover:scale-105">
         <a href="/">
-          <img src={logo} alt="Logo" />
+          <img src={logo} title="Home-Screen" alt="Logo" />
         </a>
       </div>
       <div className="flex gap-6">

@@ -14,6 +14,7 @@ const FailMessage = ({ hasFailed, onRetry }) => {
                     <button
                         className="px-4 py-2 text-white transition-all duration-100 ease-in-out rounded-3xl hover:scale-110"
                         onClick={onRetry}
+                        title='Retry'
                     >
                         <TfiReload size={28} />
                     </button>
