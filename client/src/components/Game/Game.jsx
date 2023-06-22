@@ -4,6 +4,8 @@ import AuthContext from "../context/AuthContext.jsx";
 import "../../styles/App.css";
 import FailMessage from "../UI/FailMessage";
 import WinMessage from "../UI/WinMessage"
+import {CircularProgress} from "@material-ui/core";
+import {Link} from "react-router-dom";
 
 const Game = () => {
   const { setImg, setText, setTime, userData, title, selectedLevelIndex, updateBestWpm, setSelectedLevelIndex, text, Img, time } = useContext(AuthContext);
@@ -26,6 +28,9 @@ const Game = () => {
   const [wpm, setWpm] = useState(0);
   const [hasFailed, setHasFailed] = useState(false);
   const [chatBubble, setChatBubble] = useState({ visible: false, text: `` });
+  const [leaderboardData, setLeaderboardData] = useState(null);
+  const [leaderboardAvatars, setLeaderboardAvatars] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (timeLeft > 0 && hasStartedTyping && !isFinished && !hasFailed) {
@@ -59,6 +64,31 @@ const Game = () => {
     return () => clearInterval(intervalId);
   }, [isFinished, hasFailed, timeLeft]);
 
+  useEffect(() => {
+    console.log(leaderboardData)
+    const fetchLeaderboardAvatars = async () => {
+      const usernames = Object.keys(leaderboardData);
+      const avatarResponses = await Promise.all(
+          usernames.map(username =>
+              fetch(`http://localhost:3000/getAvatar?username=${username}`)
+                  .then(response => response.text())
+                  .then(avatar => ({ username, avatar }))
+          )
+      );
+
+      const avatars = {};
+      avatarResponses.forEach(response => {
+        avatars[response.username] = response.avatar;
+      });
+
+      setLeaderboardAvatars(avatars);
+    };
+
+    if (leaderboardData) {
+      fetchLeaderboardAvatars();
+    }
+  }, [leaderboardData]);
+
   const updateLastActivity = async (username, movie, level, wpm) => {
     try {
       const response = await fetch('http://localhost:3000/setLastActivity', {
@@ -73,12 +103,64 @@ const Game = () => {
         const data = await response.json();
         console.log(data.message);
       } else {
-        throw new Error('Failed to update leaderboard');
+        console.error('Failed to update leaderboard');
       }
     } catch (error) {
       console.error('Error updating leaderboard:', error);
     }
   };
+
+  const updateLevelLeaderboard = async (wpm) => {
+    try {
+      const response = await fetch('http://localhost:3000/updateThemeLevelLeaderboard', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username: userData.username, wpm, theme: title, levelIndex: selectedLevelIndex }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data.message);
+      } else {
+        console.error('Failed to update level specific leaderboard');
+      }
+    } catch (error) {
+      console.error('Error updating level specific leaderboard:', error);
+    }
+  };
+
+  const getLevelThemeLeaderboard = async () => {
+    setIsLoading(true);
+    try {
+      const url = `http://localhost:3000/getThemeLevelLeaderboard?theme=${title}&levelIndex=${selectedLevelIndex}`;
+      const response = await fetch(url);
+
+      console.log(title, selectedLevelIndex, url);
+
+      if (response.ok) {
+        const data = await response.json();
+        setIsLoading(false);
+        setLeaderboardData(data);
+      } else {
+        console.log('Failed to get level specific leaderboard');
+      }
+    } catch (error) {
+      console.log('Error getting level specific leaderboard:', error);
+    }
+  };
+
+  function handleWinRequests() {
+    updateNextLevel(userData.username, title).then(() => {
+      updateLastActivity(userData.username, title, selectedLevelIndex, wpm).then(() => {
+        updateLevelLeaderboard(wpm).then(() => {
+          updateBestWpm(userData.username, wpm)
+        });
+      });
+    });
+    getLevelThemeLeaderboard();
+  }
 
   const handleClickForBlur = useCallback(() => {
     setIsBlurred(false);
@@ -118,11 +200,7 @@ const Game = () => {
           setTimeTaken(timeTaken);
           const wpm = Math.round((text.split(" ").length / timeTaken) * 60);
           setWpm(wpm);
-          updateNextLevel(userData.username, title).then(() => {
-            updateLastActivity(userData.username, title, selectedLevelIndex, wpm).then(() => {
-              updateBestWpm(userData.username, wpm)
-            });
-          });
+          handleWinRequests();
         }
         return;
       }
@@ -141,11 +219,7 @@ const Game = () => {
           setTimeTaken(timeTaken);
           const wpm = Math.round((text.split(" ").length / timeTaken) * 60);
           setWpm(wpm);
-          updateNextLevel(userData.username, title).then(() => {
-            updateLastActivity(userData.username, title, selectedLevelIndex, wpm).then(() => {
-              updateBestWpm(userData.username, wpm)
-            });
-          });
+          handleWinRequests();
         }
         if (nextLetterIndex === text.length && incorrectLetters.length > 0) {
           setHasFailed(true);
@@ -180,7 +254,6 @@ const Game = () => {
 
     e.preventDefault();
   }, [setHasStartedTyping, text, currentLetterIndex, hasCalculated, timesCalculated, timesUpdatedCursor, incorrectLetters, timeLeft, time]);
-
 
   const updateNextLevel = async (username, movie) => {
     try {
@@ -229,6 +302,8 @@ const Game = () => {
         setHp(data.text.length);
         setTimeLeft(data.time);
         setSelectedLevelIndex(selectedLevelIndex + 1);
+        setLeaderboardData(null);
+        setLeaderboardAvatars({});
       });
     } catch (error) {
       console.error(error);
@@ -253,6 +328,8 @@ const Game = () => {
     setWpm(0);
     setHasFailed(false);
     setChatBubble({ visible: false, text: `` });
+    setLeaderboardData(null);
+    setLeaderboardAvatars({});
   };
 
 
@@ -273,6 +350,43 @@ const Game = () => {
       <HpBar hp={hp} />
       <WinMessage isFinished={isFinished} onRetry={handleRetry} timeTaken={timeTaken} wpm={wpm} onNextLevel={handleNextLevel} />
       <FailMessage hasFailed={hasFailed} onRetry={handleRetry} />
+      {leaderboardData &&(
+          <div className="flex flex-col w-full max-w-md px-4 py-2 mt-8">
+            <div className="overflow-hidden rounded-lg shadow">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                    Username
+                  </th>
+                  <th className="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase">
+                    WPM
+                  </th>
+                </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                {Object.entries(leaderboardData).map(([username, wpm], i) => (
+                    <tr key={username} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                      <td className="flex items-center px-6 py-4 text-sm text-gray-900">
+                        <img
+                            src={leaderboardAvatars[username]}
+                            alt="Avatar"
+                            className="w-8 h-8 bg-white rounded-full"
+                        />
+                        <div className="ml-2">
+                          <Link to={`/${username}`}>
+                            {username}
+                          </Link>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-right text-gray-500">{wpm}</td>
+                    </tr>
+                ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+      )}
       <div>
         <div className="flex gap-1 place-content-center">
           <p className={`text-2xl font-bold align-middle mb-4 ${timeLeft > 0 && !isBlurred && !isFinished && !hasFailed ? "opacity-100" : "invisible"}`}>
