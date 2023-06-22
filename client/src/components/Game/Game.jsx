@@ -151,15 +151,16 @@ const Game = () => {
     }
   };
 
-  function handleWinRequests() {
+  function handleWinRequests(wpm) {
+    console.log(wpm)
     updateNextLevel(userData.username, title).then(() => {
       updateLastActivity(userData.username, title, selectedLevelIndex, wpm).then(() => {
         updateLevelLeaderboard(wpm).then(() => {
           updateBestWpm(userData.username, wpm)
+          getLevelThemeLeaderboard();
         });
       });
     });
-    getLevelThemeLeaderboard();
   }
 
   const handleClickForBlur = useCallback(() => {
@@ -200,7 +201,7 @@ const Game = () => {
           setTimeTaken(timeTaken);
           const wpm = Math.round((text.split(" ").length / timeTaken) * 60);
           setWpm(wpm);
-          handleWinRequests();
+          handleWinRequests(wpm);
         }
         return;
       }
@@ -219,7 +220,7 @@ const Game = () => {
           setTimeTaken(timeTaken);
           const wpm = Math.round((text.split(" ").length / timeTaken) * 60);
           setWpm(wpm);
-          handleWinRequests();
+          handleWinRequests(wpm);
         }
         if (nextLetterIndex === text.length && incorrectLetters.length > 0) {
           setHasFailed(true);
