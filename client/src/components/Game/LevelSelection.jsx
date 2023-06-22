@@ -20,7 +20,7 @@ const LevelSelection = () => {
   const [gameOpacity, setGameOpacity] = useState(0);
   const [openedLevels, setOpenedLevels] = useState(0);
 
-  const { setText, setGradientColor, setImg, setTime, userData, title, setTitle, selectedLevelIndex, setSelectedLevelIndex } = useContext(AuthContext);
+  const { setText, setGradientColor, setImg, setTime, userData, title, setTitle, selectedLevelIndex, setSelectedLevelIndex, setTotalLevelsCount } = useContext(AuthContext);
 
   useEffect(() => {
     fetchMovieList().then((data) => {
@@ -66,6 +66,7 @@ const LevelSelection = () => {
           .fill()
           .map((_, i) => i + 1)
       );
+      setTotalLevelsCount(data.count);
       setGradientColor(data.color)
       setShowBackButton(true);
       setFadeOut(true);

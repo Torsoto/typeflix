@@ -6,9 +6,10 @@ import FailMessage from "../UI/FailMessage";
 import WinMessage from "../UI/WinMessage"
 import {CircularProgress} from "@material-ui/core";
 import {Link} from "react-router-dom";
+import LeaderboardTable from "../UI/LeaderboardTable.jsx";
 
 const Game = () => {
-  const { setImg, setText, setTime, userData, title, selectedLevelIndex, updateBestWpm, setSelectedLevelIndex, text, Img, time } = useContext(AuthContext);
+  const { setImg, setText, totalLevelsCount, setTime, userData, title, selectedLevelIndex, updateBestWpm, setSelectedLevelIndex, text, Img, time } = useContext(AuthContext);
   const [isBlurred, setIsBlurred] = useState(true);
   const [isMessageVisible, setIsMessageVisible] = useState(true);
   const [currentLetterIndex, setCurrentLetterIndex] = useState(0);
@@ -29,8 +30,7 @@ const Game = () => {
   const [hasFailed, setHasFailed] = useState(false);
   const [chatBubble, setChatBubble] = useState({ visible: false, text: `` });
   const [leaderboardData, setLeaderboardData] = useState(null);
-  const [leaderboardAvatars, setLeaderboardAvatars] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (timeLeft > 0 && hasStartedTyping && !isFinished && !hasFailed) {
@@ -64,31 +64,6 @@ const Game = () => {
     return () => clearInterval(intervalId);
   }, [isFinished, hasFailed, timeLeft]);
 
-  useEffect(() => {
-    console.log(leaderboardData)
-    const fetchLeaderboardAvatars = async () => {
-      const usernames = Object.keys(leaderboardData);
-      const avatarResponses = await Promise.all(
-          usernames.map(username =>
-              fetch(`http://localhost:3000/getAvatar?username=${username}`)
-                  .then(response => response.text())
-                  .then(avatar => ({ username, avatar }))
-          )
-      );
-
-      const avatars = {};
-      avatarResponses.forEach(response => {
-        avatars[response.username] = response.avatar;
-      });
-
-      setLeaderboardAvatars(avatars);
-    };
-
-    if (leaderboardData) {
-      fetchLeaderboardAvatars();
-    }
-  }, [leaderboardData]);
-
   const updateLastActivity = async (username, movie, level, wpm) => {
     try {
       const response = await fetch('http://localhost:3000/setLastActivity', {
@@ -101,7 +76,6 @@ const Game = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data.message);
       } else {
         console.error('Failed to update leaderboard');
       }
@@ -122,7 +96,6 @@ const Game = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data.message);
       } else {
         console.error('Failed to update level specific leaderboard');
       }
@@ -132,7 +105,6 @@ const Game = () => {
   };
 
   const getLevelThemeLeaderboard = async () => {
-    setIsLoading(true);
     try {
       const url = `http://localhost:3000/getThemeLevelLeaderboard?theme=${title}&levelIndex=${selectedLevelIndex}`;
       const response = await fetch(url);
@@ -152,7 +124,7 @@ const Game = () => {
   };
 
   function handleWinRequests(wpm) {
-    console.log(wpm)
+    setIsLoading(true);
     updateNextLevel(userData.username, title).then(() => {
       updateLastActivity(userData.username, title, selectedLevelIndex, wpm).then(() => {
         updateLevelLeaderboard(wpm).then(() => {
@@ -257,18 +229,20 @@ const Game = () => {
   }, [setHasStartedTyping, text, currentLetterIndex, hasCalculated, timesCalculated, timesUpdatedCursor, incorrectLetters, timeLeft, time]);
 
   const updateNextLevel = async (username, movie) => {
-    try {
-      const res = await fetch(`http://localhost:3000/unlockNextLevel/`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, movie, selectedLevelIndex}),
-      });
+    if (selectedLevelIndex < totalLevelsCount) {
+      try {
+        const res = await fetch(`http://localhost:3000/unlockNextLevel/`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, movie, selectedLevelIndex}),
+        });
 
-      const data = await res.json();
-    } catch (e) {
-      console.error(e);
+        const data = await res.json();
+      } catch (e) {
+        console.error(e);
+      }
     }
   };
 
@@ -351,42 +325,12 @@ const Game = () => {
       <HpBar hp={hp} />
       <WinMessage isFinished={isFinished} onRetry={handleRetry} timeTaken={timeTaken} wpm={wpm} onNextLevel={handleNextLevel} />
       <FailMessage hasFailed={hasFailed} onRetry={handleRetry} />
-      {leaderboardData &&(
-          <div className="flex flex-col w-full max-w-md px-4 py-2 mt-8">
-            <div className="overflow-hidden rounded-lg shadow">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                    Username
-                  </th>
-                  <th className="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase">
-                    WPM
-                  </th>
-                </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                {Object.entries(leaderboardData).map(([username, wpm], i) => (
-                    <tr key={username} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="flex items-center px-6 py-4 text-sm text-gray-900">
-                        <img
-                            src={leaderboardAvatars[username]}
-                            alt="Avatar"
-                            className="w-8 h-8 bg-white rounded-full"
-                        />
-                        <div className="ml-2">
-                          <Link to={`/${username}`}>
-                            {username}
-                          </Link>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-right text-gray-500">{wpm}</td>
-                    </tr>
-                ))}
-                </tbody>
-              </table>
-            </div>
+      {isLoading ? (
+          <div className="flex items-center justify-center mt-8">
+            <CircularProgress style={{ color: 'white' }} />
           </div>
+      ) : (
+          leaderboardData && <LeaderboardTable leaderboardData={leaderboardData} />
       )}
       <div>
         <div className="flex gap-1 place-content-center">

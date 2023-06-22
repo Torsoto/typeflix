@@ -1,8 +1,11 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import { TfiReload } from "react-icons/tfi"
 import { IoMdArrowForward } from "react-icons/io"
+import AuthContext from "../context/AuthContext.jsx";
 
 const WinMessage = ({ isFinished, timeTaken, wpm, onNextLevel, onRetry }) => {
+    const { totalLevelsCount, selectedLevelIndex } = useContext(AuthContext);
+
     if (!isFinished) return null;
 
     return (
@@ -19,13 +22,15 @@ const WinMessage = ({ isFinished, timeTaken, wpm, onNextLevel, onRetry }) => {
                     >
                         <TfiReload size={28} />
                     </button>
-                    <button
-                        className="px-4 py-2 font-bold text-white transition-all duration-100 ease-in-out rounded hover:scale-125"
-                        onClick={onNextLevel}
-                        title='next Level'
-                    >
-                        <IoMdArrowForward size={38} />
-                    </button>
+                    {selectedLevelIndex < totalLevelsCount && (
+                        <button
+                            className="px-4 py-2 font-bold text-white transition-all duration-100 ease-in-out rounded hover:scale-125"
+                            onClick={onNextLevel}
+                            title='next Level'
+                        >
+                            <IoMdArrowForward size={38} />
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

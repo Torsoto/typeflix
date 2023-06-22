@@ -21,6 +21,7 @@ function App() {
     const [avatarUrl, setAvatarUrl] = useState("");
     const [title, setTitle] = useState(null);
     const [selectedLevelIndex, setSelectedLevelIndex] = useState(false);
+    const [totalLevelsCount, setTotalLevelsCount] = useState(false);
 
     useEffect(() => {
         const token = localStorage.getItem("jwt");
@@ -139,6 +140,8 @@ function App() {
                     setTitle,
                     selectedLevelIndex,
                     setSelectedLevelIndex,
+                    totalLevelsCount,
+                    setTotalLevelsCount,
                     updateBestWpm,
                     fetchData,
                     updateUserData,
