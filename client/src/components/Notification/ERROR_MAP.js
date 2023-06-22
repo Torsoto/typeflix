@@ -4,4 +4,5 @@ export const ERROR_MAP = {
     "Firebase: Password should be at least 6 characters (auth/weak-password).": "Password must be at least 6 characters long.",
     "Firebase: Error (auth/wrong-password).": "Wrong email or password.",
     "Firebase: Error (auth/user-not-found).": "Wrong email or password.",
+    "Firebase: Error (auth/invalid-email)." : "The entered email address is not valid.",
 };

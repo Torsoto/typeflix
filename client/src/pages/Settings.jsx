@@ -1,10 +1,12 @@
-import { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { BiEdit } from "react-icons/bi";
 import Navbar from "../components/UI/Navbar.jsx";
 import AuthContext from "../components/context/AuthContext.jsx";
 import "../styles/Settings.css";
 import { Avatars } from "../components/UI/Avatars.jsx";
 import Modal from "react-modal";
+import Notification from "../components/Notification/Notification.jsx";
+import { ERROR_MAP } from "../components/Notification/ERROR_MAP.js";
 
 function Settings() {
   const [error, setError] = useState("");
@@ -15,6 +17,10 @@ function Settings() {
   const [secondModalIsOpen, setSecondModalIsOpen] = useState(false);
   const [password, setPassword] = useState("");
   const { userId, userData, avatarUrl, setAvatarUrl, logout } = useContext(AuthContext);
+  const [notification, setNotification] = useState({
+    show: false,
+    message: "",
+  });
 
   Modal.setAppElement("#root");
 
@@ -124,6 +130,12 @@ function Settings() {
         logout();
       })
       .catch((error) => {
+        setNotification({
+          show: true,
+          message:
+              ERROR_MAP[error.message] ||
+              "Error deleting account. Please try again with a different password or try again later",
+        });
         console.error("Error deleting account:", error);
       });
   };
@@ -277,6 +289,11 @@ function Settings() {
           </div>
         </div>
       </Modal>
+      {notification.show && (
+          <Notification
+              message={notification.message}
+          />
+      )}
     </>
   );
 }
