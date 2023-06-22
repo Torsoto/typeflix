@@ -12,6 +12,11 @@ Welcome to Typeflix! This is a theme-based typewriting game that tests your typi
 2. Type the words that appear on the screen as quickly and accurately as possible.
 3. Your typing speed and accuracy will be displayed at the end of each level.
 
+## Installation
+1. Run ```npm install``` in each directory (3 times), namely in /, /client, and /server.
+2. Navigate back to the root directory /.
+3. Execute ```npm run dev```.
+
 Copyright (c) 2023 FH Campus Wien
 
 This project, Typeflix, is the property of FH Campus Wien and is protected by copyright laws. It is made available on GitHub for educational and reference purposes only. Any unauthorized use, reproduction, or distribution of this project is strictly prohibited.
