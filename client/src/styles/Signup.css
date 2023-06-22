@@ -1,14 +1,14 @@
-.email-input {
+.input {
     border-radius: 9999px;
     transition: box-shadow 0.2s ease-in-out;
     outline: none;
 }
 
-.email-input::selection {
+.input::selection {
     color: black;
 }
 
-.email-input-error {
+.input-error {
     outline: none;
     box-shadow: 0 0 0 2px rgb(250, 96, 96);  /* Replace this with your preferred color and width */
 }
