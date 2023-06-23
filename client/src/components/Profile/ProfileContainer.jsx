@@ -12,7 +12,6 @@ export const ProfileContainer = (username) => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [userIcon, setUserIcon] = useState("");
   const [followingAvatars, setFollowingAvatars] = useState([]);
-  const [validFollowing, setValidFollowing] = useState([]);
   const [showFollowers, setShowFollowers] = useState(false);
   const [followers, setFollowers] = useState([]);
   const [followersCount, setFollowersCount] = useState(0);
@@ -37,7 +36,15 @@ export const ProfileContainer = (username) => {
 
   // Fetches the list of users that the specified user is following and updates the 'following' state.
   useEffect(() => {
-    fetch("http://localhost:3000/getFollowing?username=" + username.username)
+    fetch(`http://localhost:3000/getFollowers?username=${username.username}`)
+      .then((response) => response.json())
+      .then((data) => setFollowers(data))
+      .catch((e) => console.error(e));
+  }, []);
+
+  // Fetches the list of users that are following the specified user and updates the 'followers' state.
+  useEffect(() => {
+    fetch(`http://localhost:3000/getFollowing?username=${username.username}`)
       .then((response) => response.json())
       .then((data) => setFollowing(data))
       .catch((e) => console.error(e));
@@ -51,21 +58,21 @@ export const ProfileContainer = (username) => {
   // Fetches the number of followers for the specified user and updates the 'followersCount' state.
   useEffect(() => {
     fetch(
-        `http://localhost:3000/getFollowersCount?username=${username.username}`
+      `http://localhost:3000/getFollowersCount?username=${username.username}`
     )
-        .then((response) => response.json())
-        .then((data) => setFollowersCount(data.count))
-        .catch((e) => console.error(e));
+      .then((response) => response.json())
+      .then((data) => setFollowersCount(data.count))
+      .catch((e) => console.error(e));
   }, [username]);
 
   // Fetches the avatars of all users that the specified user is following and updates the 'followingAvatars' state.
   useEffect(() => {
     Promise.all(
-        following.map((followingUser) =>
-            fetch(`http://localhost:3000/getAvatar?username=${followingUser}`)
-                .then((response) => response.text())
-                .then((data) => ({ following: followingUser, avatar: data }))
-        )
+      following.map((followingUser) =>
+        fetch(`http://localhost:3000/getAvatar?username=${followingUser}`)
+          .then((response) => response.text())
+          .then((data) => ({ following: followingUser, avatar: data }))
+      )
     ).then((data) => {
       setFollowingAvatars(data);
     });
@@ -151,14 +158,16 @@ export const ProfileContainer = (username) => {
                   </h3>
                 </div>
                 {showFollowers && (
-                  <div className="popup ">
+                  <div className="popup">
                     <div className="rounded-lg popup-content">
                       <span className="close" onClick={handleCloseFollowers}>
-                        &times;
+                        ×
                       </span>
                       <ul>
                         {followers.map((follower) => (
-                          <li key={follower}>{follower}</li>
+                          <li key={follower}>
+                            <a href={`/${follower}`}>{follower}</a>
+                          </li>
                         ))}
                       </ul>
                     </div>
@@ -166,10 +175,11 @@ export const ProfileContainer = (username) => {
                 )}
                 {!isSameProfile && (
                   <button
-                    className={`button-s px-2 py-1 font-semibold ${isFollowing
-                      ? "bg-white text-black"
-                      : "bg-black text-white"
-                      } rounded-full`}
+                    className={`button-s px-2 py-1 font-semibold ${
+                      isFollowing
+                        ? "bg-white text-black"
+                        : "bg-black text-white"
+                    } rounded-full`}
                     onClick={isFollowing ? handleUnfollow : handleFollow}
                   >
                     {isFollowing ? "Unfollow" : "Follow"}
@@ -208,27 +218,27 @@ export const ProfileContainer = (username) => {
               </div>
             </div>
             {customUserData.lastActivity && (
-                <div>
-                  <h2 className="text-xl h2-s pb-3">Last Played:</h2>
-                  {customUserData.lastActivity.map((activity, index) => (
-                      <div className="flex text-[#bfbfbf] pb-1" key={index}>
-                        <p>{activity.movie}</p>
-                        <p className="mx-2"> - </p>
-                        <p> Level {activity.level}</p>
-                        <p className="mx-2"> - </p>
-                        <p> {activity.wpm} WPM</p>
-                      </div>
-                  ))}
-                </div>
+              <div>
+                <h2 className="text-xl h2-s pb-3">Last Played:</h2>
+                {customUserData.lastActivity.map((activity, index) => (
+                  <div className="flex text-[#bfbfbf] pb-1" key={index}>
+                    <p>{activity.movie}</p>
+                    <p className="mx-2"> - </p>
+                    <p> Level {activity.level}</p>
+                    <p className="mx-2"> - </p>
+                    <p> {activity.wpm} WPM</p>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </div>
       </div>
-      {validFollowing.length > 0 && (
+      {following.length > 0 && (
         <div className="following-container">
           <h1 className="font-medium h1-s">Following</h1>
           <div className="following">
-            {validFollowing.map((followingUser) => {
+            {following.map((followingUser) => {
               const followingAvatar = followingAvatars.find(
                 (item) => item.following === followingUser
               )?.avatar;

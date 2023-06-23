@@ -297,6 +297,29 @@ app.delete("/deleteAccount", async (req, res) => {
       return;
     }
 
+    // Get the user's followers and following
+    const userDocRef = doc(db, "users", username);
+    const userDocSnap = await getDoc(userDocRef);
+    const { followers = [], following = [] } = userDocSnap.data();
+
+    // Update the followers' following field
+    for (const follower of followers) {
+      const followerDocRef = doc(db, "users", follower);
+      const followerDocSnap = await getDoc(followerDocRef);
+      const { following: followerFollowing = [] } = followerDocSnap.data();
+      const updatedFollowing = followerFollowing.filter((u) => u !== username);
+      await updateDoc(followerDocRef, { following: updatedFollowing });
+    }
+
+    // Update the following's followers field
+    for (const followed of following) {
+      const followedDocRef = doc(db, "users", followed);
+      const followedDocSnap = await getDoc(followedDocRef);
+      const { followers: followedFollowers = [] } = followedDocSnap.data();
+      const updatedFollowers = followedFollowers.filter((u) => u !== username);
+      await updateDoc(followedDocRef, { followers: updatedFollowers });
+    }
+
     await deleteUser(userCredential.user);
     console.log("User deleted successfully");
 
