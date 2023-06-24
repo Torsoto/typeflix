@@ -233,8 +233,9 @@ app.get("/getFollowing", async (req, res) => {
   }
 });
 
+
 app.post("/edit", async (req, res) => {
-  const { token, username, password } = req.body;
+  /*const { token, username, password } = req.body;
 
   try {
     const decoded = jwt.verify(token, secretKey);
@@ -245,12 +246,7 @@ app.post("/edit", async (req, res) => {
       displayName: username,
     });
 
-    // Update user password
-    if (password) {
-      await updatePassword(auth.currentUser, password);
-    }
-
-    // Update user document in Firestore
+    // Update user document in Firestor
     await setDoc(doc(db, "users", uid), {
       username: username.toLowerCase(),
       email: email || decoded.email,
@@ -261,7 +257,7 @@ app.post("/edit", async (req, res) => {
   } catch (error) {
     console.error("Error updating user data:", error);
     res.status(500).send({ error: error.message });
-  }
+  }*/
 });
 
 app.get("/checkUserExists", async (req, res) => {
