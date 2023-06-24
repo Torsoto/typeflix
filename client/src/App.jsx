@@ -27,12 +27,13 @@ function App() {
     useEffect(() => {
         const token = localStorage.getItem("jwt");
         if (token) {
+            let xmls='<token>'+token+'</token>';
             fetch("http://localhost:3000/validate", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
+                    "Content-Type": "application/xml",
                 },
-                body: JSON.stringify({ token }),
+                body: xmls,
             })
                 .then((response) => response.json())
                 .then((data) => {

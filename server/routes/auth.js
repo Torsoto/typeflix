@@ -19,6 +19,9 @@ import secretKey from "./secretKey.js";
 const auth = getAuth();
 const db = getFirestore();
 const app = express.Router();
+import xmlparser from 'express-xml-bodyparser'
+
+app.use(xmlparser());
 
 
 const generateToken = (user, username, email) => {
@@ -182,17 +185,17 @@ app.post("/login", async (req, res) => {
 });
 
 app.post("/validate", async (req, res) => {
-  const token = req.body.token;
-  if (token) {
-    try {
-      const decoded = jwt.verify(token, secretKey);
-      res.status(200).send({ valid: true, username: decoded.username });
-    } catch (e) {
-      res.status(401).send({ valid: false, error: e.message });
+    const token = req.body.token;
+    if (token) {
+        try {
+            const decoded = jwt.verify(token, secretKey);
+            res.status(200).send({ valid: true, username: decoded.username });
+        } catch (e) {
+            res.status(401).send({ valid: false, error: e.message });
+        }
+    } else {
+        res.status(400).send({ valid: false, error: "No token provided" });
     }
-  } else {
-    res.status(400).send({ valid: false, error: "No token provided" });
-  }
 });
 
 export default app;
