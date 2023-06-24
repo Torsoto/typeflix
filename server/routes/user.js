@@ -234,31 +234,51 @@ app.get("/getFollowing", async (req, res) => {
 });
 
 
-app.post("/edit", async (req, res) => {
-  /*const { token, username, password } = req.body;
-
+app.patch("/editUsername", async (req, res) => {
+  /* NOT WORKING ATM!!!!
   try {
-    const decoded = jwt.verify(token, secretKey);
-    const { uid } = decoded;
+    const { token, newUsername } = req.body;
+    const decodedToken = await verifyIdToken(auth, token);
+    const email = decodedToken.email;
+    const lowercaseNewUsername = newUsername.toLowerCase();
 
-    // Update user profile
-    await updateProfile(auth.currentUser, {
-      displayName: username,
+    const userDoc = await getDocs(collection(db, "users"));
+    let usernameExists = false;
+
+    userDoc.forEach((doc) => {
+      if (doc.data().username === lowercaseNewUsername) {
+        usernameExists = true;
+      }
     });
 
-    // Update user document in Firestor
-    await setDoc(doc(db, "users", uid), {
-      username: username.toLowerCase(),
-      email: email || decoded.email,
-      userid: uid,
-    });
+    if (usernameExists) {
+      console.log("Username already exists");
+      res.status(401).send({ error: "Username already exists" });
+    } else {
+      const emailToUsernameDoc = doc(db, "emailToUsername", email);
+      const emailToUsernameData = await getDoc(emailToUsernameDoc);
+      const oldUsername = emailToUsernameData.data().username;
 
-    res.status(200).send({ message: "User data updated successfully" });
+      const oldUserDoc = doc(db, "users", oldUsername);
+      const newUserDoc = doc(db, "users", lowercaseNewUsername);
+
+      const batch = writeBatch(db);
+
+      batch.update(emailToUsernameDoc, { username: lowercaseNewUsername });
+      batch.delete(oldUserDoc);
+      batch.set(newUserDoc, { username: lowercaseNewUsername }, { merge: true });
+
+      await batch.commit();
+      console.log("Successfully updated username");
+      res.status(200).send({ message: "Successfully updated username" });
+    }
   } catch (error) {
-    console.error("Error updating user data:", error);
+    console.error("Error updating username:", error);
     res.status(500).send({ error: error.message });
-  }*/
+  }
+  */
 });
+
 
 app.get("/checkUserExists", async (req, res) => {
   const { username } = req.query;
