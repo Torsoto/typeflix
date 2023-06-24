@@ -8,33 +8,50 @@ import {
     getDocs, setDoc,
 } from "firebase/firestore";
 import "../db/firebase.mjs";
-
+import xmlbuilder from "xmlbuilder";
 const db = getFirestore();
 const app = express.Router();
 const omdbiApiKey = "f455c145";
 
 app.get("/movies", async (req, res) => {
+    const { r } = req.query;
+  
     try {
-        const moviesRef = collection(db, "movies");
-        const moviesSnapshot = await getDocs(moviesRef);
-
-        const moviesList = [];
-        moviesSnapshot.forEach((doc) => {
-            const movieData = {
-                title: doc.id,
-                poster: doc.data().poster,
-            };
-            moviesList.push(movieData);
-        });
-
+      const moviesRef = collection(db, "movies");
+      const moviesSnapshot = await getDocs(moviesRef);
+  
+      const moviesList = [];
+      moviesSnapshot.forEach((doc) => {
+        const movieData = {
+          title: doc.id,
+          poster: doc.data().poster,
+        };
+        moviesList.push(movieData);
+      });
+  
+      if (r === "xml") {
+        // Convert the moviesList array to an XML string
+        const xml = xmlbuilder
+          .create({ movies: { movie: moviesList } })
+          .end({ pretty: true });
+  
+        // Set the Content-Type header to "application/xml"
+        res.setHeader("Content-Type", "application/xml");
+  
+        // Send the XML string in the response
+        res.status(200).send(xml);
+      } else {
+        // If the r parameter is not "xml", send JSON in the response
         res.status(200).json(moviesList);
+      }
     } catch (error) {
-        console.error("Error retrieving movie list:", error);
-        res.status(500).send({ error: error.message });
+      console.error("Error retrieving movie list:", error);
+      res.status(500).send({ error: error.message });
     }
-});
+  });
 
 app.get("/movies/:movie", async (req, res) => {
+    const { r } = req.query;
     try {
         const { movie } = req.params;
         const movieRef = doc(db, `movies/${movie}`);
@@ -51,7 +68,21 @@ app.get("/movies/:movie", async (req, res) => {
         const levelsSnapshot = await getDocs(levelsRef);
         const levelsCount = levelsSnapshot.size;
 
-        res.status(200).json({ count: levelsCount, color: gradientColor });
+        if (r === "xml") {
+            // Convert the data to an XML string
+            const xml = xmlbuilder
+                .create({ movie: { count: levelsCount, color: gradientColor } })
+                .end({ pretty: true });
+
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+
+            // Send the XML string in the response
+            res.status(200).send(xml);
+        } else {
+            // If the r parameter is not "xml", send JSON in the response
+            res.status(200).json({ count: levelsCount, color: gradientColor });
+        }
     } catch (error) {
         console.error(
             `Error retrieving levels or gradient color for movie ${movie}:`,
@@ -73,6 +104,8 @@ function decodeMovieName(encodedMovieName) {
 }
 
 app.get("/movies/:movie/levels/:level", async (req, res) => {
+    const { r } = req.query;
+
     try {
         const { movie, level } = req.params;
         const decodedMovieName = decodeMovieName(movie);
@@ -103,7 +136,23 @@ app.get("/movies/:movie/levels/:level", async (req, res) => {
             res.status(404).send({ error: "Time field not found" });
         }
 
-        res.status(200).json({ text: text, img: img, time: time });
+        if (r === "xml") {
+            // Convert the data to an XML string
+            const xml = xmlbuilder
+                .create({
+                    level: { text: text, img: img, time: time },
+                })
+                .end({ pretty: true });
+
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+
+            // Send the XML string in the response
+            res.status(200).send(xml);
+        } else {
+            // If the r parameter is not "xml", send JSON in the response
+            res.status(200).json({ text: text, img: img, time: time });
+        }
     } catch (error) {
         console.error(`Error retrieving level for movie: `, error);
         res.status(500).send({ error: error.message });
@@ -111,6 +160,7 @@ app.get("/movies/:movie/levels/:level", async (req, res) => {
 });
 
 app.get("/levelsOpened/:username/:movie", async (req, res) => {
+    const { r } = req.query;
     try {
         const { username, movie } = req.params;
         const lowercaseUsername = username.toLowerCase();
@@ -137,7 +187,21 @@ app.get("/levelsOpened/:username/:movie", async (req, res) => {
             }
         });
 
-        res.status(200).send({ openedLevels: openedLevels });
+        if (r === "xml") {
+            // Convert the data to an XML string
+            const xml = xmlbuilder
+                .create({ levels: { openedLevels: openedLevels } })
+                .end({ pretty: true });
+
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+
+            // Send the XML string in the response
+            res.status(200).send(xml);
+        } else {
+            // If the r parameter is not "xml", send JSON in the response
+            res.status(200).send({ openedLevels: openedLevels });
+        }
     } catch (e) {
         console.log("Error retrieving levels:", e);
         res.status(500).send({ error: e.message });
@@ -159,50 +223,95 @@ app.patch("/unlockNextLevel", async (req, res) => {
             completed: true
         });
 
-        console.log(`Successfully updated level: ${level} for movie: ${movie} and user: ${username}`);
-        res.status(200).send({ message: `Successfully updated level: ${level} for movie: ${movie} and user: ${username}` });
+        if (req.headers["accept"] === "application/xml") {
+            // Convert the data to an XML string
+            const xml = xmlbuilder
+                .create({
+                    message: `Successfully updated level: ${level} for movie: ${movie} and user: ${username}`,
+                })
+                .end({ pretty: true });
 
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+
+            // Send the XML string in the response
+            console.log(xml)
+            res.status(200).send(xml);
+        } else {
+            // If the Accept header is not "application/xml", send JSON in the response
+            console.log(`Successfully updated level: ${level} for movie: ${movie} and user: ${username}`);
+            res.status(200).send({ message: `Successfully updated level: ${level} for movie: ${movie} and user: ${username}` });
+        }
     } catch (e) {
         console.log("Error updating level:", e);
         res.status(500).send({ error: e.message });
     }
 });
 
+
 app.get("/getomdbi", async (req, res) => {
+    const { r } = req.query;
     try {
-      // Fetch the list of movies from the database
-      const moviesRef = collection(db, "movies");
-      const moviesSnapshot = await getDocs(moviesRef);
-  
-      const moviesList = [];
-      moviesSnapshot.forEach((doc) => {
-        const movieData = {
-          title: doc.id,
-          poster: doc.data().poster,
-        };
-        moviesList.push(movieData);
-      });
-  
-      // Fetch data about each movie from the OMDb API
-      const promises = moviesList.map(async (movie) => {
-        const response = await fetch(
-          `https://www.omdbapi.com/?t=${encodeURIComponent(movie.title)}&apikey=f455c145`
-        );
-  
-        if (!response.ok) {
-          throw new Error(`Failed to fetch data for movie ${movie.title}`);
+        // Fetch the list of movies from the database
+        const moviesRef = collection(db, "movies");
+        const moviesSnapshot = await getDocs(moviesRef);
+
+        const moviesList = [];
+        moviesSnapshot.forEach((doc) => {
+            const movieData = {
+                title: doc.id,
+                poster: doc.data().poster,
+            };
+            moviesList.push(movieData);
+        });
+
+        // Fetch data about each movie from the OMDb API
+        const promises = moviesList.map(async (movie) => {
+            const response = await fetch(
+                `https://www.omdbapi.com/?t=${encodeURIComponent(movie.title)}&apikey=${omdbiApiKey}&r=${r}`
+            );
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch data for movie ${movie.title}`);
+            }
+
+            if (r === "xml") {
+                let xml = await response.text();
+                // Remove the XML declaration from the response
+                xml = xml.replace(/<\?xml.*?\?>/, "");
+                return xml;
+            } else {
+                return await response.json();
+            }
+        });
+
+        const data = await Promise.all(promises);
+
+        if (r === "xml") {
+            // Convert the data to an XML string
+            let xml = '<?xml version="1.0" encoding="UTF-8"?>';
+            xml += "<movies>";
+            data.forEach((movieXml) => {
+                xml += movieXml;
+            });
+            xml += "</movies>";
+
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+
+            // Send the XML string in the response
+            res.status(200).send(xml);
+        } else {
+            // If the r parameter is not "xml", send JSON in the response
+            res.status(200).json(data);
         }
-  
-        return await response.json();
-      });
-  
-      const data = await Promise.all(promises);
-      res.status(200).json(data);
     } catch (error) {
-      console.error("Error fetching movie data:", error);
-      res.status(500).send({ error: error.message });
+        console.error("Error fetching movie data:", error);
+        res.status(500).send({ error: error.message });
     }
-  });
+});
+
+
   
 
 

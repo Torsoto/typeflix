@@ -124,6 +124,7 @@ function Settings() {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
+        //"Accept": "application/xml" // Sends xml message if this header is added
       },
       body: JSON.stringify({
         token: localStorage.getItem("jwt"),
@@ -137,11 +138,9 @@ function Settings() {
         if (!response.ok) {
           throw new Error("Failed to delete account");
         }
-        return response.json();
+        // Ignore the response data
       })
-      .then((data) => {
-        console.log(data);
-
+      .then(() => {
         // Close modal
         setModalIsOpenDelete(false);
 
@@ -161,6 +160,7 @@ function Settings() {
         console.error("Error deleting account:", error);
       });
   };
+
 
   //Modals for Username
   const handleOpenModalUsername = () => {

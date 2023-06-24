@@ -43,7 +43,7 @@ const ThemeDB = () => {
     return (
         <div>
             <Navbar />
-            <div className="grid grid-cols-3 gap-4 p-4 text-white">
+            <div className="grid grid-cols-5 gap-4 p-4 text-white">
                 {data.map((movie, index) => (
                     <div key={index} className="flex flex-col p-2">
                         <img
@@ -68,7 +68,7 @@ const ThemeDB = () => {
                     </div>
                 ))}
             </div>
-            <footer className="flex gap-1 mb-2 text-lg text-white place-content-center opacity-60"> Data from <a target="_blank" className="" href="https://www.omdbapi.com/"><p className="transition-all duration-100 ease-in-out hover:scale-105">omdbi</p></a></footer>
+            <footer className="flex gap-1 text-lg text-white place-content-center opacity-60"> Data from <a target="_blank" className="" href="https://www.omdbapi.com/"><p className="transition-all duration-100 ease-in-out hover:scale-105">omdbi</p></a></footer>
         </div>
     );
 };

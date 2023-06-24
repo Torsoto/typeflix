@@ -4,8 +4,8 @@ import AuthContext from "../context/AuthContext.jsx";
 import "../../styles/App.css";
 import FailMessage from "../UI/FailMessage";
 import WinMessage from "../UI/WinMessage"
-import {CircularProgress} from "@material-ui/core";
-import {Link} from "react-router-dom";
+import { CircularProgress } from "@material-ui/core";
+import { Link } from "react-router-dom";
 import LeaderboardTable from "../UI/LeaderboardTable.jsx";
 
 const Game = () => {
@@ -71,7 +71,7 @@ const Game = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, movie, level,  wpm}),
+        body: JSON.stringify({ username, movie, level, wpm }),
       });
 
       if (response.ok) {
@@ -227,17 +227,19 @@ const Game = () => {
   }, [setHasStartedTyping, text, currentLetterIndex, hasCalculated, timesCalculated, timesUpdatedCursor, incorrectLetters, timeLeft, time]);
 
   const updateNextLevel = async (username, movie) => {
+    let data;
     if (selectedLevelIndex < totalLevelsCount) {
       try {
         const res = await fetch(`http://localhost:3000/unlockNextLevel/`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
+            //'Accept': 'application/xml' //Without this header you will receive json isntead of xml
           },
-          body: JSON.stringify({ username, movie, selectedLevelIndex}),
+          body: JSON.stringify({ username, movie, selectedLevelIndex }),
         });
-
-        const data = await res.json();
+        data = await res.json();
+        console.log(data)
       } catch (e) {
         console.error(e);
       }
@@ -265,7 +267,7 @@ const Game = () => {
   const handleNextLevel = async () => {
     try {
       const response = await fetch(
-          `http://localhost:3000/movies/${title}/levels/${selectedLevelIndex + 1}`
+        `http://localhost:3000/movies/${title}/levels/${selectedLevelIndex + 1}`
       );
       await response.json().then((data) => {
         console.log(data)
@@ -339,11 +341,11 @@ const Game = () => {
       <WinMessage isFinished={isFinished} onRetry={handleRetry} timeTaken={timeTaken} wpm={wpm} onNextLevel={handleNextLevel} />
       <FailMessage hasFailed={hasFailed} onRetry={handleRetry} />
       {isLoading ? (
-          <div className="flex items-center justify-center mt-8">
-            <CircularProgress style={{ color: 'white' }} />
-          </div>
+        <div className="flex items-center justify-center mt-8">
+          <CircularProgress style={{ color: 'white' }} />
+        </div>
       ) : (
-          leaderboardData && <LeaderboardTable leaderboardData={leaderboardData} />
+        leaderboardData && <LeaderboardTable leaderboardData={leaderboardData} />
       )}
       <div>
         <div className="flex gap-1 place-content-center">

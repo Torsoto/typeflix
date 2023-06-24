@@ -21,215 +21,376 @@ import {
 import "../db/firebase.mjs";
 import secretKey from "./secretKey.js";
 import jwt from "jsonwebtoken";
+import xmlbuilder from "xmlbuilder";
 
 const db = getFirestore();
 const auth = getAuth();
 const app = express.Router();
 
 app.get("/user/:username", async (req, res) => {
+  const { r } = req.query;
   const { username } = req.params;
   const lowercaseUsername = username.toLowerCase();
 
   try {
-    // Get the user documents from Firestore
-    const userDocs = await getDocs(collection(db, "users"));
-    let userData = null;
+      // Get the user documents from Firestore
+      const userDocs = await getDocs(collection(db, "users"));
+      let userData = null;
 
-    userDocs.forEach((doc) => {
-      if (doc.data().username === lowercaseUsername) {
-        userData = doc.data();
-      }
-    });
-
-    if (userData) {
-      // Sort the properties of the userData object
-      const sortedUserData = {};
-      Object.keys(userData)
-        .sort()
-        .forEach((key) => {
-          sortedUserData[key] = userData[key];
-        });
-
-      // If the user exists, send their data in the response
-      res.status(200).json(sortedUserData);
-    } else {
-      // If the user doesn't exist, send a 404 error
-      res.status(404).send({
-        error:
-          "User not found (You are sending request to /:username Endpoint)",
+      userDocs.forEach((doc) => {
+          if (doc.data().username === lowercaseUsername) {
+              userData = doc.data();
+          }
       });
-    }
+
+      if (userData) {
+          // Sort the properties of the userData object
+          const sortedUserData = {};
+          Object.keys(userData)
+              .sort()
+              .forEach((key) => {
+                  sortedUserData[key] = userData[key];
+              });
+
+          if (r === "xml") {
+              // Convert the data to an XML string
+              const xml = xmlbuilder
+                  .create({ user: sortedUserData })
+                  .end({ pretty: true });
+
+              // Set the Content-Type header to "application/xml"
+              res.setHeader("Content-Type", "application/xml");
+
+              // Send the XML string in the response
+              res.status(200).send(xml);
+          } else {
+              // If the r parameter is not "xml", send JSON in the response
+              res.status(200).json(sortedUserData);
+          }
+      } else {
+          // If the user doesn't exist, send a 404 error
+          res.status(404).json({
+              error:
+                  "User not found (You are sending request to /:username Endpoint)",
+          });
+      }
   } catch (error) {
-    console.error("Error getting user data:", error);
-    res.status(500).send({ error: error.message });
+      console.error("Error getting user data:", error);
+      res.status(500).json({ error: error.message });
   }
 });
+
 
 app.put("/updateavatar", async (req, res) => {
   const { token, newAvatar } = req.body;
 
   try {
-    const decoded = jwt.verify(token, secretKey);
-    const { username } = decoded;
+      const decoded = jwt.verify(token, secretKey);
+      const { username } = decoded;
 
-    // Get the user documents from Firestore
-    const userDoc = await getDoc(doc(db, "users", username));
+      // Get the user documents from Firestore
+      const userDoc = await getDoc(doc(db, "users", username));
 
-    if (!userDoc.exists()) {
-      res.status(404).send({ error: "User not found" });
-      return;
-    }
+      if (!userDoc.exists()) {
+          res.status(404).json({ error: "User not found" });
+          return;
+      }
 
-    // Update the avatar field in the user's document
-    const updatedUser = { ...userDoc.data(), avatar: newAvatar };
-    await setDoc(doc(db, "users", username), updatedUser);
+      // Update the avatar field in the user's document
+      const updatedUser = { ...userDoc.data(), avatar: newAvatar };
+      await setDoc(doc(db, "users", username), updatedUser);
 
-    res.status(200).send({ message: "Avatar updated successfully" });
+      if (req.headers["accept"] === "application/xml") {
+          // Convert the data to an XML string
+          const xml = xmlbuilder
+              .create({
+                  message: `Avatar updated successfully`,
+              })
+              .end({ pretty: true });
+
+          // Set the Content-Type header to "application/xml"
+          res.setHeader("Content-Type", "application/xml");
+
+          // Send the XML string in the response
+          res.status(200).send(xml);
+      } else {
+          // If the Accept header is not "application/xml", send JSON in the response
+          res.status(200).json({ message: "Avatar updated successfully" });
+      }
   } catch (error) {
-    console.error("Error updating avatar:", error);
-    res.status(500).send({ error: error.message });
+      console.error("Error updating avatar:", error);
+      res.status(500).json({ error: error.message });
   }
 });
 
 app.get("/getAvatar", async (req, res) => {
+  const { r } = req.query;
   try {
-    const { username } = req.query;
+      const { username } = req.query;
 
-    const userDocRef = doc(db, "users", username);
-    const userDoc = await getDoc(userDocRef);
+      const userDocRef = doc(db, "users", username);
+      const userDoc = await getDoc(userDocRef);
 
-    if (!userDoc.exists()) {
-      res.status(404).send({ error: "User does not exist" });
-    } else {
-      const userData = userDoc.data();
-      res.status(200).send(userData.avatar);
-    }
+      if (!userDoc.exists()) {
+          res.status(404).json({ error: "User does not exist" });
+      } else {
+          const userData = userDoc.data();
+
+          if (r === "xml") {
+              // Convert the data to an XML string
+              const xml = xmlbuilder
+                  .create({ avatar: userData.avatar })
+                  .end({ pretty: true });
+
+              // Set the Content-Type header to "application/xml"
+              res.setHeader("Content-Type", "application/xml");
+
+              // Send the XML string in the response
+              res.status(200).send(xml);
+          } else {
+              // If the r parameter is not "xml", send JSON in the response
+              res.status(200).json({ avatar: userData.avatar });
+          }
+      }
   } catch (e) {
-    res.status(500).send({ error: e.message });
+      res.status(500).json({ error: e.message });
   }
 });
 
+
 app.post("/follow", async (req, res) => {
-  const { username, toFollowUsername } = req.body;
-
   try {
-    const userDoc = doc(db, "users", username);
-    const userSnapshot = await getDoc(userDoc);
-    if (!userSnapshot.exists()) {
-      res.status(404).send({ error: "User not found" });
-    } else {
-      const userData = userSnapshot.data();
-      if (userData.following.includes(toFollowUsername)) {
-        res.status(409).send({ message: "Following already added" });
+      const { username, toFollowUsername } = req.body;
+
+      const userDoc = doc(db, "users", username);
+      const userSnapshot = await getDoc(userDoc);
+      if (!userSnapshot.exists()) {
+          res.status(404).json({ error: "User not found" });
       } else {
-        userData.following.push(toFollowUsername);
-        await updateDoc(userDoc, { following: userData.following });
+          const userData = userSnapshot.data();
+          if (userData.following.includes(toFollowUsername)) {
+              if (req.headers["accept"] === "application/xml") {
+                  // Convert the data to an XML string
+                  const xml = xmlbuilder
+                      .create({
+                          message: `Following already added`,
+                      })
+                      .end({ pretty: true });
 
-        // Add the username to the toFollowUsername's followers array
-        const toFollowUserDoc = doc(db, "users", toFollowUsername);
-        const toFollowUserSnapshot = await getDoc(toFollowUserDoc);
-        const toFollowUserData = toFollowUserSnapshot.data();
-        toFollowUserData.followers.push(username);
-        await updateDoc(toFollowUserDoc, {
-          followers: toFollowUserData.followers,
-        });
+                  // Set the Content-Type header to "application/xml"
+                  res.setHeader("Content-Type", "application/xml");
 
-        res.status(200).send({ message: "Following added successfully" });
+                  // Send the XML string in the response
+                  res.status(409).send(xml);
+              } else {
+                  // If the Accept header is not "application/xml", send JSON in the response
+                  res.status(409).json({ message: "Following already added" });
+              }
+          } else {
+              userData.following.push(toFollowUsername);
+              await updateDoc(userDoc, { following: userData.following });
+
+              // Add the username to the toFollowUsername's followers array
+              const toFollowUserDoc = doc(db, "users", toFollowUsername);
+              const toFollowUserSnapshot = await getDoc(toFollowUserDoc);
+              const toFollowUserData = toFollowUserSnapshot.data();
+              toFollowUserData.followers.push(username);
+              await updateDoc(toFollowUserDoc, {
+                  followers: toFollowUserData.followers,
+              });
+
+              if (req.headers["accept"] === "application/xml") {
+                  // Convert the data to an XML string
+                  const xml = xmlbuilder
+                      .create({
+                          message: `Following added successfully`,
+                      })
+                      .end({ pretty: true });
+
+                  // Set the Content-Type header to "application/xml"
+                  res.setHeader("Content-Type", "application/xml");
+
+                  // Send the XML string in the response
+                  res.status(200).send(xml);
+              } else {
+                  // If the Accept header is not "application/xml", send JSON in the response
+                  res.status(200).json({ message: "Following added successfully" });
+              }
+          }
       }
-    }
   } catch (error) {
-    res.status(500).send({ error: error.message });
+      res.status(500).json({ error: error.message });
   }
 });
 
 app.post("/unfollow", async (req, res) => {
-  const { username, toUnfollowUsername } = req.body;
-
   try {
-    const userDoc = doc(db, "users", username);
-    const userSnapshot = await getDoc(userDoc);
+      const { username, toUnfollowUsername } = req.body;
 
-    if (!userSnapshot.exists()) {
-      res.status(404).send({ error: "User not found" });
-    } else {
-      const userData = userSnapshot.data();
+      const userDoc = doc(db, "users", username);
+      const userSnapshot = await getDoc(userDoc);
 
-      if (!userData.following.includes(toUnfollowUsername)) {
-        res.status(409).send({ message: "User not found" });
+      if (!userSnapshot.exists()) {
+          res.status(404).send({ error: "User not found" });
       } else {
-        const updatedFollowing = userData.following.filter(
-          (friend) => friend !== toUnfollowUsername
-        );
-        await updateDoc(userDoc, { following: updatedFollowing });
+          const userData = userSnapshot.data();
 
-        // Remove the username from the toUnfollowUsername's followers array
-        const toUnfollowUserDoc = doc(db, "users", toUnfollowUsername);
-        const toUnfollowUserSnapshot = await getDoc(toUnfollowUserDoc);
-        const toUnfollowUserData = toUnfollowUserSnapshot.data();
-        const updatedFollowers = toUnfollowUserData.followers.filter(
-          (follower) => follower !== username
-        );
-        await updateDoc(toUnfollowUserDoc, { followers: updatedFollowers });
+          if (!userData.following.includes(toUnfollowUsername)) {
+              if (req.headers["accept"] === "application/xml") {
+                  // Convert the data to an XML string
+                  const xml = xmlbuilder
+                      .create({
+                          message: `User not found`,
+                      })
+                      .end({ pretty: true });
 
-        res.status(200).send({ message: "Friend removed successfully" });
+                  // Set the Content-Type header to "application/xml"
+                  res.setHeader("Content-Type", "application/xml");
+
+                  // Send the XML string in the response
+                  res.status(409).send(xml);
+              } else {
+                  // If the Accept header is not "application/xml", send JSON in the response
+                  res.status(409).json({ message: "User not found" });
+              }
+          } else {
+              const updatedFollowing = userData.following.filter(
+                  (friend) => friend !== toUnfollowUsername
+              );
+              await updateDoc(userDoc, { following: updatedFollowing });
+
+              // Remove the username from the toUnfollowUsername's followers array
+              const toUnfollowUserDoc = doc(db, "users", toUnfollowUsername);
+              const toUnfollowUserSnapshot = await getDoc(toUnfollowUserDoc);
+              const toUnfollowUserData = toUnfollowUserSnapshot.data();
+              const updatedFollowers = toUnfollowUserData.followers.filter(
+                  (follower) => follower !== username
+              );
+              await updateDoc(toUnfollowUserDoc, { followers: updatedFollowers });
+
+              if (req.headers["accept"] === "application/xml") {
+                  // Convert the data to an XML string
+                  const xml = xmlbuilder
+                      .create({
+                          message: `Friend removed successfully`,
+                      })
+                      .end({ pretty: true });
+
+                  // Set the Content-Type header to "application/xml"
+                  res.setHeader("Content-Type", "application/xml");
+
+                  // Send the XML string in the response
+                  res.status(200).send(xml);
+              } else {
+                  // If the Accept header is not "application/xml", send JSON in the response
+                  res.status(200).json({ message: "Friend removed successfully" });
+              }
+          }
       }
-    }
   } catch (error) {
-    res.status(500).send({ error: error.message });
+      res.status(500).json({ error: error.message });
   }
 });
 
 app.get("/getFollowers", async (req, res) => {
-  const { username } = req.query;
-
+  const { r } = req.query;
   try {
-    const userDocRef = doc(db, "users", username);
-    const userDoc = await getDoc(userDocRef);
+      const { username } = req.query;
 
-    if (!userDoc.exists()) {
-      res.status(404).send({ error: "User does not exist" });
-    } else {
-      const userData = userDoc.data();
-      res.status(200).send(userData.followers);
-    }
+      const userDocRef = doc(db, "users", username);
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists()) {
+          res.status(404).send({ error: "User does not exist" });
+      } else {
+          const userData = userDoc.data();
+
+          if (r === "xml") {
+              // Convert the data to an XML string
+              const xml = xmlbuilder
+                  .create({ followers: { follower: userData.followers } })
+                  .end({ pretty: true });
+
+              // Set the Content-Type header to "application/xml"
+              res.setHeader("Content-Type", "application/xml");
+
+              // Send the XML string in the response
+              res.status(200).send(xml);
+          } else {
+              // If the r parameter is not "xml", send JSON in the response
+              res.status(200).json(userData.followers);
+          }
+      }
   } catch (e) {
-    res.status(500).send({ error: e.message });
+      res.status(500).json({ error: e.message });
   }
 });
 
 app.get("/getFollowersCount", async (req, res) => {
-  const { username } = req.query;
-
+  const { r } = req.query;
   try {
-    const userDocRef = doc(db, "users", username);
-    const userDoc = await getDoc(userDocRef);
+      const { username } = req.query;
 
-    if (!userDoc.exists()) {
-      res.status(404).send({ error: "User does not exist" });
-    } else {
-      const userData = userDoc.data();
-      res.status(200).send({ count: userData.followers.length });
-    }
+      const userDocRef = doc(db, "users", username);
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists()) {
+          res.status(404).send({ error: "User does not exist" });
+      } else {
+          const userData = userDoc.data();
+
+          if (r === "xml") {
+              // Convert the data to an XML string
+              const xml = xmlbuilder
+                  .create({ count: userData.followers.length })
+                  .end({ pretty: true });
+
+              // Set the Content-Type header to "application/xml"
+              res.setHeader("Content-Type", "application/xml");
+
+              // Send the XML string in the response
+              res.status(200).send(xml);
+          } else {
+              // If the r parameter is not "xml", send JSON in the response
+              res.status(200).json({ count: userData.followers.length });
+          }
+      }
   } catch (e) {
-    res.status(500).send({ error: e.message });
+      res.status(500).json({ error: e.message });
   }
 });
 
 app.get("/getFollowing", async (req, res) => {
+  const { r } = req.query;
   try {
-    const { username } = req.query;
+      const { username } = req.query;
 
-    const userDocRef = doc(db, "users", username);
-    const userDoc = await getDoc(userDocRef);
+      const userDocRef = doc(db, "users", username);
+      const userDoc = await getDoc(userDocRef);
 
-    if (!userDoc.exists()) {
-      res.status(404).send({ error: "User does not exist" });
-    } else {
-      const userData = userDoc.data();
-      res.status(200).send(userData.following);
-    }
+      if (!userDoc.exists()) {
+          res.status(404).send({ error: "User does not exist" });
+      } else {
+          const userData = userDoc.data();
+
+          if (r === "xml") {
+              // Convert the data to an XML string
+              const xml = xmlbuilder
+                  .create({ following: { user: userData.following } })
+                  .end({ pretty: true });
+
+              // Set the Content-Type header to "application/xml"
+              res.setHeader("Content-Type", "application/xml");
+
+              // Send the XML string in the response
+              res.status(200).send(xml);
+          } else {
+              // If the r parameter is not "xml", send JSON in the response
+              res.status(200).json(userData.following);
+          }
+      }
   } catch (e) {
-    res.status(500).send({ error: e.message });
+      res.status(500).json({ error: e.message });
   }
 });
 
@@ -281,110 +442,142 @@ app.patch("/editUsername", async (req, res) => {
 
 
 app.get("/checkUserExists", async (req, res) => {
+  const { r } = req.query;
   const { username } = req.query;
 
   try {
-    const userDocRef = doc(db, "users", username);
-    const userDoc = await getDoc(userDocRef);
+      const userDocRef = doc(db, "users", username);
+      const userDoc = await getDoc(userDocRef);
 
-    res.status(200).send({ exists: userDoc.exists() });
+      if (r === "xml") {
+          // Convert the data to an XML string
+          const xml = xmlbuilder
+              .create({ exists: userDoc.exists() })
+              .end({ pretty: true });
+
+          // Set the Content-Type header to "application/xml"
+          res.setHeader("Content-Type", "application/xml");
+
+          // Send the XML string in the response
+          res.status(200).send(xml);
+      } else {
+          // If the r parameter is not "xml", send JSON in the response
+          res.status(200).json({ exists: userDoc.exists() });
+      }
   } catch (e) {
-    res.status(500).send({ error: e.message });
+      res.status(500).json({ error: e.message });
   }
 });
 
 app.delete("/deleteAccount", async (req, res) => {
   try {
-    const { token, password, username, email } = req.body;
+      const { token, password, username, email } = req.body;
 
-    if (!jwt.verify(token, secretKey)) {
-      res.status(403).send({ error: "Invalid JWT" });
-      return;
-    }
+      if (!jwt.verify(token, secretKey)) {
+          res.status(403).send({ error: "Invalid JWT" });
+          return;
+      }
 
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-
-    if (!userCredential) {
-      res.status(403).send({ error: "Invalid credentials" });
-      return;
-    }
-
-    // Get the user's followers and following
-    const userDocRef = doc(db, "users", username);
-    const userDocSnap = await getDoc(userDocRef);
-    const { followers = [], following = [] } = userDocSnap.data();
-
-    // Update the followers' following field
-    for (const follower of followers) {
-      const followerDocRef = doc(db, "users", follower);
-      const followerDocSnap = await getDoc(followerDocRef);
-      const { following: followerFollowing = [] } = followerDocSnap.data();
-      const updatedFollowing = followerFollowing.filter((u) => u !== username);
-      await updateDoc(followerDocRef, { following: updatedFollowing });
-    }
-
-    // Update the following's followers field
-    for (const followed of following) {
-      const followedDocRef = doc(db, "users", followed);
-      const followedDocSnap = await getDoc(followedDocRef);
-      const { followers: followedFollowers = [] } = followedDocSnap.data();
-      const updatedFollowers = followedFollowers.filter((u) => u !== username);
-      await updateDoc(followedDocRef, { followers: updatedFollowers });
-    }
-
-    await deleteUser(userCredential.user);
-    console.log("User deleted successfully");
-
-    const userDoc = doc(db, "users", username);
-    const emailToUsernameDoc = doc(db, "emailToUsername", email);
-    const leaderboardDocRef = doc(db, "leaderboard", "global");
-    const leaderboardDocSnap = await getDoc(leaderboardDocRef);
-
-    const batch = writeBatch(db);
-
-    batch.delete(userDoc);
-    batch.delete(emailToUsernameDoc);
-
-    // Delete all movie collections
-    const moviesCollectionRef = collection(db, "movies");
-    const moviesSnapshot = await getDocs(moviesCollectionRef);
-    for (const movieDoc of moviesSnapshot.docs) {
-      const movieCollectionRef = collection(db, "users", username, movieDoc.id);
-      const movieCollectionSnapshot = await getDocs(movieCollectionRef);
-      movieCollectionSnapshot.forEach((doc) => {
-        batch.delete(doc.ref);
-      });
-    }
-
-    if (leaderboardDocSnap.exists()) {
-      // Leaderboard exists
-      let leaderboardData = leaderboardDocSnap.data().leaderboard;
-      const existingUserIndex = leaderboardData.findIndex(
-        (user) => user.username === username
+      const userCredential = await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
       );
 
-      if (existingUserIndex !== -1) {
-        // User exists in leaderboard, remove them
-        leaderboardData.splice(existingUserIndex, 1);
-        // Sort the leaderboard by wpm in descending order
-        leaderboardData.sort((a, b) => b.wpm - a.wpm);
-        // Update the leaderboard in Firestore
-        await setDoc(leaderboardDocRef, { leaderboard: leaderboardData });
+      if (!userCredential) {
+          res.status(403).send({ error: "Invalid credentials" });
+          return;
       }
-    }
 
-    await batch.commit();
-    console.log("User data deleted from Firestore");
+      // Get the user's followers and following
+      const userDocRef = doc(db, "users", username);
+      const userDocSnap = await getDoc(userDocRef);
+      const { followers = [], following = [] } = userDocSnap.data();
 
-    res.status(200).send({ message: "Account deleted successfully" });
+      // Update the followers' following field
+      for (const follower of followers) {
+          const followerDocRef = doc(db, "users", follower);
+          const followerDocSnap = await getDoc(followerDocRef);
+          const { following: followerFollowing = [] } = followerDocSnap.data();
+          const updatedFollowing = followerFollowing.filter((u) => u !== username);
+          await updateDoc(followerDocRef, { following: updatedFollowing });
+      }
+
+      // Update the following's followers field
+      for (const followed of following) {
+          const followedDocRef = doc(db, "users", followed);
+          const followedDocSnap = await getDoc(followedDocRef);
+          const { followers: followedFollowers = [] } = followedDocSnap.data();
+          const updatedFollowers = followedFollowers.filter((u) => u !== username);
+          await updateDoc(followedDocRef, { followers: updatedFollowers });
+      }
+
+      await deleteUser(userCredential.user);
+      console.log("User deleted successfully");
+
+      const userDoc = doc(db, "users", username);
+      const emailToUsernameDoc = doc(db, "emailToUsername", email);
+      const leaderboardDocRef = doc(db, "leaderboard", "global");
+      const leaderboardDocSnap = await getDoc(leaderboardDocRef);
+
+      const batch = writeBatch(db);
+
+      batch.delete(userDoc);
+      batch.delete(emailToUsernameDoc);
+
+      // Delete all movie collections
+      const moviesCollectionRef = collection(db, "movies");
+      const moviesSnapshot = await getDocs(moviesCollectionRef);
+      for (const movieDoc of moviesSnapshot.docs) {
+          const movieCollectionRef = collection(db, "users", username, movieDoc.id);
+          const movieCollectionSnapshot = await getDocs(movieCollectionRef);
+          movieCollectionSnapshot.forEach((doc) => {
+              batch.delete(doc.ref);
+          });
+      }
+
+      if (leaderboardDocSnap.exists()) {
+          // Leaderboard exists
+          let leaderboardData = leaderboardDocSnap.data().leaderboard;
+          const existingUserIndex = leaderboardData.findIndex(
+              (user) => user.username === username
+          );
+
+          if (existingUserIndex !== -1) {
+              // User exists in leaderboard, remove them
+              leaderboardData.splice(existingUserIndex, 1);
+              // Sort the leaderboard by wpm in descending order
+              leaderboardData.sort((a, b) => b.wpm - a.wpm);
+              // Update the leaderboard in Firestore
+              await setDoc(leaderboardDocRef, { leaderboard: leaderboardData });
+          }
+      }
+
+      await batch.commit();
+      console.log("User data deleted from Firestore");
+
+      if (req.headers["accept"] === "application/xml") {
+          // Convert the data to an XML string
+          const xml = xmlbuilder
+              .create({
+                  message: `Account deleted successfully`,
+              })
+              .end({ pretty: true });
+
+          // Set the Content-Type header to "application/xml"
+          res.setHeader("Content-Type", "application/xml");
+
+          // Send the XML string in the response
+          res.status(200).send(xml);
+      } else {
+          // If the Accept header is not "application/xml", send JSON in the response
+          res.status(200).json({ message: "Account deleted successfully" });
+      }
   } catch (e) {
     console.error("Error deleting user:", e);
-    res.status(500).send({ error: e.message });
+    res.status(500).json({ error: e.message });
   }
 });
+
 
 export default app;

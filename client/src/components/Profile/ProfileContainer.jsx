@@ -70,8 +70,8 @@ export const ProfileContainer = (username) => {
     Promise.all(
       following.map((followingUser) =>
         fetch(`http://localhost:3000/getAvatar?username=${followingUser}`)
-          .then((response) => response.text())
-          .then((data) => ({ following: followingUser, avatar: data }))
+          .then((response) => response.json())
+          .then((data) => ({ following: followingUser, avatar: data.avatar }))
       )
     ).then((data) => {
       setFollowingAvatars(data);
@@ -175,11 +175,10 @@ export const ProfileContainer = (username) => {
                 )}
                 {!isSameProfile && (
                   <button
-                    className={`button-s px-2 py-1 font-semibold ${
-                      isFollowing
-                        ? "bg-white text-black"
-                        : "bg-black text-white"
-                    } rounded-full`}
+                    className={`button-s px-2 py-1 font-semibold ${isFollowing
+                      ? "bg-white text-black"
+                      : "bg-black text-white"
+                      } rounded-full`}
                     onClick={isFollowing ? handleUnfollow : handleFollow}
                   >
                     {isFollowing ? "Unfollow" : "Follow"}
@@ -219,7 +218,7 @@ export const ProfileContainer = (username) => {
             </div>
             {customUserData.lastActivity && (
               <div>
-                <h2 className="text-xl h2-s pb-3">Last Played:</h2>
+                <h2 className="pb-3 text-xl h2-s">Last Played:</h2>
                 {customUserData.lastActivity.map((activity, index) => (
                   <div className="flex text-[#bfbfbf] pb-1" key={index}>
                     <p>{activity.movie}</p>
