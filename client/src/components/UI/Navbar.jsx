@@ -36,6 +36,11 @@ const Navbar = () => {
             Leaderboard
           </span>
         </a>
+        <a href="/ThemeDB" className="navbar__link">
+          <span className="font-medium text-white transition-colors hover:text-gray-400">
+            ThemeDB
+          </span>
+        </a>
       </div>
       <div className="relative w-[152px] text-right">
         <div className="flex items-center justify-end gap-1">

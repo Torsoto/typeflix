@@ -13,13 +13,15 @@ function Settings() {
   const [showAvatarOptions, setShowAvatarOptions] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [secondModalHandle, setSecondModalHandle] = useState(false);
-  const [secondModalIsOpen, setSecondModalIsOpen] = useState(false);
+  const [modalIsOpenDelete, setModalIsOpenDelete] = useState(false);
+  const [modalIsOpenUsername, setModalIsOpenUsername] = useState(false);
+  const [modalIsOpenPassword, setModalIsOpenPassword] = useState(false);
+  const [ModalIsOpenDeleteConfirm, setModalIsOpenDeleteConfirm] =
+    useState(false);
   const [password, setPassword] = useState("");
   const [modalText, setModalText] = useState("");
   const { userId, userData, avatarUrl, setAvatarUrl, logout } =
-      useContext(AuthContext);
+    useContext(AuthContext);
   const [notification, setNotification] = useState({
     show: false,
     message: "",
@@ -53,31 +55,45 @@ function Settings() {
   };
 
   const handleUpdateUsername = async () => {
+    // NOT WORKING ATM!!!
+    /*
+    if (newUsername.length > 1) {
+      try {
+        const response = await fetch("http://localhost:3000/editUsername", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            token: localStorage.getItem("jwt"),
+            newUsername: newUsername,
+          }),
+        });
 
-    console.log("bin da")
+        if (!response.ok) {
+          throw new Error("Failed to update username");
+        }
 
-    try {
-      const response = await fetch("http://localhost:3000/edit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          token: localStorage.getItem("jwt"),
-          username: newUsername,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update username");
+        const data = await response.json();
+        console.log(data.message);
+      } catch (error) {
+        setNotification({
+          show: true,
+          message:
+            ERROR_MAP[error.message] ||
+            "Error updating username. Please try again with a different username or try again later",
+        });
+        console.error("Error updating username:", error);
       }
-
-      const data = await response.json();
-      console.log(data.message);
-    } catch (error) {
-      console.error("Error updating username:", error);
+    } else {
+      setNotification({
+        show: true,
+        message: "New username must be at least 2 characters long",
+      });
     }
+    */
   };
+
 
   const handleUpdatePassword = async () => {
     try {
@@ -117,55 +133,60 @@ function Settings() {
         email: userData.email,
       }),
     })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Failed to delete account");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          console.log(data);
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to delete account");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data);
 
-          // Close modal
-          setModalIsOpen(false);
+        // Close modal
+        setModalIsOpenDelete(false);
 
-          // Delete user data from local storage
-          localStorage.removeItem("userData");
-          localStorage.removeItem("jwt");
-          console.log("here");
-          logout();
-        })
-        .catch((error) => {
-          setNotification({
-            show: true,
-            message:
-                ERROR_MAP[error.message] ||
-                "Error deleting account. Please try again with a different password or try again later",
-          });
-          console.error("Error deleting account:", error);
+        // Delete user data from local storage
+        localStorage.removeItem("userData");
+        localStorage.removeItem("jwt");
+        console.log("here");
+        logout();
+      })
+      .catch((error) => {
+        setNotification({
+          show: true,
+          message:
+            ERROR_MAP[error.message] ||
+            "Error deleting account. Please try again with a different password or try again later",
         });
+        console.error("Error deleting account:", error);
+      });
+  };
+
+  //Modals for Username
+  const handleOpenModalUsername = () => {
+    setModalIsOpenUsername(true);
+  };
+
+  const handleCancelModalUsername = () => {
+    setModalIsOpenUsername(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    setModalIsOpenDelete(true);
   };
 
   const handleOpenSecondModal = () => {
-    setModalIsOpen(false);
-    setSecondModalHandle("delete")
-    setModalText("Enter your password to confirm the deletion")
-    setSecondModalIsOpen(true);
-  };
-
-  const handleOpenUsername = () => {
-    setSecondModalHandle("username")
-    setModalText("Enter your new username")
-    setSecondModalIsOpen(true);
+    setModalIsOpenDelete(false);
+    setModalIsOpenDeleteConfirm(true);
   };
 
   const handleCloseSecondModal = () => {
-    setSecondModalIsOpen(false);
-    setModalIsOpen(false);
+    setModalIsOpenDeleteConfirm(false);
+    setModalIsOpenDelete(false);
   };
 
-  const handleCancelDelete = () => {
-    setModalIsOpen(false);
+  const handleCancelModalDelete = () => {
+    setModalIsOpenDelete(false);
   };
 
   const handleSelectAvatar = (styleName) => {
@@ -180,54 +201,93 @@ function Settings() {
     setShowAvatarOptions(!showAvatarOptions);
   };
 
-  const handleDeleteAccount = async () => {
-    setModalIsOpen(true);
-  };
-
   return (
-      <>
-        <div className="main-bg">
-          <Navbar />
-          <div className="h-[90%] m-auto max-w-7xl">
-            <div className="container mx-auto mt-24">
-              <div className="max-w-[650px] max-h-[400px] flex flex-col p-8 mx-auto rounded-lg bg-neutral-700 md:flex-row">
-                <div className="flex flex-col items-start mb-4 md:mb-0 md:w-1/2">
-                  <div className="w-40 h-40 overflow-hidden rounded-full">
-                    {avatarUrl && (
-                        <img className="bg-white" src={avatarUrl} alt="Avatar" />
-                    )}
+    <>
+      <div className="main-bg">
+        <Navbar />
+        <div className="h-[90%] m-auto max-w-7xl">
+          <div className="container mx-auto mt-20">
+            <p className="mb-8 text-3xl text-center text-white">Settings</p>
+            <div className="max-w-[650px] max-h-[400px] flex flex-col p-8 mx-auto rounded-lg bg-neutral-700 md:flex-row">
+              <div className="flex flex-col items-start mb-4 md:mb-0 md:w-1/2">
+                <div className="w-40 h-40 overflow-hidden rounded-full">
+                  {avatarUrl && (
+                    <img className="bg-white" src={avatarUrl} alt="Avatar" />
+                  )}
+                </div>
+                <button
+                  className="px-4 py-2 mt-4 font-semibold text-white bg-black rounded-full"
+                  onClick={handleToggleAvatarOptions}
+                >
+                  Change Avatar
+                </button>
+                <button
+                  className="px-4 py-2 mt-4 font-semibold text-white bg-red-500 rounded-full hover:bg-red-600"
+                  onClick={() => handleDeleteAccount()}
+                >
+                  Delete Account
+                </button>
+                <Modal
+                  isOpen={modalIsOpenDelete}
+                  onRequestClose={handleCancelModalDelete}
+                  className="flex items-center justify-center w-full h-full bg-gray-800 bg-opacity-80"
+                >
+                  <div className="p-4 bg-white rounded-lg w-96">
+                    <h2 className="text-lg font-medium text-center">
+                      Are you sure you want to delete your account?
+                    </h2>
+                    <div className="flex mt-4 place-content-center ">
+                      <button
+                        className="px-4 py-2 mr-2 font-medium text-white bg-red-500 rounded-lg hover:bg-red-600"
+                        onClick={handleOpenSecondModal}
+                      >
+                        Confirm
+                      </button>
+                      <button
+                        className="px-4 py-2 font-medium text-white bg-gray-500 rounded-lg hover:bg-gray-600"
+                        onClick={handleCancelModalDelete}
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
+                </Modal>
+              </div>
+              <div className="flex flex-col gap-8 place-content-center md:w-1/2">
+                <div className="flex items-center">
+                  <p className="mr-2 text-lg text-white">
+                    Username: {userData && <span>{userData.username}</span>}
+                  </p>
                   <button
-                      className="px-4 py-2 mt-4 font-semibold text-white bg-black rounded-full"
-                      onClick={handleToggleAvatarOptions}
+                    className="px-2 py-1 font-semibold text-white bg-black rounded-full"
+                    onClick={() => handleOpenModalUsername()}
                   >
-                    Change Avatar
-                  </button>
-                  <button
-                      className="px-4 py-2 mt-4 font-semibold text-white bg-red-500 rounded-full hover:bg-red-600"
-                      onClick={() => handleDeleteAccount()}
-                  >
-                    Delete Account
+                    <BiEdit />
                   </button>
                   <Modal
-                      isOpen={modalIsOpen}
-                      onRequestClose={handleCancelDelete}
-                      className="flex items-center justify-center w-full h-full bg-gray-800 bg-opacity-80"
+                    isOpen={modalIsOpenUsername}
+                    onRequestClose={handleCancelModalUsername}
+                    className="flex items-center justify-center w-full h-full bg-gray-800 bg-opacity-80"
                   >
                     <div className="p-4 bg-white rounded-lg w-96">
                       <h2 className="text-lg font-medium text-center">
-                        Are you sure you want to delete your account?
+                        Enter your new username!
                       </h2>
+                      <input
+                        type="username"
+                        className="w-full px-4 py-2 mt-4 border rounded-lg"
+                        onChange={(e) => setNewUsername(e.target.value)}
+                      />
                       <div className="flex mt-4 place-content-center ">
                         <button
-                            className="px-4 py-2 mr-2 font-medium text-white bg-red-500 rounded-lg hover:bg-red-600"
-                            onClick={handleOpenSecondModal}
+                          className="px-4 py-2 mr-2 font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+                          onClick={handleUpdateUsername}
                         >
                           Confirm
                         </button>
                         <button
-                            className="px-4 py-2 font-medium text-white bg-gray-500 rounded-lg hover:bg-gray-600"
-                            onClick={handleCancelDelete}
+                          className="px-4 py-2 font-medium text-white bg-gray-500 rounded-lg hover:bg-gray-600"
+                          onClick={handleCancelModalUsername}
                         >
                           Cancel
                         </button>
@@ -235,84 +295,57 @@ function Settings() {
                     </div>
                   </Modal>
                 </div>
-                <div className="flex flex-col gap-8 place-content-center md:w-1/2">
-                  <div className="flex items-center">
-                    <p className="mr-2 text-lg text-white">
-                      Username: {userData && <span>{userData.username}</span>}
-                    </p>
-                    <button
-                        className="px-2 py-1 font-semibold text-white bg-black rounded-full"
-                        onClick={() => handleOpenUsername()}
-                    >
-                      <BiEdit />
-                    </button>
-                  </div>
 
-                  <div className="flex items-start gap-2 ">
-                    <p className="text-lg text-white">
-                      Email: {userData && <span>{userData.email}</span>}
-                    </p>
-                  </div>
-                  <div className="flex items-center ">
-                    <p className="mr-2 text-lg text-white">Change password</p>
-                    <button
-                        className="px-2 py-1 font-semibold text-white bg-black rounded-full"
-                        onClick={() => handleUpdatePassword()}
-                    >
-                      <BiEdit />
-                    </button>
-                  </div>
+                <div className="flex items-start gap-2 ">
+                  <p className="text-lg text-white">
+                    Email: {userData && <span>{userData.email}</span>}
+                  </p>
                 </div>
               </div>
-              {showAvatarOptions && (
-                  <Avatars
-                      handleSelectAvatar={handleSelectAvatar}
-                      handleToggleAvatarOptions={handleToggleAvatarOptions}
-                      userId={userId}
-                  />
-              )}
-              {error && <div className="mt-4 text-red-500">{error}</div>}
             </div>
+            {showAvatarOptions && (
+              <Avatars
+                handleSelectAvatar={handleSelectAvatar}
+                handleToggleAvatarOptions={handleToggleAvatarOptions}
+                userId={userId}
+              />
+            )}
+            {error && <div className="mt-4 text-red-500">{error}</div>}
           </div>
         </div>
-        <Modal
-            isOpen={secondModalIsOpen}
-            onRequestClose={handleCloseSecondModal}
-            className="flex items-center justify-center w-full h-full bg-gray-800 bg-opacity-80"
-        >
-          <div className="p-4 bg-white rounded-lg w-96">
-            <h2 className="text-lg font-medium text-center">
-              {modalText}
-            </h2>
-            <input
-                type="password"
-                className="w-full px-4 py-2 mt-4 border rounded-lg"
-                onChange={(e) => setPassword(e.target.value)}
-            />
-            <div className="flex mt-4 place-content-center ">
-              <button
-                  className="px-4 py-2 mr-2 font-medium text-white bg-red-500 rounded-lg hover:bg-red-600"
-                  onClick={() => {
-                    if (secondModalHandle === "delete") {
-                      handleConfirmDelete();
-                    } else if (secondModalHandle === "username") {
-                      handleUpdateUsername();
-                    }
-                  }}
-              >
-                Confirm
-              </button>
-              <button
-                  className="px-4 py-2 font-medium text-white bg-gray-500 rounded-lg hover:bg-gray-600"
-                  onClick={handleCloseSecondModal}
-              >
-                Cancel
-              </button>
-            </div>
+      </div>
+      <Modal
+        isOpen={ModalIsOpenDeleteConfirm}
+        onRequestClose={handleCloseSecondModal}
+        className="flex items-center justify-center w-full h-full bg-gray-800 bg-opacity-80"
+      >
+        <div className="p-4 bg-white rounded-lg w-96">
+          <h2 className="text-lg font-medium text-center">
+            Enter your password to confirm the deletion
+          </h2>
+          <input
+            type="password"
+            className="w-full px-4 py-2 mt-4 border rounded-lg"
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <div className="flex mt-4 place-content-center ">
+            <button
+              className="px-4 py-2 mr-2 font-medium text-white bg-red-500 rounded-lg hover:bg-red-600"
+              onClick={handleConfirmDelete}
+            >
+              Confirm
+            </button>
+            <button
+              className="px-4 py-2 font-medium text-white bg-gray-500 rounded-lg hover:bg-gray-600"
+              onClick={handleCloseSecondModal}
+            >
+              Cancel
+            </button>
           </div>
-        </Modal>
-        {notification.show && <Notification message={notification.message} />}
-      </>
+        </div>
+      </Modal>
+      {notification.show && <Notification message={notification.message} />}
+    </>
   );
 }
 
