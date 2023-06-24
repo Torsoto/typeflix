@@ -105,6 +105,10 @@ const LevelSelection = () => {
     }
   };
 
+  const handleTitleToData = () => {
+
+  }
+
 
   const renderMovies = () => {
     return movies.map((movie, index) => (
@@ -118,7 +122,7 @@ const LevelSelection = () => {
           style={{ backgroundImage: `url('${movie.poster}')` }}
           onClick={() => handleMovieClick(movie.title, movie.poster)}
         ></div>
-        <p className="mt-4 text-xl font-medium text-center text-white">
+        <p onClick={handleTitleToData} title={`Data about ${movie.title}`} className="mt-4 text-xl font-medium text-center text-white transition-all duration-100 ease-in-out cursor-pointer hover:scale-105">
           {movie.title}
         </p>
       </div>
@@ -220,7 +224,7 @@ const LevelSelection = () => {
             <div className="flex items-center">
               {showBackButton && (
                 <button
-                    disabled={fadeOut}
+                  disabled={fadeOut}
                   style={{
                     opacity: fadeOut ? "0" : "1",
                     transition: "opacity 0.5s",
