@@ -11,6 +11,7 @@ import "../db/firebase.mjs";
 
 const db = getFirestore();
 const app = express.Router();
+const omdbiApiKey = "f455c145";
 
 app.get("/movies", async (req, res) => {
     try {
@@ -166,6 +167,43 @@ app.patch("/unlockNextLevel", async (req, res) => {
         res.status(500).send({ error: e.message });
     }
 });
+
+app.get("/getomdbi", async (req, res) => {
+    try {
+      // Fetch the list of movies from the database
+      const moviesRef = collection(db, "movies");
+      const moviesSnapshot = await getDocs(moviesRef);
+  
+      const moviesList = [];
+      moviesSnapshot.forEach((doc) => {
+        const movieData = {
+          title: doc.id,
+          poster: doc.data().poster,
+        };
+        moviesList.push(movieData);
+      });
+  
+      // Fetch data about each movie from the OMDb API
+      const promises = moviesList.map(async (movie) => {
+        const response = await fetch(
+          `https://www.omdbapi.com/?t=${encodeURIComponent(movie.title)}&apikey=f455c145`
+        );
+  
+        if (!response.ok) {
+          throw new Error(`Failed to fetch data for movie ${movie.title}`);
+        }
+  
+        return await response.json();
+      });
+  
+      const data = await Promise.all(promises);
+      res.status(200).json(data);
+    } catch (error) {
+      console.error("Error fetching movie data:", error);
+      res.status(500).send({ error: error.message });
+    }
+  });
+  
 
 
 export default app;

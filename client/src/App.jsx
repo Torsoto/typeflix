@@ -6,6 +6,7 @@ import Settings from "./pages/Settings";
 import Signup from "./pages/Signup";
 import Profile from "./pages/Profile.jsx";
 import Training from "./pages/Training";
+import ThemeDB from "./pages/ThemeDB";
 import { Route, Routes, Navigate } from "react-router-dom";
 import AuthContext from "../src/components/context/AuthContext.jsx";
 import Leaderboard from "./pages/Leaderboard.jsx";
@@ -171,6 +172,9 @@ function App() {
                         path="/:username"
                         element={isLoggedIn ? <Profile /> : <Navigate to="/login" />}
                     />
+                    <Route
+                        path="/themeDB"
+                        element={isLoggedIn ? <ThemeDB /> : <Navigate to="/login" />} />
                 </Routes>
             </AuthContext.Provider>
         </>

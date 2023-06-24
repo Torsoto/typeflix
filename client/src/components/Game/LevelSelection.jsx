@@ -105,11 +105,6 @@ const LevelSelection = () => {
     }
   };
 
-  const handleTitleToData = () => {
-
-  }
-
-
   const renderMovies = () => {
     return movies.map((movie, index) => (
       <div
@@ -122,7 +117,7 @@ const LevelSelection = () => {
           style={{ backgroundImage: `url('${movie.poster}')` }}
           onClick={() => handleMovieClick(movie.title, movie.poster)}
         ></div>
-        <p onClick={handleTitleToData} title={`Data about ${movie.title}`} className="mt-4 text-xl font-medium text-center text-white transition-all duration-100 ease-in-out cursor-pointer hover:scale-105">
+        <p title={`Data about ${movie.title}`} className="mt-4 text-xl font-medium text-center text-white">
           {movie.title}
         </p>
       </div>
