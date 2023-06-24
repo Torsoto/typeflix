@@ -9,6 +9,7 @@ import leaderboardRoutes from "./routes/leaderboard.js";
 import themesRoutes from "./routes/themes.js";
 import restRoutes from "./routes/restAPI.js";
 import trainingRoutes from "./routes/training.js";
+import {logWeatherAndTime} from "./logs/logWeatherAndTime.js";
 
 const app = express();
 const developmentMode = true;
@@ -49,3 +50,5 @@ app.get("/", (req, res) => {
 app.listen(3000, () => {
   console.log("Example app listening on port 3000!");
 });
+
+logWeatherAndTime();
