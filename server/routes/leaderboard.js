@@ -114,8 +114,6 @@ app.post("/updateThemeLevelLeaderboard", async (req, res) => {
     try {
         const { username, wpm, theme, levelIndex } = req.body;
 
-        console.log(wpm)
-
         // Document reference is now based on the theme, not "global"
         const leaderboardDocRef = doc(db, "leaderboard", theme);
         const leaderboardDocSnap = await getDoc(leaderboardDocRef);
@@ -167,8 +165,6 @@ app.post("/updateThemeLevelLeaderboard", async (req, res) => {
 app.get("/getThemeLevelLeaderboard", async (req, res) => {
     try {
         const { theme, levelIndex } = req.query;
-
-        console.log(req.query)
 
         const leaderboardDocRef = doc(db, "leaderboard", theme);
         const leaderboardDocSnap = await getDoc(leaderboardDocRef);

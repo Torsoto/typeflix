@@ -109,8 +109,6 @@ const Game = () => {
       const url = `http://localhost:3000/getThemeLevelLeaderboard?theme=${title}&levelIndex=${selectedLevelIndex}`;
       const response = await fetch(url);
 
-      console.log(title, selectedLevelIndex, url);
-
       if (response.ok) {
         const data = await response.json();
         setIsLoading(false);
@@ -267,18 +265,34 @@ const Game = () => {
   const handleNextLevel = async () => {
     try {
       const response = await fetch(
-          `http://localhost:3000/movies/${title}/levels/${selectedLevelIndex+1}`
+          `http://localhost:3000/movies/${title}/levels/${selectedLevelIndex + 1}`
       );
       await response.json().then((data) => {
-        handleRetry();
+        console.log(data)
         setText(data.text);
+        setIsBlurred(true);
+        setIsMessageVisible(true);
+        setCurrentLetterIndex(0);
+        setCorrectLetters([]);
+        setIncorrectLetters([]);
+        setHasStartedTyping(false);
+        setNextCursorY(0);
+        sethasCalculated(false);
+        setTimesCalculated(0);
+        setTimesUpdatedCursor(0);
+        setHp(text.length);
+        setIsFinished(false);
+        setTimeLeft(time);
+        setTimeTaken(0);
+        setWpm(0);
+        setHasFailed(false);
+        setChatBubble({ visible: false, text: `` });
         setImg(data.img);
         setTime(data.time);
         setHp(data.text.length);
         setTimeLeft(data.time);
         setSelectedLevelIndex(selectedLevelIndex + 1);
         setLeaderboardData(null);
-        setLeaderboardAvatars({});
       });
     } catch (error) {
       console.error(error);
@@ -304,7 +318,6 @@ const Game = () => {
     setHasFailed(false);
     setChatBubble({ visible: false, text: `` });
     setLeaderboardData(null);
-    setLeaderboardAvatars({});
   };
 
 
