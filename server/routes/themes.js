@@ -19,7 +19,9 @@ app.get("/movies", async (req, res) => {
     try {
       const moviesRef = collection(db, "movies");
       const moviesSnapshot = await getDocs(moviesRef);
-  
+        
+      //throw new Error("Test error"); <- test for error
+
       const moviesList = [];
       moviesSnapshot.forEach((doc) => {
         const movieData = {
@@ -46,51 +48,166 @@ app.get("/movies", async (req, res) => {
       }
     } catch (error) {
       console.error("Error retrieving movie list:", error);
-      res.status(500).send({ error: error.message });
+      if (r === "xml") {
+        const xml = xmlbuilder
+          .create({
+              error: `${error.message}`,
+          })
+          .end({ pretty: true });
+
+        // Set the Content-Type header to "application/xml"
+        res.setHeader("Content-Type", "application/xml");
+    
+        // Send the XML string in the response
+        res.status(500).send(xml);
+    } else {
+        res.status(500).json({ error: error.message });
+    }
     }
   });
 
-app.get("/movies/:movie", async (req, res) => {
+  app.get("/movies/:movie/levels/:level", async (req, res) => {
     const { r } = req.query;
+
     try {
-        const { movie } = req.params;
-        const movieRef = doc(db, `movies/${movie}`);
-        const movieSnapshot = await getDoc(movieRef);
-
-        if (!movieSnapshot.exists()) {
-            res.status(404).send({ error: `Movie ${movie} not found` });
-            return;
-        }
-
-        const gradientColor = movieSnapshot.data().gradientColor;
-
-        const levelsRef = collection(db, `movies/${movie}/levels`);
-        const levelsSnapshot = await getDocs(levelsRef);
-        const levelsCount = levelsSnapshot.size;
-
+      const { movie, level } = req.params;
+      const decodedMovieName = decodeMovieName(movie);
+      const levelRef = doc(db, `movies/${decodedMovieName}/levels/lvl${level}`);
+      const levelSnapshot = await getDoc(levelRef);
+  
+      if (!levelSnapshot.exists()) {
         if (r === "xml") {
-            // Convert the data to an XML string
+            // Convert the error message to an XML string
             const xml = xmlbuilder
-                .create({ movie: { count: levelsCount, color: gradientColor } })
-                .end({ pretty: true });
-
+              .create({
+                error: `Level not found`,
+              })
+              .end({ pretty: true });
+    
             // Set the Content-Type header to "application/xml"
             res.setHeader("Content-Type", "application/xml");
-
+    
             // Send the XML string in the response
-            res.status(200).send(xml);
+            res.status(404).send(xml);
+          } else {
+            // If the Accept header is not "application/xml", send JSON in the response
+            res.status(404).json({ error: "Level not found" });
+            return;
+          }
+      }
+  
+      const levelData = levelSnapshot.data();
+      const text = levelData.text || "There is no text for this level yet";
+      const img = levelData.img || "https://i.imgur.com/7byaekD.png";
+      const time = levelData.time || 60;
+  
+      if (!text) {
+        // Check the Accept header
+        if (r === "xml") {
+          // Convert the error message to an XML string
+          const xml = xmlbuilder
+            .create({
+              error: `Text field not found`,
+            })
+            .end({ pretty: true });
+  
+          // Set the Content-Type header to "application/xml"
+          res.setHeader("Content-Type", "application/xml");
+  
+          // Send the XML string in the response
+          res.status(404).send(xml);
         } else {
-            // If the r parameter is not "xml", send JSON in the response
-            res.status(200).json({ count: levelsCount, color: gradientColor });
+          // If the Accept header is not "application/xml", send JSON in the response
+          res.status(404).json({ error: "Text field not found" });
         }
+        return;
+      }
+  
+      if (!img) {
+        // Check the Accept header
+        if (r === "xml") {
+          // Convert the error message to an XML string
+          const xml = xmlbuilder
+            .create({
+              error: `Img field not found`,
+            })
+            .end({ pretty: true });
+  
+          // Set the Content-Type header to "application/xml"
+          res.setHeader("Content-Type", "application/xml");
+  
+          // Send the XML string in the response
+          res.status(404).send(xml);
+        } else {
+          // If the Accept header is not "application/xml", send JSON in the response
+          res.status(404).json({ error: "Img field not found" });
+        }
+        return;
+      }
+  
+      if (!time) {
+        // Check the Accept header
+        if (r === "xml") {
+          // Convert the error message to an XML string
+          const xml = xmlbuilder
+            .create({
+              error: `Time field not found`,
+            })
+            .end({ pretty: true });
+  
+          // Set the Content-Type header to "application/xml"
+          res.setHeader("Content-Type", "application/xml");
+  
+          // Send the XML string in the response
+          res.status(404).send(xml);
+        } else {
+          // If the Accept header is not "application/xml", send JSON in the response
+          res.status(404).json({ error: "Time field not found" });
+        }
+      }
+  
+      // Check the Accept header
+      if (r === "xml") {
+        // Convert the data to an XML string
+        const xml = xmlbuilder
+          .create({
+            level: { text: text, img: img, time: time },
+          })
+          .end({ pretty: true });
+  
+        // Set the Content-Type header to "application/xml"
+        res.setHeader("Content-Type", "application/xml");
+  
+        // Send the XML string in the response
+        res.status(200).send(xml);
+      } else {
+        // If the Accept header is not "application/xml", send JSON in the response
+        res.status(200).json({ text: text, img: img, time: time });
+      }
     } catch (error) {
-        console.error(
-            `Error retrieving levels or gradient color for movie ${movie}:`,
-            error
-        );
-        res.status(500).send({ error: error.message });
+      console.error(`Error retrieving level for movie: `, error);
+      
+      // Check the Accept header
+      if (r === "xml") {
+        // Convert the error message to an XML string
+        const xml = xmlbuilder
+          .create({
+            error: `${error.message}`,
+          })
+          .end({ pretty: true });
+  
+        // Set the Content-Type header to "application/xml"
+        res.setHeader("Content-Type", "application/xml");
+  
+        // Send the XML string in the response
+        res.status(500).send(xml);
+      } else {
+        // If the Accept header is not "application/xml", send JSON in the response
+        res.status(500).json({ error: error.message });
+      }
     }
-});
+  });
+  
 
 function decodeMovieName(encodedMovieName) {
     let decodedMovieName = "";
@@ -113,8 +230,24 @@ app.get("/movies/:movie/levels/:level", async (req, res) => {
         const levelSnapshot = await getDoc(levelRef);
 
         if (!levelSnapshot.exists()) {
-            res.status(404).send({ error: "Level not found" });
-            return;
+            if (r === "xml") {
+                // Convert the error message to an XML string
+                const xml = xmlbuilder
+                  .create({
+                    error: `Level not found`,
+                  })
+                  .end({ pretty: true });
+        
+                // Set the Content-Type header to "application/xml"
+                res.setHeader("Content-Type", "application/xml");
+        
+                // Send the XML string in the response
+                res.status(404).send(xml);
+              } else {
+                // If the Accept header is not "application/xml", send JSON in the response
+                res.status(404).json({ error: "Level not found" });
+                return;
+              }
         }
 
         const levelData = levelSnapshot.data();
@@ -123,18 +256,69 @@ app.get("/movies/:movie/levels/:level", async (req, res) => {
         const time = levelData.time || 60;
 
         if (!text) {
-            res.status(404).send({ error: "Text field not found" });
+            // Check the Accept header
+            if (r === "xml") {
+              // Convert the error message to an XML string
+              const xml = xmlbuilder
+                .create({
+                  error: `Text field not found`,
+                })
+                .end({ pretty: true });
+      
+              // Set the Content-Type header to "application/xml"
+              res.setHeader("Content-Type", "application/xml");
+      
+              // Send the XML string in the response
+              res.status(404).send(xml);
+            } else {
+              // If the Accept header is not "application/xml", send JSON in the response
+              res.status(404).json({ error: "Text field not found" });
+            }
             return;
-        }
-
-        if (!img) {
-            res.status(404).send({ error: "Img field not found" });
+          }
+      
+          if (!img) {
+            // Check the Accept header
+            if (r === "xml") {
+              // Convert the error message to an XML string
+              const xml = xmlbuilder
+                .create({
+                  error: `Img field not found`,
+                })
+                .end({ pretty: true });
+      
+              // Set the Content-Type header to "application/xml"
+              res.setHeader("Content-Type", "application/xml");
+      
+              // Send the XML string in the response
+              res.status(404).send(xml);
+            } else {
+              // If the Accept header is not "application/xml", send JSON in the response
+              res.status(404).json({ error: "Img field not found" });
+            }
             return;
-        }
-
-        if (!time) {
-            res.status(404).send({ error: "Time field not found" });
-        }
+          }
+      
+          if (!time) {
+            // Check the Accept header
+            if (r === "xml") {
+              // Convert the error message to an XML string
+              const xml = xmlbuilder
+                .create({
+                  error: `Time field not found`,
+                })
+                .end({ pretty: true });
+      
+              // Set the Content-Type header to "application/xml"
+              res.setHeader("Content-Type", "application/xml");
+      
+              // Send the XML string in the response
+              res.status(404).send(xml);
+            } else {
+              // If the Accept header is not "application/xml", send JSON in the response
+              res.status(404).json({ error: "Time field not found" });
+            }
+          }
 
         if (r === "xml") {
             // Convert the data to an XML string
@@ -155,7 +339,23 @@ app.get("/movies/:movie/levels/:level", async (req, res) => {
         }
     } catch (error) {
         console.error(`Error retrieving level for movie: `, error);
-        res.status(500).send({ error: error.message });
+        if (r === "xml") {
+            // Convert the error message to an XML string
+            const xml = xmlbuilder
+              .create({
+                error: `${error.message}`,
+              })
+              .end({ pretty: true });
+      
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+      
+            // Send the XML string in the response
+            res.status(500).send(xml);
+          } else {
+            // If the Accept header is not "application/xml", send JSON in the response
+            res.status(500).json({ error: error.message });
+          }
     }
 });
 
@@ -202,9 +402,25 @@ app.get("/levelsOpened/:username/:movie", async (req, res) => {
             // If the r parameter is not "xml", send JSON in the response
             res.status(200).send({ openedLevels: openedLevels });
         }
-    } catch (e) {
-        console.log("Error retrieving levels:", e);
-        res.status(500).send({ error: e.message });
+    } catch (error) {
+        console.log("Error retrieving levels:", error);
+        if (r === "xml") {
+            // Convert the error message to an XML string
+            const xml = xmlbuilder
+              .create({
+                error: `${error.message}`,
+              })
+              .end({ pretty: true });
+      
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+      
+            // Send the XML string in the response
+            res.status(500).send(xml);
+          } else {
+            // If the Accept header is not "application/xml", send JSON in the response
+            res.status(500).json({ error: error.message });
+          }
     }
 });
 
@@ -242,9 +458,25 @@ app.patch("/unlockNextLevel", async (req, res) => {
             console.log(`Successfully updated level: ${level} for movie: ${movie} and user: ${username}`);
             res.status(200).send({ message: `Successfully updated level: ${level} for movie: ${movie} and user: ${username}` });
         }
-    } catch (e) {
+    } catch (error) {
         console.log("Error updating level:", e);
-        res.status(500).send({ error: e.message });
+        if (req.headers["accept"] === "application/xml") {
+            // Convert the data to an XML string
+            const xml = xmlbuilder
+                .create({
+                    error: `${error.message}`,
+                })
+                .end({ pretty: true });
+
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+
+            // Send the XML string in the response
+            res.status(200).send(xml);
+        } else {
+            // If the Accept header is not "application/xml", send JSON in the response
+            res.status(500).json({ error: error.message });
+        }
     }
 });
 
@@ -307,7 +539,23 @@ app.get("/getomdbi", async (req, res) => {
         }
     } catch (error) {
         console.error("Error fetching movie data:", error);
-        res.status(500).send({ error: error.message });
+        if (r === "xml") {
+            // Convert the error message to an XML string
+            const xml = xmlbuilder
+              .create({
+                error: `${error.message}`,
+              })
+              .end({ pretty: true });
+      
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+      
+            // Send the XML string in the response
+            res.status(500).send(xml);
+          } else {
+            // If the Accept header is not "application/xml", send JSON in the response
+            res.status(500).json({ error: error.message });
+          }
     }
 });
 

@@ -69,14 +69,39 @@ app.get("/user/:username", async (req, res) => {
           }
       } else {
           // If the user doesn't exist, send a 404 error
-          res.status(404).json({
-              error:
-                  "User not found (You are sending request to /:username Endpoint)",
-          });
+          if (r === "xml") {
+            // Convert the data to an XML string
+            const xml = xmlbuilder
+                .create({ error: "User not found (You are sending request to /:username Endpoint)" })
+                .end({ pretty: true });
+
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+
+            // Send the XML string in the response
+            res.status(404).send(xml);
+        } else {
+            // If the r parameter is not "xml", send JSON in the response
+            res.status(404).json({error: "User not found (You are sending request to /:username Endpoint)"});
+        }
       }
   } catch (error) {
       console.error("Error getting user data:", error);
-      res.status(500).json({ error: error.message });
+      if (r === "xml") {
+        const xml = xmlbuilder
+          .create({
+              message: `${error.message}`,
+          })
+          .end({ pretty: true });
+
+        // Set the Content-Type header to "application/xml"
+        res.setHeader("Content-Type", "application/xml");
+    
+        // Send the XML string in the response
+        res.status(500).send({ error: xml });
+    } else {
+        res.status(500).json({ error: error.message });
+    }
   }
 });
 
@@ -119,7 +144,21 @@ app.put("/updateavatar", async (req, res) => {
       }
   } catch (error) {
       console.error("Error updating avatar:", error);
-      res.status(500).json({ error: error.message });
+      if (req.headers["accept"] === "application/xml") {
+        const xml = xmlbuilder
+          .create({
+              message: `${error.message}`,
+          })
+          .end({ pretty: true });
+
+        // Set the Content-Type header to "application/xml"
+        res.setHeader("Content-Type", "application/xml");
+    
+        // Send the XML string in the response
+        res.status(500).send({ error: xml });
+    } else {
+        res.status(500).json({ error: error.message });
+    }
   }
 });
 
@@ -132,7 +171,21 @@ app.get("/getAvatar", async (req, res) => {
       const userDoc = await getDoc(userDocRef);
 
       if (!userDoc.exists()) {
-          res.status(404).json({ error: "User does not exist" });
+        if (r === "xml") {
+            const xml = xmlbuilder
+              .create({
+                  error: `User does not exist`,
+              })
+              .end({ pretty: true });
+    
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+        
+            // Send the XML string in the response
+            res.status(404).send(xml);
+        } else {
+            res.status(404).json({ error: `User does not exist` });
+        }
       } else {
           const userData = userDoc.data();
 
@@ -152,8 +205,22 @@ app.get("/getAvatar", async (req, res) => {
               res.status(200).json({ avatar: userData.avatar });
           }
       }
-  } catch (e) {
-      res.status(500).json({ error: e.message });
+  } catch (error) {
+    if (req.headers["accept"] === "application/xml") {
+        const xml = xmlbuilder
+          .create({
+              message: `${error.message}`,
+          })
+          .end({ pretty: true });
+
+        // Set the Content-Type header to "application/xml"
+        res.setHeader("Content-Type", "application/xml");
+    
+        // Send the XML string in the response
+        res.status(500).send({ error: xml });
+    } else {
+        res.status(500).json({ error: error.message });
+    }
   }
 });
 
@@ -165,7 +232,21 @@ app.post("/follow", async (req, res) => {
       const userDoc = doc(db, "users", username);
       const userSnapshot = await getDoc(userDoc);
       if (!userSnapshot.exists()) {
-          res.status(404).json({ error: "User not found" });
+        if (req.headers["accept"] === "application/xml") {
+            const xml = xmlbuilder
+              .create({
+                  error: `User not found`,
+              })
+              .end({ pretty: true });
+    
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+        
+            // Send the XML string in the response
+            res.status(404).send({ error: xml });
+        } else {
+            res.status(404).json({ error: `User not found` });
+        }
       } else {
           const userData = userSnapshot.data();
           if (userData.following.includes(toFollowUsername)) {
@@ -219,7 +300,21 @@ app.post("/follow", async (req, res) => {
           }
       }
   } catch (error) {
-      res.status(500).json({ error: error.message });
+    if (req.headers["accept"] === "application/xml") {
+        const xml = xmlbuilder
+          .create({
+              error: `${error.message}`,
+          })
+          .end({ pretty: true });
+
+        // Set the Content-Type header to "application/xml"
+        res.setHeader("Content-Type", "application/xml");
+    
+        // Send the XML string in the response
+        res.status(500).send(xml);
+    } else {
+        res.status(500).json({ error: error.message });
+    }
   }
 });
 
@@ -231,7 +326,21 @@ app.post("/unfollow", async (req, res) => {
       const userSnapshot = await getDoc(userDoc);
 
       if (!userSnapshot.exists()) {
-          res.status(404).send({ error: "User not found" });
+        if (req.headers["accept"] === "application/xml") {
+            const xml = xmlbuilder
+              .create({
+                  error: `User not found`,
+              })
+              .end({ pretty: true });
+    
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+        
+            // Send the XML string in the response
+            res.status(404).send({ error: xml });
+        } else {
+            res.status(404).json({ error: `User not found` });
+        }
       } else {
           const userData = userSnapshot.data();
 
@@ -288,7 +397,21 @@ app.post("/unfollow", async (req, res) => {
           }
       }
   } catch (error) {
-      res.status(500).json({ error: error.message });
+    if (req.headers["accept"] === "application/xml") {
+        const xml = xmlbuilder
+          .create({
+              message: `${error.message}`,
+          })
+          .end({ pretty: true });
+
+        // Set the Content-Type header to "application/xml"
+        res.setHeader("Content-Type", "application/xml");
+    
+        // Send the XML string in the response
+        res.status(500).send({ error: xml });
+    } else {
+        res.status(500).json({ error: error.message });
+    }
   }
 });
 
@@ -301,7 +424,21 @@ app.get("/getFollowers", async (req, res) => {
       const userDoc = await getDoc(userDocRef);
 
       if (!userDoc.exists()) {
-          res.status(404).send({ error: "User does not exist" });
+        if (r === "xml") {
+            const xml = xmlbuilder
+              .create({
+                  error: `User does not exist`,
+              })
+              .end({ pretty: true });
+    
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+        
+            // Send the XML string in the response
+            res.status(404).send(xml);
+        } else {
+            res.status(404).json({ error: "User does not exist" });
+        }
       } else {
           const userData = userDoc.data();
 
@@ -321,8 +458,22 @@ app.get("/getFollowers", async (req, res) => {
               res.status(200).json(userData.followers);
           }
       }
-  } catch (e) {
-      res.status(500).json({ error: e.message });
+  } catch (error) {
+    if (r === "xml") {
+        const xml = xmlbuilder
+          .create({
+              error: `${error.message}`,
+          })
+          .end({ pretty: true });
+
+        // Set the Content-Type header to "application/xml"
+        res.setHeader("Content-Type", "application/xml");
+    
+        // Send the XML string in the response
+        res.status(500).send(xml);
+    } else {
+        res.status(500).json({ error: error.message });
+    }
   }
 });
 
@@ -355,8 +506,22 @@ app.get("/getFollowersCount", async (req, res) => {
               res.status(200).json({ count: userData.followers.length });
           }
       }
-  } catch (e) {
-      res.status(500).json({ error: e.message });
+  } catch (error) {
+    if (req.headers["accept"] === "application/xml") {
+        const xml = xmlbuilder
+          .create({
+              message: `${error.message}`,
+          })
+          .end({ pretty: true });
+
+        // Set the Content-Type header to "application/xml"
+        res.setHeader("Content-Type", "application/xml");
+    
+        // Send the XML string in the response
+        res.status(500).send({ error: xml });
+    } else {
+        res.status(500).json({ error: error.message });
+    }
   }
 });
 
@@ -389,8 +554,22 @@ app.get("/getFollowing", async (req, res) => {
               res.status(200).json(userData.following);
           }
       }
-  } catch (e) {
-      res.status(500).json({ error: e.message });
+  } catch (error) {
+    if (req.headers["accept"] === "application/xml") {
+        const xml = xmlbuilder
+          .create({
+              message: `${error.message}`,
+          })
+          .end({ pretty: true });
+
+        // Set the Content-Type header to "application/xml"
+        res.setHeader("Content-Type", "application/xml");
+    
+        // Send the XML string in the response
+        res.status(500).send({ error: xml });
+    } else {
+        res.status(500).json({ error: error.message });
+    }
   }
 });
 
@@ -459,13 +638,27 @@ app.get("/checkUserExists", async (req, res) => {
           res.setHeader("Content-Type", "application/xml");
 
           // Send the XML string in the response
-          res.status(200).send(xml);
+          res.status(200).send({xml});
       } else {
           // If the r parameter is not "xml", send JSON in the response
           res.status(200).json({ exists: userDoc.exists() });
       }
-  } catch (e) {
-      res.status(500).json({ error: e.message });
+  } catch (error) {
+    if (r === "xml") {
+        const xml = xmlbuilder
+          .create({
+              message: `${error.message}`,
+          })
+          .end({ pretty: true });
+
+        // Set the Content-Type header to "application/xml"
+        res.setHeader("Content-Type", "application/xml");
+    
+        // Send the XML string in the response
+        res.status(500).send({ error: xml });
+    } else {
+        res.status(500).json({ error: error.message });
+    }
   }
 });
 
@@ -474,8 +667,22 @@ app.delete("/deleteAccount", async (req, res) => {
       const { token, password, username, email } = req.body;
 
       if (!jwt.verify(token, secretKey)) {
-          res.status(403).send({ error: "Invalid JWT" });
-          return;
+        if (req.headers["accept"] === "application/xml") {
+            const xml = xmlbuilder
+              .create({
+                  message: `Invalid JWT`,
+              })
+              .end({ pretty: true });
+
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+        
+            // Send the XML string in the response
+            res.status(403).send(xml);
+        } else {
+            res.status(403).json({ error: "Invalid JWT" });
+            return;
+        }
       }
 
       const userCredential = await signInWithEmailAndPassword(
@@ -485,9 +692,23 @@ app.delete("/deleteAccount", async (req, res) => {
       );
 
       if (!userCredential) {
-          res.status(403).send({ error: "Invalid credentials" });
-          return;
+        if (req.headers["accept"] === "application/xml") {
+            const xml = xmlbuilder
+              .create({
+                  message: `Invalid credentials`,
+              })
+              .end({ pretty: true });
+
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+        
+            // Send the XML string in the response
+            res.status(403).send(xml);
+      } else {
+        res.status(403).json({ error: "Invalid credentials" });
+        return;
       }
+    }
 
       // Get the user's followers and following
       const userDocRef = doc(db, "users", username);
@@ -573,9 +794,23 @@ app.delete("/deleteAccount", async (req, res) => {
           // If the Accept header is not "application/xml", send JSON in the response
           res.status(200).json({ message: "Account deleted successfully" });
       }
-  } catch (e) {
-    console.error("Error deleting user:", e);
-    res.status(500).json({ error: e.message });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    if (req.headers["accept"] === "application/xml") {
+        const xml = xmlbuilder
+          .create({
+              message: `${error.message}`,
+          })
+          .end({ pretty: true });
+
+        // Set the Content-Type header to "application/xml"
+        res.setHeader("Content-Type", "application/xml");
+    
+        // Send the XML string in the response
+        res.status(500).send({ error: xml });
+    } else {
+        res.status(500).json({ error: error.message });
+    }
   }
 });
 
