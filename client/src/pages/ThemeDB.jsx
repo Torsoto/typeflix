@@ -43,7 +43,7 @@ const ThemeDB = () => {
     return (
         <div>
             <Navbar />
-            <div className="grid grid-cols-5 gap-4 p-4 text-white">
+            <div className="grid grid-cols-3 gap-4 p-4 text-white">
                 {data.map((movie, index) => (
                     <div key={index} className="flex flex-col p-2">
                         <img

@@ -34,7 +34,7 @@ function Leaderboard() {
                             <CircularProgress style={{ color: 'white' }} />
                         </div>
                     ) : (
-                        <LeaderboardTable leaderboardData={leaderboardData}/>
+                        <LeaderboardTable leaderboardData={leaderboardData} />
                     )}
                 </div>
             </div>

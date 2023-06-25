@@ -9,8 +9,11 @@ import "../db/firebase.mjs";
 
 const db = getFirestore();
 const app = express.Router();
+import xmlbuilder from "xmlbuilder";
 
 app.post("/updateLeaderboard", async (req, res) => {
+    const acceptHeader = req.headers["accept"];
+
     try {
         const { username, wpm } = req.body;
 
@@ -20,8 +23,23 @@ app.post("/updateLeaderboard", async (req, res) => {
         const userDocSnap = await getDoc(userDocRef);
 
         if (!userDocSnap.exists()) {
-            res.status(404).send({ error: "User not found" });
-            return;
+            if (acceptHeader === "application/xml") {
+                // Convert the error message to an XML string
+                const xml = xmlbuilder
+                    .create({
+                        error: `User not found`,
+                    })
+                    .end({ pretty: true });
+
+                // Set the Content-Type header to "application/xml"
+                res.setHeader("Content-Type", "application/xml");
+
+                // Send the XML string in the response
+                return res.status(404).send(xml);
+            } else {
+                // If the query is not xml, send JSON in the response
+                return res.status(404).json({ error: "User not found" });
+            }
         }
 
         let userDocData = userDocSnap.data();
@@ -75,23 +93,69 @@ app.post("/updateLeaderboard", async (req, res) => {
         // Update the leaderboard in Firestore
         await setDoc(leaderboardDocRef, { leaderboard: leaderboardData });
 
-        res
-            .status(200)
-            .send({ message: "Leaderboard and user stats updated successfully." });
-    } catch (e) {
-        console.log("Error updating leaderboard:", e);
-        res.status(500).send({ error: e.message });
+        if (acceptHeader === "application/xml" === "xml") {
+            // Convert the error message to an XML string
+            const xml = xmlbuilder
+                .create({
+                    message: `Leaderboard and user stats updated successfully.`,
+                })
+                .end({ pretty: true });
+
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+
+            // Send the XML string in the response
+            res.status(200).send(xml);
+        } else {
+            // If the query is not xml, send JSON in the response
+            res.status(200).json({ message: "Leaderboard and user stats updated successfully" });
+        }
+    } catch (error) {
+        console.log("Error updating leaderboard:", error);
+        if (acceptHeader === "application/xml" === "xml") {
+            // Convert the error message to an XML string
+            const xml = xmlbuilder
+                .create({
+                    error: `${error.message}`,
+                })
+                .end({ pretty: true });
+
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+
+            // Send the XML string in the response
+            res.status(500).send(xml);
+        } else {
+            // If the query is not xml, send JSON in the response
+            res.status(500).json({ error: error.message });
+        }
     }
 });
 
 app.get("/getLeaderboard", async (req, res) => {
+    const { r } = req.query;
     try {
         const leaderboardDocRef = doc(db, "leaderboard", "global");
         const leaderboardDocSnap = await getDoc(leaderboardDocRef);
 
         if (!leaderboardDocSnap.exists()) {
             console.log("Leaderboard does not exist");
-            return res.status(404).send({ error: "Leaderboard does not exist" });
+            if (r === "xml") {
+                // Convert the error message to an XML string
+                const xml = xmlbuilder
+                    .create({ error: "Leaderboard does not exist" })
+                    .end({ pretty: true });
+
+                // Set the Content-Type header to "application/xml"
+                res.setHeader("Content-Type", "application/xml");
+
+                // Send the XML string in the response
+                res.status(404).send(xml);
+            } else {
+                // If the r parameter is not "xml", send JSON in the response
+                res.status(404).json({ error: "Leaderboard does not exist" });
+            }
+            return;
         }
 
         const leaderboardData = leaderboardDocSnap.data().leaderboard;
@@ -102,15 +166,45 @@ app.get("/getLeaderboard", async (req, res) => {
             leaderboardObject[user.username] = user.wpm;
         }
 
-        res.status(200).send(leaderboardObject);
+        if (r === "xml") {
+            // Convert the leaderboard object to an XML string
+            const xml = xmlbuilder
+                .create({ leaderboard: leaderboardObject })
+                .end({ pretty: true });
+
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+
+            // Send the XML string in the response
+            res.status(200).send(xml);
+        } else {
+            // If the r parameter is not "xml", send JSON in the response
+            res.status(200).json(leaderboardObject);
+        }
     } catch (e) {
         console.log("Error retrieving leaderboard:", e);
-        res.status(500).send({ error: e.message });
+        if (r === "xml") {
+            // Convert the error message to an XML string
+            const xml = xmlbuilder
+                .create({ error: e.message })
+                .end({ pretty: true });
+
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+
+            // Send the XML string in the response
+            res.status(500).send(xml);
+        } else {
+            // If the r parameter is not "xml", send JSON in the response
+            res.status(500).json({ error: e.message });
+        }
     }
 });
 
+
 // New endpoint to update theme and level specific leaderboard
 app.post("/updateThemeLevelLeaderboard", async (req, res) => {
+    const acceptHeader = req.headers["accept"];
     try {
         const { username, wpm, theme, levelIndex } = req.body;
 
@@ -152,17 +246,45 @@ app.post("/updateThemeLevelLeaderboard", async (req, res) => {
         // Update the leaderboard in Firestore
         await setDoc(leaderboardDocRef, leaderboardData);
 
-        res
-            .status(200)
-            .send({ message: "Leaderboard updated successfully." });
+        if (acceptHeader === "application/xml" === "xml") {
+            // Convert the success message to an XML string
+            const xml = xmlbuilder
+                .create({ message: "Leaderboard updated successfully." })
+                .end({ pretty: true });
+
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+
+            // Send the XML string in the response
+            res.status(200).send(xml);
+        } else {
+            // If the r parameter is not "xml", send JSON in the response
+            res.status(200).json({ message: "Leaderboard updated successfully." });
+        }
     } catch (e) {
         console.log("Error updating leaderboard:", e);
-        res.status(500).send({ error: e.message });
+        if (acceptHeader === "application/xml" === "xml") {
+            // Convert the error message to an XML string
+            const xml = xmlbuilder
+                .create({ error: e.message })
+                .end({ pretty: true });
+
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+
+            // Send the XML string in the response
+            res.status(500).send(xml);
+        } else {
+            // If the r parameter is not "xml", send JSON in the response
+            res.status(500).json({ error: e.message });
+        }
     }
 });
 
+
 // New endpoint to get theme and level specific leaderboard
 app.get("/getThemeLevelLeaderboard", async (req, res) => {
+    const { r } = req.query;
     try {
         const { theme, levelIndex } = req.query;
 
@@ -171,7 +293,22 @@ app.get("/getThemeLevelLeaderboard", async (req, res) => {
 
         if (!leaderboardDocSnap.exists()) {
             console.log("Leaderboard does not exist");
-            return res.status(404).send({ error: "Leaderboard does not exist" });
+            if (r === "xml") {
+                // Convert the error message to an XML string
+                const xml = xmlbuilder
+                    .create({ error: "Leaderboard does not exist" })
+                    .end({ pretty: true });
+
+                // Set the Content-Type header to "application/xml"
+                res.setHeader("Content-Type", "application/xml");
+
+                // Send the XML string in the response
+                res.status(404).send(xml);
+            } else {
+                // If the r parameter is not "xml", send JSON in the response
+                res.status(404).json({ error: "Leaderboard does not exist" });
+            }
+            return;
         }
 
         const leaderboardData = leaderboardDocSnap.data();
@@ -183,11 +320,40 @@ app.get("/getThemeLevelLeaderboard", async (req, res) => {
             leaderboardObject[user.username] = user.wpm;
         }
 
-        res.status(200).send(leaderboardObject);
+        if (r === "xml") {
+            // Convert the leaderboard object to an XML string
+            const xml = xmlbuilder
+                .create({ leaderboard: leaderboardObject })
+                .end({ pretty: true });
+
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+
+            // Send the XML string in the response
+            res.status(200).send(xml);
+        } else {
+            // If the r parameter is not "xml", send JSON in the response
+            res.status(200).json(leaderboardObject);
+        }
     } catch (e) {
         console.log("Error retrieving leaderboard:", e);
-        res.status(500).send({ error: e.message });
+        if (r === "xml") {
+            // Convert the error message to an XML string
+            const xml = xmlbuilder
+                .create({ error: e.message })
+                .end({ pretty: true });
+
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+
+            // Send the XML string in the response
+            res.status(500).send(xml);
+        } else {
+            // If the r parameter is not "xml", send JSON in the response
+            res.status(500).json({ error: e.message });
+        }
     }
 });
+
 
 export default app;

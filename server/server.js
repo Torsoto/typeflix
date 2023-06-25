@@ -9,7 +9,8 @@ import leaderboardRoutes from "./routes/leaderboard.js";
 import themesRoutes from "./routes/themes.js";
 import restRoutes from "./routes/restAPI.js";
 import trainingRoutes from "./routes/training.js";
-import {logWeatherAndTime} from "./logsFunction/logWeatherAndTime.js";
+import { logWeatherAndTime } from "./logsFunction/logWeatherAndTime.js";
+import xmlbuilder from "xmlbuilder";
 
 const app = express();
 const developmentMode = true;
@@ -44,7 +45,20 @@ app.use(restRoutes);
 app.use(trainingRoutes);
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  const { r } = req.query
+  if (r === "xml") {
+    const xml = xmlbuilder
+      .create({
+        message: "Hello World!"
+      })
+      .end({ pretty: true });
+
+    res.setHeader("Content-Type", "application/xml");
+
+    res.status(200).send(xml)
+  } else {
+    res.status(200).json("Hello World!");
+  }
 });
 
 app.listen(3000, () => {

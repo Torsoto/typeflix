@@ -1,16 +1,16 @@
 import express from "express";
 import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
 } from "firebase/auth";
 import {
-  getFirestore,
-  doc,
-  getDoc,
-  getDocs,
-  collection,
-  writeBatch,
+    getFirestore,
+    doc,
+    getDoc,
+    getDocs,
+    collection,
+    writeBatch,
 } from "firebase/firestore";
 import "../db/firebase.mjs";
 import jwt from "jsonwebtoken";
@@ -20,6 +20,7 @@ const auth = getAuth();
 const db = getFirestore();
 const app = express.Router();
 import xmlparser from 'express-xml-bodyparser'
+import xmlbuilder from "xmlbuilder";
 
 app.use(xmlparser());
 
@@ -65,7 +66,7 @@ const createThemesCollection = async (username, batch) => {
     await batch.commit();
 };
 
-const handleLogin = async (email, username, password, res) => {
+const handleLogin = async (email, username, password, res, acceptHeader) => {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         console.log("User logged in successfully");
@@ -75,15 +76,47 @@ const handleLogin = async (email, username, password, res) => {
         console.log("Themes collections recreated successfully");
 
         const token = generateToken(userCredential.user, username, email);
-        res.status(200).send({ token: token, username: userCredential.user.uid });
+
+        if (acceptHeader === "application/xml") {
+            // Convert the data to an XML string
+            const xml = xmlbuilder
+                .create({ token: token, username: userCredential.user.uid })
+                .end({ pretty: true });
+
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+
+            // Send the XML string in the response
+            res.status(200).send(xml);
+        } else {
+            // If the Accept header is not "application/xml", send JSON in the response
+            res.status(200).json({ token: token, username: userCredential.user.uid });
+        }
     } catch (error) {
         console.error("Error:", error.message);
         console.error(email, password);
-        res.status(400).send({ error: error.message });
+
+        if (acceptHeader === "application/xml") {
+            // Convert the error message to an XML string
+            const xml = xmlbuilder
+                .create({ error: error.message })
+                .end({ pretty: true });
+
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+
+            // Send the XML string in the response
+            res.status(400).send(xml);
+        } else {
+            // If the Accept header is not "application/xml", send JSON in the response
+            res.status(400).json({ error: error.message });
+        }
     }
 };
 
+
 app.post("/signup", async (req, res) => {
+    const acceptHeader = req.headers["accept"];
     try {
         const { username, email, password } = req.body;
         const lowercaseUsername = username.toLowerCase();
@@ -99,7 +132,21 @@ app.post("/signup", async (req, res) => {
 
         if (usernameExists) {
             console.log("Username already exists");
-            res.status(401).send({ error: "Username already exists" });
+            if (acceptHeader === "application/xml") {
+                // Convert the error message to an XML string
+                const xml = xmlbuilder
+                    .create({ error: "Username already exists" })
+                    .end({ pretty: true });
+
+                // Set the Content-Type header to "application/xml"
+                res.setHeader("Content-Type", "application/xml");
+
+                // Send the XML string in the response
+                res.status(401).send(xml);
+            } else {
+                // If the Accept header is not "application/xml", send JSON in the response
+                res.status(401).json({ error: "Username already exists" });
+            }
         } else {
             try {
                 createUserWithEmailAndPassword(auth, email, password)
@@ -131,26 +178,89 @@ app.post("/signup", async (req, res) => {
                             username: lowercaseUsername,
                         });
 
-                        createThemesCollection(lowercaseUsername, batch).then(()=>{
+                        createThemesCollection(lowercaseUsername, batch).then(() => {
                             console.log("User data stored in Firestore");
                             const token = generateToken(userRecord.user, lowercaseUsername, email);
-                            res.status(200).send({ token: token, uid: userRecord.user.uid });
+                            if (acceptHeader === "application/xml") {
+                                // Convert the success message to an XML string
+                                const xml = xmlbuilder
+                                    .create({
+                                        token: token,
+                                        uid: userRecord.user.uid,
+                                    })
+                                    .end({ pretty: true });
+
+                                // Set the Content-Type header to "application/xml"
+                                res.setHeader("Content-Type", "application/xml");
+
+                                // Send the XML string in the response
+                                res.status(200).send(xml);
+                            } else {
+                                // If the Accept header is not "application/xml", send JSON in the response
+                                res.status(200).json({
+                                    token: token,
+                                    uid: userRecord.user.uid,
+                                });
+                            }
                         });
                     })
                     .catch((error) => {
                         console.log("Error creating new user:", error);
-                        res.status(500).send({ error: error.message });
+                        if (acceptHeader === "application/xml") {
+                            // Convert the error message to an XML string
+                            const xml = xmlbuilder
+                                .create({ error: error.message })
+                                .end({ pretty: true });
+
+                            // Set the Content-Type header to "application/xml"
+                            res.setHeader("Content-Type", "application/xml");
+
+                            // Send the XML string in the response
+                            res.status(500).send(xml);
+                        } else {
+                            // If the Accept header is not "application/xml", send JSON in the response
+                            res.status(500).json({ error: error.message });
+                        }
                     });
             } catch (e) {
-                res.status(500).send({ error: e.message });
+                if (acceptHeader === "application/xml") {
+                    // Convert the error message to an XML string
+                    const xml = xmlbuilder
+                        .create({ error: error.message })
+                        .end({ pretty: true });
+
+                    // Set the Content-Type header to "application/xml"
+                    res.setHeader("Content-Type", "application/xml");
+
+                    // Send the XML string in the response
+                    res.status(500).send(xml);
+                } else {
+                    // If the Accept header is not "application/xml", send JSON in the response
+                    res.status(500).json({ error: error.message });
+                }
             }
         }
     } catch (e) {
-        res.status(500).send({ error: e.message });
+        if (acceptHeader === "application/xml") {
+            // Convert the error message to an XML string
+            const xml = xmlbuilder
+                .create({ error: error.message })
+                .end({ pretty: true });
+
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+
+            // Send the XML string in the response
+            res.status(500).send(xml);
+        } else {
+            // If the Accept header is not "application/xml", send JSON in the response
+            res.status(500).json({ error: error.message });
+        }
     }
 });
 
 app.post("/login", async (req, res) => {
+    const acceptHeader = req.headers["accept"];
     const { identifier, password } = req.body;
     const lowercaseIdentifier = identifier.toLowerCase();
 
@@ -169,33 +279,95 @@ app.post("/login", async (req, res) => {
 
     if (email) {
         // User found by username
-        await handleLogin(email, lowercaseIdentifier, password, res);
+        await handleLogin(email, lowercaseIdentifier, password, res, acceptHeader);
     } else {
         console.log("try2")
         // User not found by username, attempt to sign in with the identifier as email
         try {
             const docSnapshot = await getDoc(doc(db, "emailToUsername", lowercaseIdentifier));
             const username = docSnapshot.data().username;
-            await handleLogin(lowercaseIdentifier, username, password, res);
+            await handleLogin(lowercaseIdentifier, username, password, res, acceptHeader);
         } catch (error) {
             console.error("Error getting username from email:", error);
-            res.status(500).send({ error: error.message });
+            if (acceptHeader === "application/xml") {
+                // Convert the error message to an XML string
+                const xml = xmlbuilder
+                    .create({ error: error.message })
+                    .end({ pretty: true });
+
+                // Set the Content-Type header to "application/xml"
+                res.setHeader("Content-Type", "application/xml");
+
+                // Send the XML string in the response
+                res.status(500).send(xml);
+            } else {
+                // If the Accept header is not "application/xml", send JSON in the response
+                res.status(500).json({ error: error.message });
+            }
         }
     }
 });
 
+
 app.post("/validate", async (req, res) => {
+    const acceptHeader = req.headers["accept"];
     const token = req.body.token;
     if (token) {
         try {
             const decoded = jwt.verify(token, secretKey);
-            res.status(200).send({ valid: true, username: decoded.username });
+            if (acceptHeader === "application/xml") {
+                // Convert the success message to an XML string
+                const xml = xmlbuilder
+                    .create({
+                        valid: true,
+                        username: decoded.username,
+                    })
+                    .end({ pretty: true });
+
+                // Set the Content-Type header to "application/xml"
+                res.setHeader("Content-Type", "application/xml");
+
+                // Send the XML string in the response
+                res.status(200).send(xml);
+            } else {
+                // If the Accept header is not "application/xml", send JSON in the response
+                res.status(200).json({ valid: true, username: decoded.username });
+            }
         } catch (e) {
-            res.status(401).send({ valid: false, error: e.message });
+            if (acceptHeader === "application/xml") {
+                // Convert the error message to an XML string
+                const xml = xmlbuilder
+                    .create({ valid: false, error: e.message })
+                    .end({ pretty: true });
+
+                // Set the Content-Type header to "application/xml"
+                res.setHeader("Content-Type", "application/xml");
+
+                // Send the XML string in the response
+                res.status(401).send(xml);
+            } else {
+                // If the Accept header is not "application/xml", send JSON in the response
+                res.status(401).json({ valid: false, error: e.message });
+            }
         }
     } else {
-        res.status(400).send({ valid: false, error: "No token provided" });
+        if (acceptHeader === "application/xml") {
+            // Convert the error message to an XML string
+            const xml = xmlbuilder
+                .create({ valid: false, error: "No token provided" })
+                .end({ pretty: true });
+
+            // Set the Content-Type header to "application/xml"
+            res.setHeader("Content-Type", "application/xml");
+
+            // Send the XML string in the response
+            res.status(400).send(xml);
+        } else {
+            // If the Accept header is not "application/xml", send JSON in the response
+            res.status(400).json({ valid: false, error: "No token provided" });
+        }
     }
 });
+
 
 export default app;

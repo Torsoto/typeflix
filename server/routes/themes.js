@@ -449,9 +449,23 @@ app.get("/levelsOpened/:username/:movie", async (req, res) => {
     // If the user hasn't started on the specified movie yet
     if (levelDocsSnapshot.empty) {
       console.log("User has not started on this movie");
-      return res
-        .status(404)
-        .send({ error: "User has not started on this movie" });
+      if (r === "xml") {
+        // Convert the data to an XML string
+        const xml = xmlbuilder
+          .create({ error: "User has not started on this movie" })
+          .end({ pretty: true });
+
+        // Set the Content-Type header to "application/xml"
+        res.setHeader("Content-Type", "application/xml");
+
+        // Send the XML string in the response
+        return res.status(404).send(xml);
+      } else {
+        // If the r parameter is not "xml", send JSON in the response
+        return res
+          .status(404)
+          .send({ error: "User has not started on this movie" });
+      }
     }
 
     // Count the number of opened levels
@@ -475,7 +489,7 @@ app.get("/levelsOpened/:username/:movie", async (req, res) => {
       res.status(200).send(xml);
     } else {
       // If the r parameter is not "xml", send JSON in the response
-      res.status(200).send({ openedLevels: openedLevels });
+      res.status(200).json({ openedLevels: openedLevels });
     }
   } catch (error) {
     console.log("Error retrieving levels:", error);

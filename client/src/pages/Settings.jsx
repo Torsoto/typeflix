@@ -227,79 +227,20 @@ function Settings() {
                 >
                   Delete Account
                 </button>
-                <Modal
-                  isOpen={modalIsOpenDelete}
-                  onRequestClose={handleCancelModalDelete}
-                  className="flex items-center justify-center w-full h-full bg-gray-800 bg-opacity-80"
-                >
-                  <div className="p-4 bg-white rounded-lg w-96">
-                    <h2 className="text-lg font-medium text-center">
-                      Are you sure you want to delete your account?
-                    </h2>
-                    <div className="flex mt-4 place-content-center ">
-                      <button
-                        className="px-4 py-2 mr-2 font-medium text-white bg-red-500 rounded-lg hover:bg-red-600"
-                        onClick={handleOpenSecondModal}
-                      >
-                        Confirm
-                      </button>
-                      <button
-                        className="px-4 py-2 font-medium text-white bg-gray-500 rounded-lg hover:bg-gray-600"
-                        onClick={handleCancelModalDelete}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                </Modal>
               </div>
               <div className="flex flex-col gap-8 place-content-center md:w-1/2">
                 <div className="flex items-center">
                   <p className="mr-2 text-lg text-white">
                     Username: {userData && <span>{userData.username}</span>}
                   </p>
-                  <button
-                    className="px-2 py-1 font-semibold text-white bg-black rounded-full"
-                    onClick={() => handleOpenModalUsername()}
-                  >
-                    <BiEdit />
-                  </button>
-                  <Modal
-                    isOpen={modalIsOpenUsername}
-                    onRequestClose={handleCancelModalUsername}
-                    className="flex items-center justify-center w-full h-full bg-gray-800 bg-opacity-80"
-                  >
-                    <div className="p-4 bg-white rounded-lg w-96">
-                      <h2 className="text-lg font-medium text-center">
-                        Enter your new username!
-                      </h2>
-                      <input
-                        type="username"
-                        className="w-full px-4 py-2 mt-4 border rounded-lg"
-                        onChange={(e) => setNewUsername(e.target.value)}
-                      />
-                      <div className="flex mt-4 place-content-center ">
-                        <button
-                          className="px-4 py-2 mr-2 font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600"
-                          onClick={handleUpdateUsername}
-                        >
-                          Confirm
-                        </button>
-                        <button
-                          className="px-4 py-2 font-medium text-white bg-gray-500 rounded-lg hover:bg-gray-600"
-                          onClick={handleCancelModalUsername}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  </Modal>
                 </div>
-
                 <div className="flex items-start gap-2 ">
                   <p className="text-lg text-white">
                     Email: {userData && <span>{userData.email}</span>}
                   </p>
+                </div>
+                <div>
+                  <button className="h-10 p-2 text-white bg-black rounded-3xl">Reset Password</button>
                 </div>
               </div>
             </div>
@@ -338,6 +279,31 @@ function Settings() {
             <button
               className="px-4 py-2 font-medium text-white bg-gray-500 rounded-lg hover:bg-gray-600"
               onClick={handleCloseSecondModal}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        isOpen={modalIsOpenDelete}
+        onRequestClose={handleCancelModalDelete}
+        className="flex items-center justify-center w-full h-full bg-gray-800 bg-opacity-80"
+      >
+        <div className="p-4 bg-white rounded-lg w-96">
+          <h2 className="text-lg font-medium text-center">
+            Are you sure you want to delete your account?
+          </h2>
+          <div className="flex mt-4 place-content-center ">
+            <button
+              className="px-4 py-2 mr-2 font-medium text-white bg-red-500 rounded-lg hover:bg-red-600"
+              onClick={handleOpenSecondModal}
+            >
+              Confirm
+            </button>
+            <button
+              className="px-4 py-2 font-medium text-white bg-gray-500 rounded-lg hover:bg-gray-600"
+              onClick={handleCancelModalDelete}
             >
               Cancel
             </button>

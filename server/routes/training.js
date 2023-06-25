@@ -31,7 +31,7 @@ app.get("/training", async (req, res) => {
 
                 // Set the Content-Type header to "application/xml"
                 res.setHeader("Content-Type", "application/xml");
-                
+
 
                 // Send the XML string in the response
                 res.status(200).send(xml);
@@ -52,7 +52,7 @@ app.get("/training", async (req, res) => {
 
             // Set the Content-Type header to "application/xml"
             res.setHeader("Content-Type", "application/xml");
-            
+
 
             // Send the XML string in the response
             res.status(500).send(xml);
