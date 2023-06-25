@@ -8,18 +8,16 @@ import Modal from "react-modal";
 import Notification from "../components/Notification/Notification.jsx";
 import { ERROR_MAP } from "../components/Notification/ERROR_MAP.js";
 
+
 function Settings() {
   const [error, setError] = useState("");
   const [showAvatarOptions, setShowAvatarOptions] = useState(false);
-  const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [modalIsOpenDelete, setModalIsOpenDelete] = useState(false);
-  const [modalIsOpenUsername, setModalIsOpenUsername] = useState(false);
   const [modalIsOpenPassword, setModalIsOpenPassword] = useState(false);
   const [ModalIsOpenDeleteConfirm, setModalIsOpenDeleteConfirm] =
     useState(false);
   const [password, setPassword] = useState("");
-  const [modalText, setModalText] = useState("");
   const { userId, userData, avatarUrl, setAvatarUrl, logout } =
     useContext(AuthContext);
   const [notification, setNotification] = useState({
@@ -53,47 +51,6 @@ function Settings() {
       console.error("Error updating avatar:", error);
     }
   };
-
-  const handleUpdateUsername = async () => {
-    // NOT WORKING ATM!!!
-    /*
-    if (newUsername.length > 1) {
-      try {
-        const response = await fetch("http://localhost:3000/editUsername", {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            token: localStorage.getItem("jwt"),
-            newUsername: newUsername,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to update username");
-        }
-
-        const data = await response.json();
-        console.log(data.message);
-      } catch (error) {
-        setNotification({
-          show: true,
-          message:
-            ERROR_MAP[error.message] ||
-            "Error updating username. Please try again with a different username or try again later",
-        });
-        console.error("Error updating username:", error);
-      }
-    } else {
-      setNotification({
-        show: true,
-        message: "New username must be at least 2 characters long",
-      });
-    }
-    */
-  };
-
 
   const handleUpdatePassword = async () => {
     try {
@@ -161,31 +118,32 @@ function Settings() {
       });
   };
 
-
-  //Modals for Username
-  const handleOpenModalUsername = () => {
-    setModalIsOpenUsername(true);
+  //Modal for changing password
+  const handleChangePassword = async () => {
+    setModalIsOpenPassword(true);
   };
 
-  const handleCancelModalUsername = () => {
-    setModalIsOpenUsername(false);
+  const handleCancelChangePassword = () => {
+    setModalIsOpenPassword(false);
   };
 
+  //first Modal for deletion
   const handleDeleteAccount = async () => {
     setModalIsOpenDelete(true);
   };
 
-  const handleOpenSecondModal = () => {
+  const handleCancelModalDelete = () => {
+    setModalIsOpenDelete(false);
+  };
+
+  //Second Modal (confirm delete)
+  const handleOpenSecondModalDelete = () => {
     setModalIsOpenDelete(false);
     setModalIsOpenDeleteConfirm(true);
   };
 
-  const handleCloseSecondModal = () => {
+  const handleCloseSecondModalDelete = () => {
     setModalIsOpenDeleteConfirm(false);
-    setModalIsOpenDelete(false);
-  };
-
-  const handleCancelModalDelete = () => {
     setModalIsOpenDelete(false);
   };
 
@@ -240,7 +198,47 @@ function Settings() {
                   </p>
                 </div>
                 <div>
-                  <button className="h-10 p-2 text-white bg-black rounded-3xl">Reset Password</button>
+                  <button
+                    className="h-10 p-2 text-white bg-black rounded-3xl"
+                    onClick={() => handleChangePassword()}
+                  >
+                    Reset Password
+                  </button>
+                  <Modal
+                    isOpen={modalIsOpenPassword}
+                    onRequestClose={handleCancelChangePassword}
+                    className="flex items-center justify-center w-full h-full bg-gray-800 bg-opacity-80"
+                  >
+                    <div className="p-4 bg-white rounded-lg w-96">
+                      <h2 className="text-lg font-medium text-center">
+                        Enter your password for Changing
+                      </h2>
+                      <input
+                        type="password"
+                        className="w-full px-4 py-2 mt-4 border rounded-lg"
+                        onChange
+                      />
+                      <h2 className="text-lg font-medium text-center">
+                        Enter your new Password
+                      </h2>
+                      <input
+                        type="password"
+                        className="w-full px-4 py-2 mt-4 border rounded-lg"
+                        onChange
+                      />
+                      <div className="flex mt-4 place-content-center ">
+                        <button className="px-4 py-2 mr-2 font-medium text-white bg-red-500 rounded-lg hover:bg-red-600">
+                          Confirm
+                        </button>
+                        <button
+                          className="px-4 py-2 font-medium text-white bg-gray-500 rounded-lg hover:bg-gray-600"
+                          onClick={handleCancelChangePassword}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </Modal>
                 </div>
               </div>
             </div>
@@ -257,7 +255,7 @@ function Settings() {
       </div>
       <Modal
         isOpen={ModalIsOpenDeleteConfirm}
-        onRequestClose={handleCloseSecondModal}
+        onRequestClose={handleCloseSecondModalDelete}
         className="flex items-center justify-center w-full h-full bg-gray-800 bg-opacity-80"
       >
         <div className="p-4 bg-white rounded-lg w-96">
@@ -278,7 +276,7 @@ function Settings() {
             </button>
             <button
               className="px-4 py-2 font-medium text-white bg-gray-500 rounded-lg hover:bg-gray-600"
-              onClick={handleCloseSecondModal}
+              onClick={handleCloseSecondModalDelete}
             >
               Cancel
             </button>
@@ -297,7 +295,7 @@ function Settings() {
           <div className="flex mt-4 place-content-center ">
             <button
               className="px-4 py-2 mr-2 font-medium text-white bg-red-500 rounded-lg hover:bg-red-600"
-              onClick={handleOpenSecondModal}
+              onClick={handleOpenSecondModalDelete}
             >
               Confirm
             </button>
