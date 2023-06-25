@@ -548,7 +548,7 @@ app.patch("/unlockNextLevel", async (req, res) => {
       res.status(200).send({ message: `Successfully updated level: ${level} for movie: ${movie} and user: ${username}` });
     }
   } catch (error) {
-    console.log("Error updating level:", e);
+    console.log("Error updating level:", error);
     if (req.headers["accept"] === "application/xml") {
       // Convert the data to an XML string
       const xml = xmlbuilder
