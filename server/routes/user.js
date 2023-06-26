@@ -406,53 +406,6 @@ app.get("/getFollowing", async (req, res) => {
     }
 });
 
-
-app.patch("/editUsername", async (req, res) => {
-    /* NOT WORKING ATM!!!!
-    try {
-      const { token, newUsername } = req.body;
-      const decodedToken = await verifyIdToken(auth, token);
-      const email = decodedToken.email;
-      const lowercaseNewUsername = newUsername.toLowerCase();
-  
-      const userDoc = await getDocs(collection(db, "users"));
-      let usernameExists = false;
-  
-      userDoc.forEach((doc) => {
-        if (doc.data().username === lowercaseNewUsername) {
-          usernameExists = true;
-        }
-      });
-  
-      if (usernameExists) {
-        console.log("Username already exists");
-        res.status(401).send({ error: "Username already exists" });
-      } else {
-        const emailToUsernameDoc = doc(db, "emailToUsername", email);
-        const emailToUsernameData = await getDoc(emailToUsernameDoc);
-        const oldUsername = emailToUsernameData.data().username;
-  
-        const oldUserDoc = doc(db, "users", oldUsername);
-        const newUserDoc = doc(db, "users", lowercaseNewUsername);
-  
-        const batch = writeBatch(db);
-  
-        batch.update(emailToUsernameDoc, { username: lowercaseNewUsername });
-        batch.delete(oldUserDoc);
-        batch.set(newUserDoc, { username: lowercaseNewUsername }, { merge: true });
-  
-        await batch.commit();
-        console.log("Successfully updated username");
-        res.status(200).send({ message: "Successfully updated username" });
-      }
-    } catch (error) {
-      console.error("Error updating username:", error);
-      res.status(500).send({ error: error.message });
-    }
-    */
-});
-
-
 app.get("/checkUserExists", async (req, res) => {
     const { r } = req.query;
     const { username } = req.query;
@@ -588,6 +541,8 @@ app.delete("/deleteAccount", async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+
 
 
 export default app;
