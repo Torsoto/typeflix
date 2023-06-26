@@ -5,7 +5,6 @@ import "../../styles/App.css";
 import FailMessage from "../UI/FailMessage";
 import WinMessage from "../UI/WinMessage"
 import { CircularProgress } from "@material-ui/core";
-import { Link } from "react-router-dom";
 import LeaderboardTable from "../UI/LeaderboardTable.jsx";
 
 const Game = () => {
@@ -23,9 +22,10 @@ const Game = () => {
   const pRef = useRef();
   const [hp, setHp] = useState(text.length);
   const [isFinished, setIsFinished] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(time);
-  const hpPercentage = (hp / text.length) * 100;
+  const [startTime, setStartTime] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(time * 1000);
   const [timeTaken, setTimeTaken] = useState(0);
+  const hpPercentage = (hp / text.length) * 100;
   const [wpm, setWpm] = useState(0);
   const [hasFailed, setHasFailed] = useState(false);
   const [chatBubble, setChatBubble] = useState({ visible: false, text: `` });
@@ -33,17 +33,25 @@ const Game = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (timeLeft > 0 && hasStartedTyping && !isFinished && !hasFailed) {
-      const timerId = setTimeout(() => {
-        setTimeLeft(timeLeft - 1);
-        if (timeLeft === 1) {
-          setHasFailed(true);
-        }
-      }, 1000);
+    console.log(timeTaken)
+  }, [timeTaken])
 
-      return () => clearTimeout(timerId);
+  useEffect(() => {
+    if (hasStartedTyping && !isFinished && !hasFailed) {
+      setStartTime(Date.now());
+      const timerId = setInterval(() => {
+        const timeElapsedInMilliseconds = Date.now() - startTime;
+        const timeLeft = time * 1000 - timeElapsedInMilliseconds;
+        setTimeLeft(timeLeft);
+        if (timeLeft <= 0) {
+          setHasFailed(true);
+          clearInterval(timerId);
+        }
+      }, 100);  // you can adjust the interval here
+
+      return () => clearInterval(timerId);
     }
-  }, [timeLeft, hasStartedTyping, isFinished, hasFailed]);
+  }, [hasStartedTyping, isFinished, hasFailed, startTime, time]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -167,7 +175,7 @@ const Game = () => {
         } else {
           setIsFinished(true);
           setHp(hp - 1)
-          const timeTaken = time - timeLeft;
+          const timeTaken = time - timeLeft/1000;
           setTimeTaken(timeTaken);
           const wpm = Math.round((text.split(" ").length / timeTaken) * 60);
           setWpm(wpm);
@@ -186,7 +194,7 @@ const Game = () => {
         if (nextLetterIndex === text.length && incorrectLetters.length === 0) {
           setIsFinished(true);
           setHasFailed(false);
-          const timeTaken = time - timeLeft;
+          const timeTaken = time - timeLeft/1000;
           setTimeTaken(timeTaken);
           const wpm = Math.round((text.split(" ").length / timeTaken) * 60);
           setWpm(wpm);
@@ -208,14 +216,14 @@ const Game = () => {
       if (currentLetterIndex > 0) {
         setCurrentLetterIndex(currentLetterIndex - 1);
         setCorrectLetters((prevCorrectLetters) =>
-          prevCorrectLetters.filter(
-            (item) => item !== `${currentLetterIndex - 1}`
-          )
+            prevCorrectLetters.filter(
+                (item) => item !== `${currentLetterIndex - 1}`
+            )
         );
         setIncorrectLetters((prevIncorrectLetters) =>
-          prevIncorrectLetters.filter(
-            (item) => item !== `${currentLetterIndex - 1}`
-          )
+            prevIncorrectLetters.filter(
+                (item) => item !== `${currentLetterIndex - 1}`
+            )
         );
         if (correctLetters.includes(`${currentLetterIndex - 1}`)) {
           setHp(hp + 1);
@@ -226,20 +234,19 @@ const Game = () => {
     e.preventDefault();
   }, [setHasStartedTyping, text, currentLetterIndex, hasCalculated, timesCalculated, timesUpdatedCursor, incorrectLetters, timeLeft, time]);
 
+
+
   const updateNextLevel = async (username, movie) => {
-    let data;
     if (selectedLevelIndex < totalLevelsCount) {
       try {
         const res = await fetch(`http://localhost:3000/unlockNextLevel/`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            //'Accept': 'application/xml' //Without this header you will receive json isntead of xml
           },
           body: JSON.stringify({ username, movie, selectedLevelIndex }),
         });
-        data = await res.json();
-        console.log(data)
+        await res.json();
       } catch (e) {
         console.error(e);
       }
@@ -270,7 +277,6 @@ const Game = () => {
         `http://localhost:3000/movies/${title}/levels/${selectedLevelIndex + 1}`
       );
       await response.json().then((data) => {
-        console.log(data)
         setText(data.text);
         setIsBlurred(true);
         setIsMessageVisible(true);
@@ -284,7 +290,7 @@ const Game = () => {
         setTimesUpdatedCursor(0);
         setHp(text.length);
         setIsFinished(false);
-        setTimeLeft(time);
+        setTimeLeft(time * 1000);
         setTimeTaken(0);
         setWpm(0);
         setHasFailed(false);
@@ -314,7 +320,7 @@ const Game = () => {
     setTimesUpdatedCursor(0);
     setHp(text.length);
     setIsFinished(false);
-    setTimeLeft(time);
+    setTimeLeft(time * 1000);
     setTimeTaken(0);
     setWpm(0);
     setHasFailed(false);
@@ -338,7 +344,7 @@ const Game = () => {
         />
       </div>
       <HpBar hp={hp} />
-      <WinMessage isFinished={isFinished} onRetry={handleRetry} timeTaken={timeTaken} wpm={wpm} onNextLevel={handleNextLevel} />
+      <WinMessage isFinished={isFinished} onRetry={handleRetry} timeTaken={Math.floor(timeTaken)} wpm={wpm} onNextLevel={handleNextLevel} />
       <FailMessage hasFailed={hasFailed} onRetry={handleRetry} />
       {isLoading ? (
         <div className="flex items-center justify-center mt-8">
@@ -350,7 +356,7 @@ const Game = () => {
       <div>
         <div className="flex gap-1 place-content-center">
           <p className={`text-2xl font-bold align-middle mb-4 ${timeLeft > 0 && !isBlurred && !isFinished && !hasFailed ? "opacity-100" : "invisible"}`}>
-            {timeLeft > 0 && !isBlurred ? `${timeLeft}` : "0"}
+            {timeLeft > 0 && !isBlurred ? `${Math.floor(timeLeft / 1000)}` : "0"}  {/* round down to the nearest second */}
           </p>
         </div>
         <div className="relative">
@@ -364,7 +370,7 @@ const Game = () => {
             tabIndex={0}
             onKeyDown={handleKeyDown}
             onClick={handleClickForBlur}
-            className={`max-w-[1200px] ${isBlurred ? "blur" : ""
+            className={`max-w-[1200px] flex ${isBlurred ? "blur" : ""
               } overflow-hidden inline-block items-center h-[155px]  text-2xl m-auto focus:outline-none ${isFinished || hasFailed ? "hidden" : ""
               }`}
           >
