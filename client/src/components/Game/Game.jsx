@@ -1,15 +1,34 @@
-import React, { useState, useCallback, useEffect, useRef, useContext } from "react";
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  useContext,
+} from "react";
 import "../../styles/Home.css";
 import AuthContext from "../context/AuthContext.jsx";
 import "../../styles/App.css";
 import FailMessage from "../UI/FailMessage";
-import WinMessage from "../UI/WinMessage"
+import WinMessage from "../UI/WinMessage";
 import { CircularProgress } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import LeaderboardTable from "../UI/LeaderboardTable.jsx";
 
 const Game = () => {
-  const { setImg, setText, totalLevelsCount, setTime, userData, title, selectedLevelIndex, updateBestWpm, setSelectedLevelIndex, text, Img, time } = useContext(AuthContext);
+  const {
+    setImg,
+    setText,
+    totalLevelsCount,
+    setTime,
+    userData,
+    title,
+    selectedLevelIndex,
+    updateBestWpm,
+    setSelectedLevelIndex,
+    text,
+    Img,
+    time,
+  } = useContext(AuthContext);
   const [isBlurred, setIsBlurred] = useState(true);
   const [isMessageVisible, setIsMessageVisible] = useState(true);
   const [currentLetterIndex, setCurrentLetterIndex] = useState(0);
@@ -51,12 +70,12 @@ const Game = () => {
       if (!isFinished && !hasFailed && timeLeft > 0) {
         setChatBubble({
           visible: true,
-          text: 'Thats all you got?'
+          text: "Thats all you got?",
         });
         setTimeout(() => {
           setChatBubble({
             visible: false,
-            text: ''
+            text: "",
           });
         }, 3000);
       }
@@ -67,10 +86,10 @@ const Game = () => {
 
   const updateLastActivity = async (username, movie, level, wpm) => {
     try {
-      const response = await fetch('http://localhost:3000/setLastActivity', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3000/setLastActivity", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ username, movie, level, wpm }),
       });
@@ -78,30 +97,38 @@ const Game = () => {
       if (response.ok) {
         const data = await response.json();
       } else {
-        console.error('Failed to update leaderboard');
+        console.error("Failed to update leaderboard");
       }
     } catch (error) {
-      console.error('Error updating leaderboard:', error);
+      console.error("Error updating leaderboard:", error);
     }
   };
 
   const updateLevelLeaderboard = async (wpm) => {
     try {
-      const response = await fetch('http://localhost:3000/updateThemeLevelLeaderboard', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username: userData.username, wpm, theme: title, levelIndex: selectedLevelIndex }),
-      });
+      const response = await fetch(
+        "http://localhost:3000/updateThemeLevelLeaderboard",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: userData.username,
+            wpm,
+            theme: title,
+            levelIndex: selectedLevelIndex,
+          }),
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
       } else {
-        console.error('Failed to update level specific leaderboard');
+        console.error("Failed to update level specific leaderboard");
       }
     } catch (error) {
-      console.error('Error updating level specific leaderboard:', error);
+      console.error("Error updating level specific leaderboard:", error);
     }
   };
 
@@ -115,19 +142,24 @@ const Game = () => {
         setIsLoading(false);
         setLeaderboardData(data);
       } else {
-        console.log('Failed to get level specific leaderboard');
+        console.log("Failed to get level specific leaderboard");
       }
     } catch (error) {
-      console.log('Error getting level specific leaderboard:', error);
+      console.log("Error getting level specific leaderboard:", error);
     }
   };
 
   function handleWinRequests(wpm) {
     setIsLoading(true);
     updateNextLevel(userData.username, title).then(() => {
-      updateLastActivity(userData.username, title, selectedLevelIndex, wpm).then(() => {
+      updateLastActivity(
+        userData.username,
+        title,
+        selectedLevelIndex,
+        wpm
+      ).then(() => {
         updateLevelLeaderboard(wpm).then(() => {
-          updateBestWpm(userData.username, wpm)
+          updateBestWpm(userData.username, wpm);
           getLevelThemeLeaderboard();
         });
       });
@@ -139,117 +171,132 @@ const Game = () => {
     setIsMessageVisible(false);
   }, []);
 
-  const handleKeyDown = useCallback((e) => {
+  const handleKeyDown = useCallback(
+    (e) => {
+      if (!hasStartedTyping) {
+        setHasStartedTyping(true);
+        setStartTime(Date.now());
+      }
 
-    if (!hasStartedTyping) {
       setHasStartedTyping(true);
-      setStartTime(Date.now());
-    }
+      const key = e.key;
+      const expectedLetter = text[currentLetterIndex];
+      const isLetter = key.length === 1;
+      const isSpace = key === " ";
+      const isBackspace = key === "Backspace";
 
-    setHasStartedTyping(true);
-    const key = e.key;
-    const expectedLetter = text[currentLetterIndex];
-    const isLetter = key.length === 1;
-    const isSpace = key === " ";
-    const isBackspace = key === "Backspace";
+      const element = document.querySelector(".blinking-cursor");
+      const cursorPosY = element.offsetTop;
 
-    const element = document.querySelector(".blinking-cursor");
-    const cursorPosY = element.offsetTop;
-
-    if (!hasCalculated) {
-      setNextCursorY(cursorPosY + 100);
-      sethasCalculated(true);
-      setTimesCalculated(timesCalculated + 1);
-    }
-
-    if (cursorPosY >= nextCursorY && timesCalculated === 1) {
-      setNextCursorY(cursorPosY);
-      setTimesUpdatedCursor(timesUpdatedCursor + 1);
-    }
-
-    if (isLetter || (isSpace && expectedLetter === " ")) {
-      if (currentLetterIndex >= text.length - 1) {
-        if (incorrectLetters.length > 0) {
-          setHasFailed(true);
-        } else {
-          setIsFinished(true);
-          const timeTaken = time - timeLeft;
-          setTimeTaken(timeTaken);
-          const durationMs = Date.now() - startTime;
-          const durationMin = durationMs / 1000 / 60;
-          const wpm = Math.floor((text.split(" ").length / durationMin));
-          setWpm(wpm);
-          handleWinRequests(wpm);
-        }
-        return;
+      if (!hasCalculated) {
+        setNextCursorY(cursorPosY + 100);
+        sethasCalculated(true);
+        setTimesCalculated(timesCalculated + 1);
       }
-      const nextLetterIndex = currentLetterIndex + 1;
-      if (key === expectedLetter) {
-        setHp(hp - 1);
-        setCorrectLetters((prevCorrectLetters) => [
-          ...prevCorrectLetters,
-          `${currentLetterIndex}`,
-        ]);
-        setCurrentLetterIndex(nextLetterIndex);
-        if (nextLetterIndex === text.length && incorrectLetters.length === 0) {
-          setIsFinished(true);
-          setHasFailed(false);
-          const timeTaken = time - timeLeft;
-          setTimeTaken(timeTaken);
-          const durationMs = Date.now() - startTime;
-          const durationMin = durationMs / 1000 / 60;
-          const wpm = Math.floor((text.split(" ").length / durationMin));
-          setWpm(wpm);
-          handleWinRequests(wpm);
-        }
-        if (nextLetterIndex === text.length && incorrectLetters.length > 0) {
-          setHasFailed(true);
-        }
-      } else if (expectedLetter !== " ") {
-        setIncorrectLetters((prevIncorrectLetters) => [
-          ...prevIncorrectLetters,
-          `${currentLetterIndex}`,
-        ]);
-        setCurrentLetterIndex(nextLetterIndex);
-      }
-    }
 
-    if (isBackspace) {
-      if (currentLetterIndex > 0) {
-        setCurrentLetterIndex(currentLetterIndex - 1);
-        setCorrectLetters((prevCorrectLetters) =>
+      if (cursorPosY >= nextCursorY && timesCalculated === 1) {
+        setNextCursorY(cursorPosY);
+        setTimesUpdatedCursor(timesUpdatedCursor + 1);
+      }
+
+      if (isLetter || (isSpace && expectedLetter === " ")) {
+        if (currentLetterIndex >= text.length - 1) {
+          if (incorrectLetters.length > 0) {
+            setHasFailed(true);
+          } else {
+            setIsFinished(true);
+            const timeTaken = time - timeLeft;
+            setTimeTaken(timeTaken);
+            const durationMs = Date.now() - startTime;
+            const durationMin = durationMs / 1000 / 60;
+            const wpm = Math.floor(text.split(" ").length / durationMin);
+            setWpm(wpm);
+            handleWinRequests(wpm);
+          }
+          return;
+        }
+        const nextLetterIndex = currentLetterIndex + 1;
+        if (key === expectedLetter) {
+          setHp(hp - 1);
+          setCorrectLetters((prevCorrectLetters) => [
+            ...prevCorrectLetters,
+            `${currentLetterIndex}`,
+          ]);
+          setCurrentLetterIndex(nextLetterIndex);
+          if (
+            nextLetterIndex === text.length &&
+            incorrectLetters.length === 0
+          ) {
+            setIsFinished(true);
+            setHasFailed(false);
+            const timeTaken = time - timeLeft;
+            setTimeTaken(timeTaken);
+            const durationMs = Date.now() - startTime;
+            const durationMin = durationMs / 1000 / 60;
+            const wpm = Math.floor(text.split(" ").length / durationMin);
+            setWpm(wpm);
+            handleWinRequests(wpm);
+          }
+          if (nextLetterIndex === text.length && incorrectLetters.length > 0) {
+            setHasFailed(true);
+          }
+        } else if (expectedLetter !== " ") {
+          setIncorrectLetters((prevIncorrectLetters) => [
+            ...prevIncorrectLetters,
+            `${currentLetterIndex}`,
+          ]);
+          setCurrentLetterIndex(nextLetterIndex);
+        }
+      }
+
+      if (isBackspace) {
+        if (currentLetterIndex > 0) {
+          setCurrentLetterIndex(currentLetterIndex - 1);
+          setCorrectLetters((prevCorrectLetters) =>
             prevCorrectLetters.filter(
-                (item) => item !== `${currentLetterIndex - 1}`
+              (item) => item !== `${currentLetterIndex - 1}`
             )
-        );
-        setIncorrectLetters((prevIncorrectLetters) =>
+          );
+          setIncorrectLetters((prevIncorrectLetters) =>
             prevIncorrectLetters.filter(
-                (item) => item !== `${currentLetterIndex - 1}`
+              (item) => item !== `${currentLetterIndex - 1}`
             )
-        );
-        if (correctLetters.includes(`${currentLetterIndex - 1}`)) {
-          setHp(hp + 1);
+          );
+          if (correctLetters.includes(`${currentLetterIndex - 1}`)) {
+            setHp(hp + 1);
+          }
         }
       }
-    }
 
-    e.preventDefault();
-  }, [setHasStartedTyping, text, currentLetterIndex, hasCalculated, timesCalculated, timesUpdatedCursor, incorrectLetters, timeLeft, time]);
+      e.preventDefault();
+    },
+    [
+      setHasStartedTyping,
+      text,
+      currentLetterIndex,
+      hasCalculated,
+      timesCalculated,
+      timesUpdatedCursor,
+      incorrectLetters,
+      timeLeft,
+      time,
+    ]
+  );
 
   const updateNextLevel = async (username, movie) => {
     let data;
-    if (selectedLevelIndex < totalLevelsCount) {
+    if (selectedLevelIndex <= totalLevelsCount) {
       try {
         const res = await fetch(`http://localhost:3000/unlockNextLevel/`, {
-          method: 'PATCH',
+          method: "PATCH",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             //'Accept': 'application/xml' //Without this header you will receive json isntead of xml
           },
           body: JSON.stringify({ username, movie, selectedLevelIndex }),
         });
         data = await res.json();
-        console.log(data)
+        console.log(data);
       } catch (e) {
         console.error(e);
       }
@@ -265,53 +312,18 @@ const Game = () => {
     }
 
     return (
-        <div className={`w-full border-2 border-black h-4 mb-10 mt-4 max-w-[500px] bg-white rounded-full`}>
-          <div
-              className={`h-full ${barColor} rounded-full`}
-              style={{ width: `${hpPercentage}%` }}
-          />
-        </div>
+      <div
+        className={`w-full border-2 border-black h-4 mb-10 mt-4 max-w-[500px] bg-white rounded-full`}
+      >
+        <div
+          className={`h-full ${barColor} rounded-full`}
+          style={{ width: `${hpPercentage}%` }}
+        />
+      </div>
     );
   };
 
-  const handleNextLevel = async () => {
-    try {
-      const response = await fetch(
-          `http://localhost:3000/movies/${title}/levels/${selectedLevelIndex + 1}`
-      );
-      await response.json().then((data) => {
-        console.log(data)
-        setText(data.text);
-        setIsBlurred(true);
-        setIsMessageVisible(true);
-        setCurrentLetterIndex(0);
-        setCorrectLetters([]);
-        setIncorrectLetters([]);
-        setHasStartedTyping(false);
-        setNextCursorY(0);
-        sethasCalculated(false);
-        setTimesCalculated(0);
-        setTimesUpdatedCursor(0);
-        setHp(text.length);
-        setIsFinished(false);
-        setTimeLeft(time);
-        setTimeTaken(0);
-        setWpm(0);
-        setHasFailed(false);
-        setChatBubble({ visible: false, text: `` });
-        setImg(data.img);
-        setTime(data.time);
-        setHp(data.text.length);
-        setTimeLeft(data.time);
-        setSelectedLevelIndex(selectedLevelIndex + 1);
-        setLeaderboardData(null);
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  const handleRetry = () => {
+  const resetGameState = (data) => {
     setIsBlurred(true);
     setIsMessageVisible(true);
     setCurrentLetterIndex(0);
@@ -322,9 +334,9 @@ const Game = () => {
     sethasCalculated(false);
     setTimesCalculated(0);
     setTimesUpdatedCursor(0);
-    setHp(text.length);
+    setHp(data.text.length);
     setIsFinished(false);
-    setTimeLeft(time);
+    setTimeLeft(data.time);
     setTimeTaken(0);
     setWpm(0);
     setHasFailed(false);
@@ -332,81 +344,120 @@ const Game = () => {
     setLeaderboardData(null);
   };
 
+  const handleNextLevel = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/movies/${title}/levels/${selectedLevelIndex + 1}`
+      );
+      const data = await response.json();
+      console.log(data);
+      setText(data.text);
+      setImg(data.img);
+      setTime(data.time);
+      setHp(data.text.length);
+      setTimeLeft(data.time);
+      setSelectedLevelIndex(selectedLevelIndex + 1);
+      resetGameState(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleRetry = () => {
+    resetGameState({ text, time });
+  };
 
   return (
-      <div className="grid mx-auto text-white place-items-center ">
-        <div className="relative mr-8">
-          {chatBubble.visible && (
-              <div className="absolute top-0 z-50 p-2 text-black bg-white rounded-md -left-20 chat-bubble">
-                {chatBubble.text}
-              </div>
-          )}
-          <img
-              src={Img}
-              alt="image of enemy"
-              className="h-[250px] z-10 stance"
-          />
-        </div>
-        <HpBar hp={hp} />
-        <WinMessage isFinished={isFinished} onRetry={handleRetry} timeTaken={timeTaken} wpm={wpm} onNextLevel={handleNextLevel} />
-        <FailMessage hasFailed={hasFailed} onRetry={handleRetry} />
-        {isLoading ? (
-            <div className="flex items-center justify-center mt-8">
-              <CircularProgress style={{ color: 'white' }} />
-            </div>
-        ) : (
-            leaderboardData && <LeaderboardTable leaderboardData={leaderboardData} />
-        )}
-        <div>
-          <div className="flex gap-1 place-content-center">
-            <p className={`text-2xl font-bold align-middle mb-4 ${timeLeft > 0 && !isBlurred && !isFinished && !hasFailed ? "opacity-100" : "invisible"}`}>
-              {timeLeft > 0 && !isBlurred ? `${timeLeft}` : "0"}
-            </p>
+    <div className="grid mx-auto text-white place-items-center ">
+      <div className="relative mr-8">
+        {chatBubble.visible && (
+          <div className="absolute top-0 z-50 p-2 text-black bg-white rounded-md -left-20 chat-bubble">
+            {chatBubble.text}
           </div>
-          <div className="relative">
-            <div
-                className={`absolute text-2xl font-mono top-0 bottom-24 left-0 right-0 flex items-center justify-center text-center ${isMessageVisible ? "" : "hidden"
-                }`}
+        )}
+        <img src={Img} alt="image of enemy" className="h-[250px] z-10 stance" />
+      </div>
+      <HpBar hp={hp} />
+      <WinMessage
+        isFinished={isFinished}
+        onRetry={handleRetry}
+        timeTaken={timeTaken}
+        wpm={wpm}
+        onNextLevel={handleNextLevel}
+      />
+      <FailMessage hasFailed={hasFailed} onRetry={handleRetry} />
+      {isLoading ? (
+        <div className="flex items-center justify-center mt-8">
+          <CircularProgress style={{ color: "white" }} />
+        </div>
+      ) : (
+        leaderboardData && (
+          <LeaderboardTable leaderboardData={leaderboardData} />
+        )
+      )}
+      <div>
+        <div className="flex gap-1 place-content-center">
+          <p
+            className={`text-2xl font-bold align-middle mb-4 ${
+              timeLeft > 0 && !isBlurred && !isFinished && !hasFailed
+                ? "opacity-100"
+                : "invisible"
+            }`}
+          >
+            {timeLeft > 0 && !isBlurred ? `${timeLeft}` : "0"}
+          </p>
+        </div>
+        <div className="relative">
+          <div
+            className={`absolute text-2xl font-mono top-0 bottom-24 left-0 right-0 flex items-center justify-center text-center ${
+              isMessageVisible ? "" : "hidden"
+            }`}
+          >
+            click here to start typing
+          </div>
+          <main
+            tabIndex={0}
+            onKeyDown={handleKeyDown}
+            onClick={handleClickForBlur}
+            className={`max-w-[1200px] ${
+              isBlurred ? "blur" : ""
+            } overflow-hidden inline-block items-center h-[155px]  text-2xl m-auto focus:outline-none ${
+              isFinished || hasFailed ? "hidden" : ""
+            }`}
+          >
+            <p
+              ref={pRef}
+              className={`relative leading-[50px] text-justify text-2xl font-medium`}
+              style={{ top: -50 * timesUpdatedCursor }}
             >
-              click here to start typing
-            </div>
-            <main
-                tabIndex={0}
-                onKeyDown={handleKeyDown}
-                onClick={handleClickForBlur}
-                className={`max-w-[1200px] ${isBlurred ? "blur" : ""
-                } overflow-hidden inline-block items-center h-[155px]  text-2xl m-auto focus:outline-none ${isFinished || hasFailed ? "hidden" : ""
-                }`}
-            >
-              <p ref={pRef} className={`relative leading-[50px] text-justify text-2xl font-medium`} style={{ top: -50 * timesUpdatedCursor }}>
-                {text.split('').map((letter, letterIndex) => (
-                    <React.Fragment key={letterIndex}>
-                      {letterIndex === currentLetterIndex && !isBlurred && (
-                          <span className="fixed z-10 -ml-[3px] -mt-[1.5px] text-yellow-400 blinking-cursor">
+              {text.split("").map((letter, letterIndex) => (
+                <React.Fragment key={letterIndex}>
+                  {letterIndex === currentLetterIndex && !isBlurred && (
+                    <span className="fixed z-10 -ml-[3px] -mt-[1.5px] text-yellow-400 blinking-cursor">
                       |
                     </span>
-                      )}
-                      <span
-                          key={`${letter}-${letterIndex}`}
-                          className={
-                            letterIndex === currentLetterIndex
-                                ? "current opacity-60 relative transition-color"
-                                : correctLetters.includes(`${letterIndex}`)
-                                    ? "opacity-100 relative transition-color"
-                                    : incorrectLetters.includes(`${letterIndex}`)
-                                        ? "opacity-100 text-red-500 relative transition-color"
-                                        : "opacity-60 relative transition-color"
-                          }
-                      >
+                  )}
+                  <span
+                    key={`${letter}-${letterIndex}`}
+                    className={
+                      letterIndex === currentLetterIndex
+                        ? "current opacity-60 relative transition-color"
+                        : correctLetters.includes(`${letterIndex}`)
+                        ? "opacity-100 relative transition-color"
+                        : incorrectLetters.includes(`${letterIndex}`)
+                        ? "opacity-100 text-red-500 relative transition-color"
+                        : "opacity-60 relative transition-color"
+                    }
+                  >
                     {letter}
                   </span>
-                    </React.Fragment>
-                ))}
-              </p>
-            </main>
-          </div>
+                </React.Fragment>
+              ))}
+            </p>
+          </main>
         </div>
       </div>
+    </div>
   );
 };
 

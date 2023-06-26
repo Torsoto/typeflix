@@ -3,7 +3,7 @@ import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import {
   getFirestore,
@@ -47,7 +47,6 @@ app.post("/reset-password", async (req, res) => {
 });
 
 const createThemesCollection = async (username, batch) => {
-  // Here we start to check and add missing movie collections
   const moviesRef = collection(db, "movies");
   const moviesSnapshot = await getDocs(moviesRef);
 
@@ -56,19 +55,30 @@ const createThemesCollection = async (username, batch) => {
     const userMovieCollectionRef = collection(db, "users", username, movieName);
     const userMovieCollectionSnapshot = await getDocs(userMovieCollectionRef);
 
-    // If the user movie collection does not exist or is empty, create it.
     if (userMovieCollectionSnapshot.empty) {
       const levelsRef = collection(db, "movies", movieName, "levels");
       const levelsSnapshot = await getDocs(levelsRef);
       let firstLevel = true;
+      let levelIndex = 1;
       levelsSnapshot.forEach((levelDoc) => {
         const levelDocRef = doc(userMovieCollectionRef, levelDoc.id);
         if (firstLevel) {
           batch.set(levelDocRef, { completed: true });
           firstLevel = false;
         } else {
-          batch.set(levelDocRef, { completed: false });
+          if ([2].includes(levelIndex)) {
+            batch.set(levelDocRef, {
+              completed: false,
+              bossWon: false,
+              themeCompleted: false,
+            });
+          } else if ([4, 7, 10].includes(levelIndex)) {
+            batch.set(levelDocRef, { completed: false, bossWon: false });
+          } else {
+            batch.set(levelDocRef, { completed: false });
+          }
         }
+        levelIndex++;
       });
     }
   }
@@ -138,7 +148,6 @@ app.post("/signup", async (req, res) => {
               gamesplayed: 0,
               bosses: 0,
               themescompleted: 0,
-              lastplayed: [],
               lastActivity: [],
             });
 

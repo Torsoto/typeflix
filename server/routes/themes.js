@@ -5,7 +5,8 @@ import {
   getDoc,
   updateDoc,
   collection,
-  getDocs, setDoc,
+  getDocs,
+  setDoc,
 } from "firebase/firestore";
 import "../db/firebase.mjs";
 import xmlbuilder from "xmlbuilder";
@@ -99,7 +100,6 @@ app.get("/movies/:movie", async (req, res) => {
     const levelsRef = collection(db, `movies/${movie}/levels`);
     const levelsSnapshot = await getDocs(levelsRef);
     const levelsCount = levelsSnapshot.size;
-
 
     if (r === "xml") {
       // Convert the data to an XML string
@@ -298,7 +298,12 @@ app.get("/levelsOpened/:username/:movie", async (req, res) => {
     const lowercaseUsername = username.toLowerCase();
 
     // Reference to the movie collection
-    const movieCollectionRef = collection(db, "users", lowercaseUsername, movie);
+    const movieCollectionRef = collection(
+      db,
+      "users",
+      lowercaseUsername,
+      movie
+    );
 
     // Get all level documents in the movie collection
     const levelDocsSnapshot = await getDocs(movieCollectionRef);
@@ -327,7 +332,7 @@ app.get("/levelsOpened/:username/:movie", async (req, res) => {
 
     // Count the number of opened levels
     let openedLevels = 0;
-    levelDocsSnapshot.forEach(levelDoc => {
+    levelDocsSnapshot.forEach((levelDoc) => {
       if (levelDoc.data().completed === true) {
         openedLevels++;
       }
@@ -370,28 +375,66 @@ app.get("/levelsOpened/:username/:movie", async (req, res) => {
   }
 });
 
-
 app.patch("/unlockNextLevel", async (req, res) => {
   try {
     const { username, movie, selectedLevelIndex } = req.body;
     const lowercaseUsername = username.toLowerCase();
     const level = String("lvl" + (selectedLevelIndex + 1));
 
-    // Reference to the level document
     const levelDocRef = doc(db, "users", lowercaseUsername, movie, level);
 
-    // Update the 'completed' field to true
     await updateDoc(levelDocRef, {
-      completed: true
+      completed: true,
     });
-    console.log(`Successfully updated level: ${level} for movie: ${movie} and user: ${username}`);
-    res.status(200).send({ message: `Successfully updated level: ${level} for movie: ${movie} and user: ${username}` });
+
+    const userDoc = doc(db, "users", lowercaseUsername);
+    const userSnapshot = await getDoc(userDoc);
+    let userData = userSnapshot.data();
+
+    if ([3, 6, 9, 10].includes(selectedLevelIndex)) {
+      const currentLevel = String("lvl" + selectedLevelIndex);
+      const currentLevelDocRef = doc(
+        db,
+        "users",
+        lowercaseUsername,
+        movie,
+        currentLevel
+      );
+      const currentLevelSnapshot = await getDoc(currentLevelDocRef);
+      const currentLevelData = currentLevelSnapshot.data();
+
+      if (!currentLevelData.bossWon) {
+        await updateDoc(currentLevelDocRef, {
+          completed: true,
+          bossWon: true,
+        });
+
+        userData.bosses++;
+        await updateDoc(userDoc, userData);
+      }
+
+      if (selectedLevelIndex === 10 && !currentLevelData.themeCompleted) {
+        userData.themescompleted++;
+        await updateDoc(currentLevelDocRef, {
+          themeCompleted: true,
+        });
+        await updateDoc(userDoc, userData);
+      }
+    }
+
+    console.log(
+      `Successfully updated level: ${level} for movie: ${movie} and user: ${username}`
+    );
+    res
+      .status(200)
+      .send({
+        message: `Successfully updated level: ${level} for movie: ${movie} and user: ${username}`,
+      });
   } catch (error) {
     console.log("Error updating level:", error);
     res.status(500).json({ error: error.message });
   }
 });
-
 
 app.get("/getomdbi", async (req, res) => {
   const { r } = req.query;
@@ -412,7 +455,9 @@ app.get("/getomdbi", async (req, res) => {
     // Fetch data about each movie from the OMDb API
     const promises = moviesList.map(async (movie) => {
       const response = await fetch(
-        `https://www.omdbapi.com/?t=${encodeURIComponent(movie.title)}&apikey=${omdbiApiKey}&r=${r}`
+        `https://www.omdbapi.com/?t=${encodeURIComponent(
+          movie.title
+        )}&apikey=${omdbiApiKey}&r=${r}`
       );
 
       if (!response.ok) {
@@ -470,9 +515,5 @@ app.get("/getomdbi", async (req, res) => {
     }
   }
 });
-
-
-
-
 
 export default app;
