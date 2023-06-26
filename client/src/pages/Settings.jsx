@@ -52,30 +52,6 @@ function Settings() {
     }
   };
 
-  const handleUpdatePassword = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/edit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          token: localStorage.getItem("jwt"),
-          password: newPassword,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update password");
-      }
-
-      const data = await response.json();
-      console.log(data.message);
-    } catch (error) {
-      console.error("Error updating password:", error);
-    }
-  };
-
   const handleConfirmDelete = () => {
     fetch("http://localhost:3000/deleteAccount", {
       method: "DELETE",
