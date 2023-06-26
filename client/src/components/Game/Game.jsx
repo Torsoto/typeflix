@@ -5,6 +5,7 @@ import "../../styles/App.css";
 import FailMessage from "../UI/FailMessage";
 import WinMessage from "../UI/WinMessage"
 import { CircularProgress } from "@material-ui/core";
+import { Link } from "react-router-dom";
 import LeaderboardTable from "../UI/LeaderboardTable.jsx";
 
 const Game = () => {
@@ -22,10 +23,10 @@ const Game = () => {
   const pRef = useRef();
   const [hp, setHp] = useState(text.length);
   const [isFinished, setIsFinished] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(time);
   const [startTime, setStartTime] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(time * 1000);
-  const [timeTaken, setTimeTaken] = useState(0);
   const hpPercentage = (hp / text.length) * 100;
+  const [timeTaken, setTimeTaken] = useState(0);
   const [wpm, setWpm] = useState(0);
   const [hasFailed, setHasFailed] = useState(false);
   const [chatBubble, setChatBubble] = useState({ visible: false, text: `` });
@@ -33,25 +34,17 @@ const Game = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    console.log(timeTaken)
-  }, [timeTaken])
-
-  useEffect(() => {
-    if (hasStartedTyping && !isFinished && !hasFailed) {
-      setStartTime(Date.now());
-      const timerId = setInterval(() => {
-        const timeElapsedInMilliseconds = Date.now() - startTime;
-        const timeLeft = time * 1000 - timeElapsedInMilliseconds;
-        setTimeLeft(timeLeft);
-        if (timeLeft <= 0) {
+    if (timeLeft > 0 && hasStartedTyping && !isFinished && !hasFailed) {
+      const timerId = setTimeout(() => {
+        setTimeLeft(timeLeft - 1);
+        if (timeLeft === 1) {
           setHasFailed(true);
-          clearInterval(timerId);
         }
-      }, 100);  // you can adjust the interval here
+      }, 1000);
 
-      return () => clearInterval(timerId);
+      return () => clearTimeout(timerId);
     }
-  }, [hasStartedTyping, isFinished, hasFailed, startTime, time]);
+  }, [timeLeft, hasStartedTyping, isFinished, hasFailed]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -147,6 +140,12 @@ const Game = () => {
   }, []);
 
   const handleKeyDown = useCallback((e) => {
+
+    if (!hasStartedTyping) {
+      setHasStartedTyping(true);
+      setStartTime(Date.now());
+    }
+
     setHasStartedTyping(true);
     const key = e.key;
     const expectedLetter = text[currentLetterIndex];
@@ -174,10 +173,11 @@ const Game = () => {
           setHasFailed(true);
         } else {
           setIsFinished(true);
-          setHp(hp - 1)
-          const timeTaken = time - timeLeft/1000;
+          const timeTaken = time - timeLeft;
           setTimeTaken(timeTaken);
-          const wpm = Math.round((text.split(" ").length / timeTaken) * 60);
+          const durationMs = Date.now() - startTime;
+          const durationMin = durationMs / 1000 / 60;
+          const wpm = Math.floor((text.split(" ").length / durationMin));
           setWpm(wpm);
           handleWinRequests(wpm);
         }
@@ -194,9 +194,11 @@ const Game = () => {
         if (nextLetterIndex === text.length && incorrectLetters.length === 0) {
           setIsFinished(true);
           setHasFailed(false);
-          const timeTaken = time - timeLeft/1000;
+          const timeTaken = time - timeLeft;
           setTimeTaken(timeTaken);
-          const wpm = Math.round((text.split(" ").length / timeTaken) * 60);
+          const durationMs = Date.now() - startTime;
+          const durationMin = durationMs / 1000 / 60;
+          const wpm = Math.floor((text.split(" ").length / durationMin));
           setWpm(wpm);
           handleWinRequests(wpm);
         }
@@ -234,19 +236,20 @@ const Game = () => {
     e.preventDefault();
   }, [setHasStartedTyping, text, currentLetterIndex, hasCalculated, timesCalculated, timesUpdatedCursor, incorrectLetters, timeLeft, time]);
 
-
-
   const updateNextLevel = async (username, movie) => {
+    let data;
     if (selectedLevelIndex < totalLevelsCount) {
       try {
         const res = await fetch(`http://localhost:3000/unlockNextLevel/`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
+            //'Accept': 'application/xml' //Without this header you will receive json isntead of xml
           },
           body: JSON.stringify({ username, movie, selectedLevelIndex }),
         });
-        await res.json();
+        data = await res.json();
+        console.log(data)
       } catch (e) {
         console.error(e);
       }
@@ -262,21 +265,22 @@ const Game = () => {
     }
 
     return (
-      <div className={`w-full border-2 border-black h-4 mb-10 mt-4 max-w-[500px] bg-white rounded-full`}>
-        <div
-          className={`h-full ${barColor} rounded-full`}
-          style={{ width: `${hpPercentage}%` }}
-        />
-      </div>
+        <div className={`w-full border-2 border-black h-4 mb-10 mt-4 max-w-[500px] bg-white rounded-full`}>
+          <div
+              className={`h-full ${barColor} rounded-full`}
+              style={{ width: `${hpPercentage}%` }}
+          />
+        </div>
     );
   };
 
   const handleNextLevel = async () => {
     try {
       const response = await fetch(
-        `http://localhost:3000/movies/${title}/levels/${selectedLevelIndex + 1}`
+          `http://localhost:3000/movies/${title}/levels/${selectedLevelIndex + 1}`
       );
       await response.json().then((data) => {
+        console.log(data)
         setText(data.text);
         setIsBlurred(true);
         setIsMessageVisible(true);
@@ -290,7 +294,7 @@ const Game = () => {
         setTimesUpdatedCursor(0);
         setHp(text.length);
         setIsFinished(false);
-        setTimeLeft(time * 1000);
+        setTimeLeft(time);
         setTimeTaken(0);
         setWpm(0);
         setHasFailed(false);
@@ -320,7 +324,7 @@ const Game = () => {
     setTimesUpdatedCursor(0);
     setHp(text.length);
     setIsFinished(false);
-    setTimeLeft(time * 1000);
+    setTimeLeft(time);
     setTimeTaken(0);
     setWpm(0);
     setHasFailed(false);
@@ -330,79 +334,79 @@ const Game = () => {
 
 
   return (
-    <div className="grid mx-auto text-white place-items-center ">
-      <div className="relative mr-8">
-        {chatBubble.visible && (
-          <div className="absolute top-0 z-50 p-2 text-black bg-white rounded-md -left-20 chat-bubble">
-            {chatBubble.text}
-          </div>
+      <div className="grid mx-auto text-white place-items-center ">
+        <div className="relative mr-8">
+          {chatBubble.visible && (
+              <div className="absolute top-0 z-50 p-2 text-black bg-white rounded-md -left-20 chat-bubble">
+                {chatBubble.text}
+              </div>
+          )}
+          <img
+              src={Img}
+              alt="image of enemy"
+              className="h-[250px] z-10 stance"
+          />
+        </div>
+        <HpBar hp={hp} />
+        <WinMessage isFinished={isFinished} onRetry={handleRetry} timeTaken={timeTaken} wpm={wpm} onNextLevel={handleNextLevel} />
+        <FailMessage hasFailed={hasFailed} onRetry={handleRetry} />
+        {isLoading ? (
+            <div className="flex items-center justify-center mt-8">
+              <CircularProgress style={{ color: 'white' }} />
+            </div>
+        ) : (
+            leaderboardData && <LeaderboardTable leaderboardData={leaderboardData} />
         )}
-        <img
-          src={Img}
-          alt="image of enemy"
-          className="h-[250px] z-10 stance"
-        />
-      </div>
-      <HpBar hp={hp} />
-      <WinMessage isFinished={isFinished} onRetry={handleRetry} timeTaken={Math.floor(timeTaken)} wpm={wpm} onNextLevel={handleNextLevel} />
-      <FailMessage hasFailed={hasFailed} onRetry={handleRetry} />
-      {isLoading ? (
-        <div className="flex items-center justify-center mt-8">
-          <CircularProgress style={{ color: 'white' }} />
-        </div>
-      ) : (
-        leaderboardData && <LeaderboardTable leaderboardData={leaderboardData} />
-      )}
-      <div>
-        <div className="flex gap-1 place-content-center">
-          <p className={`text-2xl font-bold align-middle mb-4 ${timeLeft > 0 && !isBlurred && !isFinished && !hasFailed ? "opacity-100" : "invisible"}`}>
-            {timeLeft > 0 && !isBlurred ? `${Math.floor(timeLeft / 1000)}` : "0"}  {/* round down to the nearest second */}
-          </p>
-        </div>
-        <div className="relative">
-          <div
-            className={`absolute text-2xl font-mono top-0 bottom-24 left-0 right-0 flex items-center justify-center text-center ${isMessageVisible ? "" : "hidden"
-              }`}
-          >
-            click here to start typing
+        <div>
+          <div className="flex gap-1 place-content-center">
+            <p className={`text-2xl font-bold align-middle mb-4 ${timeLeft > 0 && !isBlurred && !isFinished && !hasFailed ? "opacity-100" : "invisible"}`}>
+              {timeLeft > 0 && !isBlurred ? `${timeLeft}` : "0"}
+            </p>
           </div>
-          <main
-            tabIndex={0}
-            onKeyDown={handleKeyDown}
-            onClick={handleClickForBlur}
-            className={`max-w-[1200px] flex ${isBlurred ? "blur" : ""
-              } overflow-hidden inline-block items-center h-[155px]  text-2xl m-auto focus:outline-none ${isFinished || hasFailed ? "hidden" : ""
-              }`}
-          >
-            <p ref={pRef} className={`relative leading-[50px] text-justify text-2xl font-medium`} style={{ top: -50 * timesUpdatedCursor }}>
-              {text.split('').map((letter, letterIndex) => (
-                <React.Fragment key={letterIndex}>
-                  {letterIndex === currentLetterIndex && !isBlurred && (
-                    <span className="fixed z-10 -ml-[3px] -mt-[1.5px] text-yellow-400 blinking-cursor">
+          <div className="relative">
+            <div
+                className={`absolute text-2xl font-mono top-0 bottom-24 left-0 right-0 flex items-center justify-center text-center ${isMessageVisible ? "" : "hidden"
+                }`}
+            >
+              click here to start typing
+            </div>
+            <main
+                tabIndex={0}
+                onKeyDown={handleKeyDown}
+                onClick={handleClickForBlur}
+                className={`max-w-[1200px] ${isBlurred ? "blur" : ""
+                } overflow-hidden inline-block items-center h-[155px]  text-2xl m-auto focus:outline-none ${isFinished || hasFailed ? "hidden" : ""
+                }`}
+            >
+              <p ref={pRef} className={`relative leading-[50px] text-justify text-2xl font-medium`} style={{ top: -50 * timesUpdatedCursor }}>
+                {text.split('').map((letter, letterIndex) => (
+                    <React.Fragment key={letterIndex}>
+                      {letterIndex === currentLetterIndex && !isBlurred && (
+                          <span className="fixed z-10 -ml-[3px] -mt-[1.5px] text-yellow-400 blinking-cursor">
                       |
                     </span>
-                  )}
-                  <span
-                    key={`${letter}-${letterIndex}`}
-                    className={
-                      letterIndex === currentLetterIndex
-                        ? "current opacity-60 relative transition-color"
-                        : correctLetters.includes(`${letterIndex}`)
-                          ? "opacity-100 relative transition-color"
-                          : incorrectLetters.includes(`${letterIndex}`)
-                            ? "opacity-100 text-red-500 relative transition-color"
-                            : "opacity-60 relative transition-color"
-                    }
-                  >
+                      )}
+                      <span
+                          key={`${letter}-${letterIndex}`}
+                          className={
+                            letterIndex === currentLetterIndex
+                                ? "current opacity-60 relative transition-color"
+                                : correctLetters.includes(`${letterIndex}`)
+                                    ? "opacity-100 relative transition-color"
+                                    : incorrectLetters.includes(`${letterIndex}`)
+                                        ? "opacity-100 text-red-500 relative transition-color"
+                                        : "opacity-60 relative transition-color"
+                          }
+                      >
                     {letter}
                   </span>
-                </React.Fragment>
-              ))}
-            </p>
-          </main>
+                    </React.Fragment>
+                ))}
+              </p>
+            </main>
+          </div>
         </div>
       </div>
-    </div>
   );
 };
 
