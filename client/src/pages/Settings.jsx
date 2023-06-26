@@ -8,13 +8,13 @@ import Modal from "react-modal";
 import Notification from "../components/Notification/Notification.jsx";
 import { ERROR_MAP } from "../components/Notification/ERROR_MAP.js";
 
-
 function Settings() {
   const [error, setError] = useState("");
   const [showAvatarOptions, setShowAvatarOptions] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [modalIsOpenDelete, setModalIsOpenDelete] = useState(false);
   const [modalIsOpenPassword, setModalIsOpenPassword] = useState(false);
+  const [modalIsOpenDelete, setModalIsOpenDelete] = useState(false);
   const [ModalIsOpenDeleteConfirm, setModalIsOpenDeleteConfirm] =
     useState(false);
   const [password, setPassword] = useState("");
@@ -24,6 +24,8 @@ function Settings() {
     show: false,
     message: "",
   });
+  const [email, setEmail] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   Modal.setAppElement("#root");
 
@@ -187,24 +189,20 @@ function Settings() {
                   >
                     <div className="p-4 bg-white rounded-lg w-96">
                       <h2 className="text-lg font-medium text-center">
-                        Enter your password for Changing
+                        Enter your Email
                       </h2>
                       <input
-                        type="password"
+                        type="email"
                         className="w-full px-4 py-2 mt-4 border rounded-lg"
-                        onChange
-                      />
-                      <h2 className="text-lg font-medium text-center">
-                        Enter your new Password
-                      </h2>
-                      <input
-                        type="password"
-                        className="w-full px-4 py-2 mt-4 border rounded-lg"
-                        onChange
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                       />
                       <div className="flex mt-4 place-content-center ">
-                        <button className="px-4 py-2 mr-2 font-medium text-white bg-red-500 rounded-lg hover:bg-red-600">
-                          Confirm
+                        <button 
+                          className="px-4 py-2 mr-2 font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+                          onClick
+                        >
+                          Send
                         </button>
                         <button
                           className="px-4 py-2 font-medium text-white bg-gray-500 rounded-lg hover:bg-gray-600"
