@@ -15,7 +15,7 @@ fetch('http://localhost:3000/movies')
   });
 
 // Fetch data from the /user/:username endpoint
-const username = 'tolga'; // Replace with the desired username
+const username = 'tolga';
 
 fetch(`http://localhost:3000/user/${username}`)
   .then(response => response.json())
@@ -24,16 +24,25 @@ fetch(`http://localhost:3000/user/${username}`)
     Object.keys(data).forEach(key => {
       const dataItem = document.createElement('li');
       if (key === 'lastActivity') {
-        let lastActivityStr = 'lastActivity: ';
-        data[key].forEach((activity, index) => {
-          lastActivityStr += `${activity.movie} (wpm: ${activity.wpm}, level: ${activity.level})`;
-          if (index < data[key].length - 1) {
-            lastActivityStr += ', ';
-          }
+        dataItem.textContent = 'lastActivity:';
+        const lastActivityList = document.createElement('ul');
+        data[key].forEach(activity => {
+          const activityItem = document.createElement('li');
+          activityItem.textContent = `${activity.movie} (wpm: ${activity.wpm}, level: ${activity.level})`;
+          lastActivityList.appendChild(activityItem);
         });
-        dataItem.textContent = lastActivityStr;
+        dataItem.appendChild(lastActivityList);
       } else if (key === 'followers' && data[key].length === 0) {
         dataItem.textContent = 'followers: empty';
+      } else if (key === 'following') {
+        dataItem.textContent = 'following:';
+        const followingList = document.createElement('ul');
+        data[key].forEach(following => {
+          const followingItem = document.createElement('li');
+          followingItem.textContent = following;
+          followingList.appendChild(followingItem);
+        });
+        dataItem.appendChild(followingList);
       } else if (key === 'avatar') {
         const avatarImg = document.createElement('img');
         avatarImg.src = data[key];
@@ -47,6 +56,8 @@ fetch(`http://localhost:3000/user/${username}`)
       userData.appendChild(dataItem);
     });
   });
+
+
 
 // Fetch data from the /getLeaderboard endpoint
 fetch('http://localhost:3000/getLeaderboard')
