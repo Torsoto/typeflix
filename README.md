@@ -26,32 +26,32 @@ All of these endpoints can return data in either JSON or XML format. To request 
 Note: The examples provided assume a local development server at `http://localhost:3000/`.
 
 ### Movies
-1. `/movies`: Returns movie collection.
-2. `/movies/:themename`: Returns theme collection.
-3. `/movies/:themename/levels/:levelindex`: Returns text of specified level of specified (theme).
+- `/movies`: Returns movie collection.
+-  `/movies/:themename`: Returns theme collection.
+- `/movies/:themename/levels/:levelindex`: Returns text of specified level of specified (theme).
 
 ### Leaderboard
-1. `/getLeaderBoard`: Returns global leaderboard.
-2. `/getThemeLevelLeaderboard`: Returns leaderboard for a specific theme and level.
+- `/getLeaderBoard`: Returns global leaderboard.
+- `/getThemeLevelLeaderboard`: Returns leaderboard for a specific theme and level.
 
 ### Weather and Time
-1. `/weather/vienna`: Returns weather information about Vienna, which is logged on login.
-2. `/time/vienna`: Returns time information about Vienna, which is logged on login.
+- `/weather/vienna`: Returns weather information about Vienna, which is logged on login.
+- `/time/vienna`: Returns time information about Vienna, which is logged on login.
 
 ### User-related
-1. `/levelsOpened/:username/:movie`: Returns opened levels of a specific user for a given movie.
-2. `/user/:username`: Returns all data of the user.
-3. `/getAvatar`: Returns current avatar from the DiceBear API for a specific user.
-4. `/getFollowing`: Returns a list of people whom the user is following.
-5. `/getFollowers`: Returns a list of all followers of a specified username.
-6. `/getFollowersCount`: Returns the number of followers for a specified username.
-7. `/checkUserExists`: Checks if a user with the specified username exists.
+- `/levelsOpened/:username/:movie`: Returns opened levels of a specific user for a given movie.
+- `/user/:username`: Returns all data of the user.
+- `/getAvatar`: Returns current avatar from the DiceBear API for a specific user.
+- `/getFollowing`: Returns a list of people whom the user is following.
+- `/getFollowers`: Returns a list of all followers of a specified username.
+- `/getFollowersCount`: Returns the number of followers for a specified username.
+- `/checkUserExists`: Checks if a user with the specified username exists.
 
 ### ThemeDB
-1. `/getomdbi`: Returns data from the OMDB API for each theme currently displayed.
+- `/getomdbi`: Returns data from the OMDB API for each theme currently displayed.
 
 ### Miscellaneous
-1. `/training`: Returns 200 random words from the Random-Word-API.
+- `/training`: Returns 200 random words from the Random-Word-API.
 
 Copyright (c) 2023 FH Campus Wien
 
