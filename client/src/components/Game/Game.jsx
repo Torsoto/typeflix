@@ -11,7 +11,6 @@ import "../../styles/App.css";
 import FailMessage from "../UI/FailMessage";
 import WinMessage from "../UI/WinMessage";
 import { CircularProgress } from "@material-ui/core";
-import { Link } from "react-router-dom";
 import LeaderboardTable from "../UI/LeaderboardTable.jsx";
 
 const Game = () => {
@@ -291,7 +290,6 @@ const Game = () => {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
-            //'Accept': 'application/xml' //Without this header you will receive json isntead of xml
           },
           body: JSON.stringify({ username, movie, selectedLevelIndex }),
         });
