@@ -151,8 +151,6 @@ app.get("/getLeaderboard", async (req, res) => {
     }
 });
 
-
-// New endpoint to update theme and level specific leaderboard
 app.post("/updateThemeLevelLeaderboard", async (req, res) => {
     try {
         const { username, wpm, theme, levelIndex } = req.body;
@@ -201,8 +199,6 @@ app.post("/updateThemeLevelLeaderboard", async (req, res) => {
     }
 });
 
-
-// New endpoint to get theme and level specific leaderboard
 app.get("/getThemeLevelLeaderboard", async (req, res) => {
     const { r } = req.query;
     try {

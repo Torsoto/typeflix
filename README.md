@@ -2,39 +2,70 @@
 
 Welcome to Typeflix! This is a theme-based typewriting game that tests your typing speed and accuracy with different levels of difficulty.
 
-## Features
+# Features
 - Theme-based: We have different themes based on your favourite TV-Shows, Movies and Animes!
 - Typing speed: The game measures your typing speed in words per minute (WPM) and puts your best score on the globla and theme leadboard.
 - Difficulty levels: As you progress through the levels, the difficulty increases, providing a greater challenge.
 
-## How to Play
+# How to Play
 1. Select a theme and choose level(if its your first time you will have to start at level 1).
 2. Type the words that appear on the screen as quickly and accurately as possible.
 3. Your typing speed will be displayed at the end of each level.
 
-## Installation
+# Installation
 1. Run ```npm install``` in each directory (3 times), namely in /, /client, and /server.
 2. Navigate back to the root directory /.
 3. Execute ```npm run dev```.
 
-## Endpoints
-http://localhost:3000/ (some endpoints are only meant to manipulate the database and require a body in the request so here are only the ones you can easily request on the browser)
-All of these Endpoints can return the data as either json or xml -> add new query r=xml to get xml data 
-example: /movies/Breaking%20Bad?r=xml or /getAvatar?username=tolga&r=xml
+# Endpoints
+http://localhost:3000/
+This is the base URL for the API. Some endpoints are only meant to manipulate the database and require a request body, so only the endpoints that can be easily requested from a browser are listed below.
 
-1. /movies
-2. /movies/:themename | /movies/Breaking%20Bad
-3. /movies/:themename/levels/:levelindex | /movies/Breaking%20Bad/levels/1
-4. /getLeaderBoard | returns globabl leaderboard
-5. /getThemeLevelLeaderboard | /getThemeLevelLeaderboard?theme=Bleach&levelIndex=1
-6. /weather/vienna | returns weather information about vienna which we log on login
-7. /time/vienna | returns time information about vienna which we log on login
-8. /levelsOpened/:username/:movie | /levelsOpened/tolga/Breaking%20Bad
-9. /getomdbi | returns data from the ombdi api for each theme we currently display.
-10. /training | returns 200 random words from a random-word-api
-11. /user/:username | /user/tolga | returns all data of the user
-12. /getAvatar | /getAvatar?username=tolga | returns current avatar from the dicebear api
-13. /getFollowing | /getFollowing?username=tolga | returns list of people who the user is following
+All of these endpoints can return data in either JSON or XML format. To request XML data, add the query parameter `r=xml` to the URL. For example, `/movies/Breaking%20Bad?r=xml` or `/getAvatar?username=tolga&r=xml`.
+
+Note: The examples provided assume a local development server at `http://localhost:3000/`.
+
+### Movies
+1. `/movies`: Returns movie collection.
+2. `/movies/:themename`: Returns theme collection.
+3. `/movies/:themename/levels/:levelindex`: Returns text of specified level of specified (theme).
+4. `/unlockNextLevel`: Unlocks the next level in a theme and handles changing bosses if the boss level has been completed or if the last theme sets themeComplete to true for the specified user.
+
+### Leaderboard
+5. `/getLeaderBoard`: Returns global leaderboard.
+6. `/getThemeLevelLeaderboard`: Returns leaderboard for a specific theme and level.
+7. `/updateLeaderboard`: Updates global leaderboard and sorts it.
+8. `/updateThemeLevelLeaderboard`: Updates leaderboard for a specific theme and level and sorts it.
+
+### Weather and Time
+9. `/weather/vienna`: Returns weather information about Vienna, which is logged on login.
+10. `/time/vienna`: Returns time information about Vienna, which is logged on login.
+
+### User-related
+11. `/levelsOpened/:username/:movie`: Returns opened levels of a specific user for a given movie.
+12. `/user/:username`: Returns all data of the user.
+13. `/getAvatar`: Returns current avatar from the DiceBear API for a specific user.
+14. `/getFollowing`: Returns a list of people whom the user is following.
+15. `/signup`: Sign Up using Firebase + Firestore.
+16. `/login`: Login using Firebase + Firestore (Email or Username and password).
+17. `/validate`: Checks if the JWT token is still valid.
+18. `/updateavatar`: Updates the avatar of a specific user.
+19. `/follow`: Adds a username to the list of followers for the specified user.
+20. `/unfollow`: Unfollows a username from the list of followers for the specified user.
+21. `/getFollowers`: Returns a list of all followers of a specified username.
+22. `/getFollowersCount`: Returns the number of followers for a specified username.
+23. `/checkUserExists`: Checks if a user with the specified username exists.
+24. `/deleteAccount`: Deletes the account from Firestore and Firebase.
+25. `/setLastActivity`: Adds the latest played theme to the lastActivity array of length 3.
+26. `/reset-password`: Sends user an email for password reset.
+
+### API Integration
+27. `/getomdbi`: Returns data from the OMDB API for each theme currently displayed.
+
+### Miscellaneous
+28. `/training`: Returns 200 random words from the Random-Word-API.
+29. `/weather/vienna`: Returns weather information about Vienna.
+30. `/time/vienna`: Returns local time in Vienna.
 
 Copyright (c) 2023 FH Campus Wien
 
