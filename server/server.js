@@ -57,12 +57,12 @@ app.get("/", (req, res) => {
 
     res.status(200).send(xml)
   } else {
-    res.status(200).json("Hello World!");
+    res.status(200).json("Welcome to the TypeFlix API! Visit our github and read the README for more information");
   }
 });
 
 app.listen(3000, () => {
-  console.log("Example app listening on port 3000!");
+  console.log("Example app listening on port http://localhost:3000");
 });
 
 logWeatherAndTime();
