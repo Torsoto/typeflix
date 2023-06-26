@@ -181,7 +181,7 @@ app.post("/login", async (req, res) => {
         try {
             const docSnapshot = await getDoc(doc(db, "emailToUsername", lowercaseIdentifier));
             const username = docSnapshot.data().username;
-            await handleLogin(lowercaseIdentifier, username, password, res, acceptHeader);
+            await handleLogin(lowercaseIdentifier, username, password, res);
         } catch (error) {
             console.error("Error getting username from email:", error);
             res.status(500).json({ error: error.message });
