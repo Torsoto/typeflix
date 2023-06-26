@@ -312,14 +312,12 @@ const Game = () => {
     }
 
     return (
-      <div
-        className={`w-full border-2 border-black h-4 mb-10 mt-4 max-w-[500px] bg-white rounded-full`}
-      >
-        <div
-          className={`h-full ${barColor} rounded-full`}
-          style={{ width: `${hpPercentage}%` }}
-        />
-      </div>
+        <div className={`w-full border-2 border-black h-4 mb-10 mt-4 max-w-[500px] bg-white rounded-full`}>
+          <div
+              className={`h-full ${barColor} rounded-full`}
+              style={{ width: `${hpPercentage}%` }}
+          />
+        </div>
     );
   };
 
@@ -368,72 +366,55 @@ const Game = () => {
   };
 
   return (
-    <div className="grid mx-auto text-white place-items-center ">
-      <div className="relative mr-8">
-        {chatBubble.visible && (
-          <div className="absolute top-0 z-50 p-2 text-black bg-white rounded-md -left-20 chat-bubble">
-            {chatBubble.text}
-          </div>
+      <div className="grid mx-auto text-white place-items-center ">
+        <div className="relative mr-8">
+          {chatBubble.visible && (
+              <div className="absolute top-0 z-50 p-2 text-black bg-white rounded-md -left-20 chat-bubble">
+                {chatBubble.text}
+              </div>
+          )}
+          <img
+              src={Img}
+              alt="image of enemy"
+              className="h-[250px] z-10 stance"
+          />
+        </div>
+        <HpBar hp={hp} />
+        <WinMessage isFinished={isFinished} onRetry={handleRetry} timeTaken={timeTaken} wpm={wpm} onNextLevel={handleNextLevel} />
+        <FailMessage hasFailed={hasFailed} onRetry={handleRetry} />
+        {isLoading ? (
+            <div className="flex items-center justify-center mt-8">
+              <CircularProgress style={{ color: 'white' }} />
+            </div>
+        ) : (
+            leaderboardData && <LeaderboardTable leaderboardData={leaderboardData} />
         )}
-        <img src={Img} alt="image of enemy" className="h-[250px] z-10 stance" />
-      </div>
-      <HpBar hp={hp} />
-      <WinMessage
-        isFinished={isFinished}
-        onRetry={handleRetry}
-        timeTaken={timeTaken}
-        wpm={wpm}
-        onNextLevel={handleNextLevel}
-      />
-      <FailMessage hasFailed={hasFailed} onRetry={handleRetry} />
-      {isLoading ? (
-        <div className="flex items-center justify-center mt-8">
-          <CircularProgress style={{ color: "white" }} />
-        </div>
-      ) : (
-        leaderboardData && (
-          <LeaderboardTable leaderboardData={leaderboardData} />
-        )
-      )}
-      <div>
-        <div className="flex gap-1 place-content-center">
-          <p
-            className={`text-2xl font-bold align-middle mb-4 ${
-              timeLeft > 0 && !isBlurred && !isFinished && !hasFailed
-                ? "opacity-100"
-                : "invisible"
-            }`}
-          >
-            {timeLeft > 0 && !isBlurred ? `${timeLeft}` : "0"}
-          </p>
-        </div>
-        <div className="relative">
-          <div
-            className={`absolute text-2xl font-mono top-0 bottom-24 left-0 right-0 flex items-center justify-center text-center ${
-              isMessageVisible ? "" : "hidden"
-            }`}
-          >
-            click here to start typing
+        <div>
+          <div className="flex gap-1 place-content-center">
+            <p className={`text-2xl font-bold align-middle mb-4 ${timeLeft > 0 && !isBlurred && !isFinished && !hasFailed ? "opacity-100" : "invisible"}`}>
+              {timeLeft > 0 && !isBlurred ? `${timeLeft}` : "0"}
+            </p>
           </div>
-          <main
-            tabIndex={0}
-            onKeyDown={handleKeyDown}
-            onClick={handleClickForBlur}
-            className={`max-w-[1200px] ${
-              isBlurred ? "blur" : ""
-            } overflow-hidden inline-block items-center h-[155px]  text-2xl m-auto focus:outline-none ${
-              isFinished || hasFailed ? "hidden" : ""
-            }`}
-          >
-            <p
-              ref={pRef}
-              className={`relative leading-[50px] text-justify text-2xl font-medium`}
-              style={{ top: -50 * timesUpdatedCursor }}
+          <div className="relative">
+            <div
+                className={`absolute text-2xl font-mono top-0 bottom-24 left-0 right-0 flex items-center justify-center text-center ${isMessageVisible ? "" : "hidden"
+                }`}
             >
-              {text.split("").map((letter, letterIndex) => (
-                <React.Fragment key={letterIndex}>
-                  {letterIndex === currentLetterIndex && !isBlurred && (
-                    <span className="fixed z-10 -ml-[3px] -mt-[1.5px] text-yellow-400 blinking-cursor">
+              click here to start typing
+            </div>
+            <main
+                tabIndex={0}
+                onKeyDown={handleKeyDown}
+                onClick={handleClickForBlur}
+                className={`max-w-[1200px] ${isBlurred ? "blur" : ""
+                } overflow-hidden inline-block items-center h-[155px]  text-2xl m-auto focus:outline-none ${isFinished || hasFailed ? "hidden" : ""
+                }`}
+            >
+              <p ref={pRef} className={`relative leading-[50px] text-justify text-2xl font-medium`} style={{ top: -50 * timesUpdatedCursor }}>
+                {text.split('').map((letter, letterIndex) => (
+                    <React.Fragment key={letterIndex}>
+                      {letterIndex === currentLetterIndex && !isBlurred && (
+                          <span className="fixed z-10 -ml-[3px] -mt-[1.5px] text-yellow-400 blinking-cursor">
                       |
                     </span>
                   )}
@@ -451,13 +432,13 @@ const Game = () => {
                   >
                     {letter}
                   </span>
-                </React.Fragment>
-              ))}
-            </p>
-          </main>
+                    </React.Fragment>
+                ))}
+              </p>
+            </main>
+          </div>
         </div>
       </div>
-    </div>
   );
 };
 
