@@ -175,10 +175,11 @@ export const ProfileContainer = (username) => {
                 )}
                 {!isSameProfile && (
                   <button
-                    className={`button-s px-2 py-1 font-semibold ${isFollowing
-                      ? "bg-white text-black"
-                      : "bg-black text-white"
-                      } rounded-full`}
+                    className={`button-s px-2 py-1 font-semibold ${
+                      isFollowing
+                        ? "bg-white text-black"
+                        : "bg-black text-white"
+                    } rounded-full`}
                     onClick={isFollowing ? handleUnfollow : handleFollow}
                   >
                     {isFollowing ? "Unfollow" : "Follow"}
@@ -212,6 +213,10 @@ export const ProfileContainer = (username) => {
                     <span className="text-white">
                       {customUserData.themescompleted}
                     </span>
+                  </p>
+                  <p>
+                    Bosses Won:{" "}
+                    <span className="text-white">{customUserData.bosses}</span>
                   </p>
                 </div>
               </div>
