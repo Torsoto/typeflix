@@ -11,21 +11,21 @@ import { ERROR_MAP } from "../components/Notification/ERROR_MAP.js";
 function Settings() {
   const [error, setError] = useState("");
   const [showAvatarOptions, setShowAvatarOptions] = useState(false);
-  const [newUsername, setNewUsername] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [modalIsOpenDelete, setModalIsOpenDelete] = useState(false);
-  const [modalIsOpenUsername, setModalIsOpenUsername] = useState(false);
   const [modalIsOpenPassword, setModalIsOpenPassword] = useState(false);
+  const [modalIsOpenDelete, setModalIsOpenDelete] = useState(false);
   const [ModalIsOpenDeleteConfirm, setModalIsOpenDeleteConfirm] =
     useState(false);
   const [password, setPassword] = useState("");
-  const [modalText, setModalText] = useState("");
   const { userId, userData, avatarUrl, setAvatarUrl, logout } =
     useContext(AuthContext);
   const [notification, setNotification] = useState({
     show: false,
     message: "",
   });
+  const [email, setEmail] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   Modal.setAppElement("#root");
 
@@ -54,68 +54,26 @@ function Settings() {
     }
   };
 
-  const handleUpdateUsername = async () => {
-    // NOT WORKING ATM!!!
-    /*
-    if (newUsername.length > 1) {
-      try {
-        const response = await fetch("http://localhost:3000/editUsername", {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            token: localStorage.getItem("jwt"),
-            newUsername: newUsername,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to update username");
-        }
-
-        const data = await response.json();
-        console.log(data.message);
-      } catch (error) {
-        setNotification({
-          show: true,
-          message:
-            ERROR_MAP[error.message] ||
-            "Error updating username. Please try again with a different username or try again later",
-        });
-        console.error("Error updating username:", error);
-      }
-    } else {
-      setNotification({
-        show: true,
-        message: "New username must be at least 2 characters long",
-      });
-    }
-    */
-  };
-
-
-  const handleUpdatePassword = async () => {
+  const handleSendPasswordResetEmail = async () => {
+    
+    handleCancelChangePassword(false);
+    
     try {
-      const response = await fetch("http://localhost:3000/edit", {
+      const response = await fetch("http://localhost:3000/reset-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          token: localStorage.getItem("jwt"),
-          password: newPassword,
-        }),
+        body: JSON.stringify({ email }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to update password");
+      if (response.ok) {
+        console.log("Reset password email send successfully");
+      } else {
+        console.log("Error sending reset password email");
       }
-
-      const data = await response.json();
-      console.log(data.message);
     } catch (error) {
-      console.error("Error updating password:", error);
+      console.log("Error sending request to endpoint");
     }
   };
 
@@ -161,31 +119,32 @@ function Settings() {
       });
   };
 
-
-  //Modals for Username
-  const handleOpenModalUsername = () => {
-    setModalIsOpenUsername(true);
+  //Modal for changing password
+  const handleChangePassword = async () => {
+    setModalIsOpenPassword(true);
   };
 
-  const handleCancelModalUsername = () => {
-    setModalIsOpenUsername(false);
+  const handleCancelChangePassword = () => {
+    setModalIsOpenPassword(false);
   };
 
+  //first Modal for deletion
   const handleDeleteAccount = async () => {
     setModalIsOpenDelete(true);
   };
 
-  const handleOpenSecondModal = () => {
+  const handleCancelModalDelete = () => {
+    setModalIsOpenDelete(false);
+  };
+
+  //Second Modal (confirm delete)
+  const handleOpenSecondModalDelete = () => {
     setModalIsOpenDelete(false);
     setModalIsOpenDeleteConfirm(true);
   };
 
-  const handleCloseSecondModal = () => {
+  const handleCloseSecondModalDelete = () => {
     setModalIsOpenDeleteConfirm(false);
-    setModalIsOpenDelete(false);
-  };
-
-  const handleCancelModalDelete = () => {
     setModalIsOpenDelete(false);
   };
 
@@ -227,79 +186,56 @@ function Settings() {
                 >
                   Delete Account
                 </button>
-                <Modal
-                  isOpen={modalIsOpenDelete}
-                  onRequestClose={handleCancelModalDelete}
-                  className="flex items-center justify-center w-full h-full bg-gray-800 bg-opacity-80"
-                >
-                  <div className="p-4 bg-white rounded-lg w-96">
-                    <h2 className="text-lg font-medium text-center">
-                      Are you sure you want to delete your account?
-                    </h2>
-                    <div className="flex mt-4 place-content-center ">
-                      <button
-                        className="px-4 py-2 mr-2 font-medium text-white bg-red-500 rounded-lg hover:bg-red-600"
-                        onClick={handleOpenSecondModal}
-                      >
-                        Confirm
-                      </button>
-                      <button
-                        className="px-4 py-2 font-medium text-white bg-gray-500 rounded-lg hover:bg-gray-600"
-                        onClick={handleCancelModalDelete}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                </Modal>
               </div>
               <div className="flex flex-col gap-8 place-content-center md:w-1/2">
                 <div className="flex items-center">
                   <p className="mr-2 text-lg text-white">
                     Username: {userData && <span>{userData.username}</span>}
                   </p>
+                </div>
+                <div className="flex items-start gap-2 ">
+                  <p className="text-lg text-white">
+                    Email: {userData && <span>{userData.email}</span>}
+                  </p>
+                </div>
+                <div>
                   <button
-                    className="px-2 py-1 font-semibold text-white bg-black rounded-full"
-                    onClick={() => handleOpenModalUsername()}
+                    className="h-10 p-2 text-white bg-black rounded-3xl"
+                    onClick={() => handleChangePassword()}
                   >
-                    <BiEdit />
+                    Reset Password
                   </button>
                   <Modal
-                    isOpen={modalIsOpenUsername}
-                    onRequestClose={handleCancelModalUsername}
+                    isOpen={modalIsOpenPassword}
+                    onRequestClose={handleCancelChangePassword}
                     className="flex items-center justify-center w-full h-full bg-gray-800 bg-opacity-80"
                   >
                     <div className="p-4 bg-white rounded-lg w-96">
                       <h2 className="text-lg font-medium text-center">
-                        Enter your new username!
+                        Enter your Email
                       </h2>
                       <input
-                        type="username"
+                        type="email"
                         className="w-full px-4 py-2 mt-4 border rounded-lg"
-                        onChange={(e) => setNewUsername(e.target.value)}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                       />
                       <div className="flex mt-4 place-content-center ">
                         <button
                           className="px-4 py-2 mr-2 font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600"
-                          onClick={handleUpdateUsername}
+                          onClick={handleSendPasswordResetEmail}
                         >
-                          Confirm
+                          Send
                         </button>
                         <button
                           className="px-4 py-2 font-medium text-white bg-gray-500 rounded-lg hover:bg-gray-600"
-                          onClick={handleCancelModalUsername}
+                          onClick={handleCancelChangePassword}
                         >
                           Cancel
                         </button>
                       </div>
                     </div>
                   </Modal>
-                </div>
-
-                <div className="flex items-start gap-2 ">
-                  <p className="text-lg text-white">
-                    Email: {userData && <span>{userData.email}</span>}
-                  </p>
                 </div>
               </div>
             </div>
@@ -316,7 +252,7 @@ function Settings() {
       </div>
       <Modal
         isOpen={ModalIsOpenDeleteConfirm}
-        onRequestClose={handleCloseSecondModal}
+        onRequestClose={handleCloseSecondModalDelete}
         className="flex items-center justify-center w-full h-full bg-gray-800 bg-opacity-80"
       >
         <div className="p-4 bg-white rounded-lg w-96">
@@ -337,7 +273,32 @@ function Settings() {
             </button>
             <button
               className="px-4 py-2 font-medium text-white bg-gray-500 rounded-lg hover:bg-gray-600"
-              onClick={handleCloseSecondModal}
+              onClick={handleCloseSecondModalDelete}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        isOpen={modalIsOpenDelete}
+        onRequestClose={handleCancelModalDelete}
+        className="flex items-center justify-center w-full h-full bg-gray-800 bg-opacity-80"
+      >
+        <div className="p-4 bg-white rounded-lg w-96">
+          <h2 className="text-lg font-medium text-center">
+            Are you sure you want to delete your account?
+          </h2>
+          <div className="flex mt-4 place-content-center ">
+            <button
+              className="px-4 py-2 mr-2 font-medium text-white bg-red-500 rounded-lg hover:bg-red-600"
+              onClick={handleOpenSecondModalDelete}
+            >
+              Confirm
+            </button>
+            <button
+              className="px-4 py-2 font-medium text-white bg-gray-500 rounded-lg hover:bg-gray-600"
+              onClick={handleCancelModalDelete}
             >
               Cancel
             </button>

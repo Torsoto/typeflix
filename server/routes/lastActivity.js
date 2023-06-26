@@ -16,7 +16,7 @@ app.post("/setLastActivity", async (req, res) => {
         const { username, movie, level, wpm } = req.body;
 
         if (!username || typeof username !== 'string') {
-            res.status(400).send({ error: "Invalid or missing username" });
+            res.status(400).json({ error: "Invalid or missing username" });
             return;
         }
 
@@ -25,7 +25,7 @@ app.post("/setLastActivity", async (req, res) => {
 
         if (!userDocSnap.exists()) {
             console.log("404")
-            res.status(404).send({ error: "User not found" });
+            res.status(404).json({ error: "User not found" });
             return;
         }
 
@@ -44,16 +44,19 @@ app.post("/setLastActivity", async (req, res) => {
         await setDoc(userDocRef, userDocData)
             .then(() => {
                 console.log("User's last activity updated successfully.");
-                res.status(200).send({ message: "User's last activity updated successfully." });
+                res.status(200).json({
+                    message: "User's last activity updated successfully.",
+                });
             })
             .catch((e) => {
                 console.log("Error updating user's last activity:", e);
-                res.status(500).send({ error: e.message });
+                res.status(500).json({ error: e.message });
             });
     } catch (e) {
         console.log("Error updating user's last activity:", e);
-        res.status(500).send({ error: e.message });
+        res.status(500).json({ error: e.message });
     }
 });
+
 
 export default app;
