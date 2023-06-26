@@ -5,8 +5,10 @@ import "../../styles/App.css";
 import FailMessage from "../UI/FailMessage";
 import WinMessage from "../UI/WinMessage"
 import { CircularProgress } from "@material-ui/core";
-import { Link } from "react-router-dom";
 import LeaderboardTable from "../UI/LeaderboardTable.jsx";
+import { GiDaemonSkull } from "react-icons/Gi"
+import { IoSkullSharp } from "react-icons/io5"
+import { AiFillWarning } from "react-icons/Ai"
 
 const Game = () => {
   const { setImg, setText, totalLevelsCount, setTime, userData, title, selectedLevelIndex, updateBestWpm, setSelectedLevelIndex, text, Img, time } = useContext(AuthContext);
@@ -32,6 +34,7 @@ const Game = () => {
   const [chatBubble, setChatBubble] = useState({ visible: false, text: `` });
   const [leaderboardData, setLeaderboardData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
     if (timeLeft > 0 && hasStartedTyping && !isFinished && !hasFailed) {
@@ -173,6 +176,7 @@ const Game = () => {
           setHasFailed(true);
         } else {
           setIsFinished(true);
+          setHp(hp - 1)
           const timeTaken = time - timeLeft;
           setTimeTaken(timeTaken);
           const durationMs = Date.now() - startTime;
@@ -332,15 +336,29 @@ const Game = () => {
     setLeaderboardData(null);
   };
 
+  let Icon;
+  let iconText;
+  if (selectedLevelIndex % 3 === 0) {
+    Icon = IoSkullSharp;
+    iconText = "Mini Boss!";
+  } else if (selectedLevelIndex === 10) {
+    Icon = GiDaemonSkull;
+    iconText = "BOSS!";
+  }
+
+
+
+  useEffect(() => {
+    if (Icon) {
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 1200);
+    }
+  }, [Icon]);
+
 
   return (
     <div className="grid mx-auto text-white place-items-center ">
       <div className="relative mr-8">
-        {/*chatBubble.visible && (
-              <div className="absolute top-0 z-50 p-2 text-black bg-white rounded-md -left-20 chat-bubble">
-                {chatBubble.text}
-              </div>
-          )*/}
         <img
           src={Img}
           alt="image of enemy"
@@ -348,6 +366,16 @@ const Game = () => {
         />
       </div>
       <HpBar hp={hp} />
+      {showPopup && (
+        <div className="absolute flex items-center justify-center p-4 text-3xl text-red-600 transform -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-[0.96] rounded-xl top-1/2 left-1/2">
+          <AiFillWarning />
+          <Icon />
+          {iconText}
+          <Icon />
+          <AiFillWarning />
+        </div>
+      )}
+
       <WinMessage isFinished={isFinished} onRetry={handleRetry} timeTaken={timeTaken} wpm={wpm} onNextLevel={handleNextLevel} />
       <FailMessage hasFailed={hasFailed} onRetry={handleRetry} />
       {isLoading ? (
@@ -376,7 +404,7 @@ const Game = () => {
             onClick={handleClickForBlur}
             className={`max-w-[1200px] ${isBlurred ? "blur" : ""
               } overflow-hidden inline-block items-center h-[155px]  text-2xl m-auto focus:outline-none ${isFinished || hasFailed ? "hidden" : ""
-              }`}
+              } `}
           >
             <p ref={pRef} className={`relative leading-[50px] text-justify text-2xl font-medium`} style={{ top: -50 * timesUpdatedCursor }}>
               {text.split('').map((letter, letterIndex) => (
