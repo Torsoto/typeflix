@@ -12,8 +12,6 @@ const app = express.Router();
 import xmlbuilder from "xmlbuilder";
 
 app.post("/updateLeaderboard", async (req, res) => {
-    const acceptHeader = req.headers["accept"];
-
     try {
         const { username, wpm } = req.body;
 
@@ -23,23 +21,7 @@ app.post("/updateLeaderboard", async (req, res) => {
         const userDocSnap = await getDoc(userDocRef);
 
         if (!userDocSnap.exists()) {
-            if (acceptHeader === "application/xml") {
-                // Convert the error message to an XML string
-                const xml = xmlbuilder
-                    .create({
-                        error: `User not found`,
-                    })
-                    .end({ pretty: true });
-
-                // Set the Content-Type header to "application/xml"
-                res.setHeader("Content-Type", "application/xml");
-
-                // Send the XML string in the response
-                return res.status(404).send(xml);
-            } else {
-                // If the query is not xml, send JSON in the response
-                return res.status(404).json({ error: "User not found" });
-            }
+            return res.status(404).json({ error: "User not found" });
         }
 
         let userDocData = userDocSnap.data();
@@ -92,43 +74,11 @@ app.post("/updateLeaderboard", async (req, res) => {
 
         // Update the leaderboard in Firestore
         await setDoc(leaderboardDocRef, { leaderboard: leaderboardData });
+        res.status(200).json({ message: "Leaderboard and user stats updated successfully" });
 
-        if (acceptHeader === "application/xml" === "xml") {
-            // Convert the error message to an XML string
-            const xml = xmlbuilder
-                .create({
-                    message: `Leaderboard and user stats updated successfully.`,
-                })
-                .end({ pretty: true });
-
-            // Set the Content-Type header to "application/xml"
-            res.setHeader("Content-Type", "application/xml");
-
-            // Send the XML string in the response
-            res.status(200).send(xml);
-        } else {
-            // If the query is not xml, send JSON in the response
-            res.status(200).json({ message: "Leaderboard and user stats updated successfully" });
-        }
     } catch (error) {
         console.log("Error updating leaderboard:", error);
-        if (acceptHeader === "application/xml" === "xml") {
-            // Convert the error message to an XML string
-            const xml = xmlbuilder
-                .create({
-                    error: `${error.message}`,
-                })
-                .end({ pretty: true });
-
-            // Set the Content-Type header to "application/xml"
-            res.setHeader("Content-Type", "application/xml");
-
-            // Send the XML string in the response
-            res.status(500).send(xml);
-        } else {
-            // If the query is not xml, send JSON in the response
-            res.status(500).json({ error: error.message });
-        }
+        res.status(500).json({ error: error.message });
     }
 });
 
@@ -204,7 +154,6 @@ app.get("/getLeaderboard", async (req, res) => {
 
 // New endpoint to update theme and level specific leaderboard
 app.post("/updateThemeLevelLeaderboard", async (req, res) => {
-    const acceptHeader = req.headers["accept"];
     try {
         const { username, wpm, theme, levelIndex } = req.body;
 
@@ -245,39 +194,10 @@ app.post("/updateThemeLevelLeaderboard", async (req, res) => {
 
         // Update the leaderboard in Firestore
         await setDoc(leaderboardDocRef, leaderboardData);
-
-        if (acceptHeader === "application/xml" === "xml") {
-            // Convert the success message to an XML string
-            const xml = xmlbuilder
-                .create({ message: "Leaderboard updated successfully." })
-                .end({ pretty: true });
-
-            // Set the Content-Type header to "application/xml"
-            res.setHeader("Content-Type", "application/xml");
-
-            // Send the XML string in the response
-            res.status(200).send(xml);
-        } else {
-            // If the r parameter is not "xml", send JSON in the response
-            res.status(200).json({ message: "Leaderboard updated successfully." });
-        }
+        res.status(200).json({ message: "Leaderboard updated successfully." });
     } catch (e) {
         console.log("Error updating leaderboard:", e);
-        if (acceptHeader === "application/xml" === "xml") {
-            // Convert the error message to an XML string
-            const xml = xmlbuilder
-                .create({ error: e.message })
-                .end({ pretty: true });
-
-            // Set the Content-Type header to "application/xml"
-            res.setHeader("Content-Type", "application/xml");
-
-            // Send the XML string in the response
-            res.status(500).send(xml);
-        } else {
-            // If the r parameter is not "xml", send JSON in the response
-            res.status(500).json({ error: e.message });
-        }
+        res.status(500).json({ error: e.message });
     }
 });
 

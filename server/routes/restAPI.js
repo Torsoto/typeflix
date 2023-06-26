@@ -61,7 +61,7 @@ app.get("/weather/vienna", async (req, res) => {
     console.error("Error retrieving weather data:", error);
 
     // Check the Accept header
-    if (req.headers["accept"] === "application/xml") {
+    if (r === "xml") {
       // Convert the error message to an XML string
       const xml = xmlbuilder
         .create({
