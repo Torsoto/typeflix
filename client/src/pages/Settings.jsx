@@ -55,6 +55,9 @@ function Settings() {
   };
 
   const handleSendPasswordResetEmail = async () => {
+    
+    handleCancelChangePassword(false);
+    
     try {
       const response = await fetch("http://localhost:3000/reset-password", {
         method: "POST",
