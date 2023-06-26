@@ -351,7 +351,7 @@ const Game = () => {
   useEffect(() => {
     if (Icon) {
       setShowPopup(true);
-      setTimeout(() => setShowPopup(false), 1200);
+      setTimeout(() => setShowPopup(false), 1000);
     }
   }, [Icon]);
 
@@ -367,7 +367,7 @@ const Game = () => {
       </div>
       <HpBar hp={hp} />
       {showPopup && (
-        <div className="absolute flex items-center justify-center p-4 text-3xl text-red-600 transform -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-[0.96] rounded-xl top-1/2 left-1/2">
+        <div className="absolute flex items-center justify-center p-4 text-2xl text-red-600 transform -translate-x-1/2 translate-y-8 bg-black bg-opacity-[0.96] rounded-xl top-1/2 left-1/2">
           <AiFillWarning />
           <Icon />
           {iconText}
