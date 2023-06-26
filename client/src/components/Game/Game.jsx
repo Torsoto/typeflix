@@ -49,6 +49,7 @@ const Game = () => {
   const [hasFailed, setHasFailed] = useState(false);
   const [chatBubble, setChatBubble] = useState({ visible: false, text: `` });
   const [leaderboardData, setLeaderboardData] = useState(null);
+  const [isLeaderboardVisible, setIsLeaderboardVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -122,7 +123,7 @@ const Game = () => {
       );
 
       if (response.ok) {
-        const data = await response.json();
+        await response.json();
       } else {
         console.error("Failed to update level specific leaderboard");
       }
@@ -138,24 +139,27 @@ const Game = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setIsLoading(false);
         setLeaderboardData(data);
       } else {
         console.log("Failed to get level specific leaderboard");
       }
     } catch (error) {
       console.log("Error getting level specific leaderboard:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+
   function handleWinRequests(wpm) {
     setIsLoading(true);
+    setIsLeaderboardVisible(true);
     updateNextLevel(userData.username, title).then(() => {
       updateLastActivity(
-        userData.username,
-        title,
-        selectedLevelIndex,
-        wpm
+          userData.username,
+          title,
+          selectedLevelIndex,
+          wpm
       ).then(() => {
         updateLevelLeaderboard(wpm).then(() => {
           updateBestWpm(userData.username, wpm);
@@ -320,6 +324,8 @@ const Game = () => {
   };
 
   const resetGameState = (data) => {
+    setIsLeaderboardVisible(false);
+    setIsLoading(false);
     setIsBlurred(true);
     setIsMessageVisible(true);
     setCurrentLetterIndex(0);
@@ -343,7 +349,7 @@ const Game = () => {
   const handleNextLevel = async () => {
     try {
       const response = await fetch(
-        `http://localhost:3000/movies/${title}/levels/${selectedLevelIndex + 1}`
+          `http://localhost:3000/movies/${title}/levels/${selectedLevelIndex + 1}`
       );
       const data = await response.json();
       console.log(data);
@@ -358,6 +364,7 @@ const Game = () => {
       console.error(error);
     }
   };
+
 
   const handleRetry = () => {
     resetGameState({ text, time });
@@ -385,7 +392,7 @@ const Game = () => {
               <CircularProgress style={{ color: 'white' }} />
             </div>
         ) : (
-            leaderboardData && <LeaderboardTable leaderboardData={leaderboardData} />
+            leaderboardData && isLeaderboardVisible && <LeaderboardTable leaderboardData={leaderboardData} />
         )}
         <div>
           <div className="flex gap-1 place-content-center">

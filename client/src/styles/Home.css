@@ -66,6 +66,6 @@ body {
   }
 
   .transition-color {
-    transition: all 0.1s ease;
+    transition: all 0.2s ease;
   }
 }
