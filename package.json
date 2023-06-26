@@ -5,7 +5,8 @@
   "scripts": {
     "dev:server": "cd server && npm run dev",
     "dev:client": "cd client && npm run dev",
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\""
+    "dev:testclient": "cd testclient && npm run dev",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\" \"npm run dev:testclient\""
   },
   "dependencies": {
     "@material-ui/core": "^4.12.4",

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test Client</title>
+</head>
+
+<body class="bg-gray-100">
+  <div id="app" class="max-w-4xl p-4 mx-auto">
+    <h1 class="mb-4 text-3xl font-bold">Data from Endpoints</h1>
+    <div class="grid grid-cols-3 gap-4">
+      <div>
+        <h2 class="mb-2 text-xl font-semibold">Themes</h2>
+        <ul id="movies-list" class="list-disc list-inside"></ul>
+      </div>
+      <div>
+        <h2 class="mb-2 text-xl font-semibold">User Data</h2>
+        <ul id="user-data" class="list-disc list-inside"></ul>
+      </div>
+      <div>
+        <h2 class="mb-2 text-xl font-semibold">Global Leaderboard</h2>
+        <ul id="leaderboard" class="list-disc list-inside"></ul>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="/main.js"></script>
+</body>
+
+</html>
