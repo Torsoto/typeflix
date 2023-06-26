@@ -54,6 +54,26 @@ function Settings() {
     }
   };
 
+  const handleSendPasswordResetEmail = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/reset-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        console.log("Reset password email send successfully");
+      } else {
+        console.log("Error sending reset password email");
+      }
+    } catch (error) {
+      console.log("Error sending request to endpoint");
+    }
+  };
+
   const handleConfirmDelete = () => {
     fetch("http://localhost:3000/deleteAccount", {
       method: "DELETE",
@@ -198,9 +218,9 @@ function Settings() {
                         onChange={(e) => setEmail(e.target.value)}
                       />
                       <div className="flex mt-4 place-content-center ">
-                        <button 
+                        <button
                           className="px-4 py-2 mr-2 font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600"
-                          onClick
+                          onClick={handleSendPasswordResetEmail}
                         >
                           Send
                         </button>
