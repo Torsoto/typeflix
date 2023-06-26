@@ -179,21 +179,16 @@ app.post("/login", async (req, res) => {
   const userDoc = await getDocs(collection(db, "users"));
   let email;
 
-  console.log(identifier, lowercaseIdentifier, password);
-
   userDoc.forEach((doc) => {
     if (doc.data().username === lowercaseIdentifier) {
       email = doc.data().email;
-      console.log("try");
     }
-    console.log("try");
   });
 
   if (email) {
     // User found by username
     await handleLogin(email, lowercaseIdentifier, password, res);
   } else {
-    console.log("try2");
     // User not found by username, attempt to sign in with the identifier as email
     try {
       const docSnapshot = await getDoc(
