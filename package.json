@@ -9,7 +9,6 @@
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\" \"npm run dev:testclient\""
   },
   "dependencies": {
-    "@material-ui/core": "^4.12.4",
     "concurrently": "^6.2.1"
   }
 }

@@ -10,7 +10,7 @@ import AuthContext from "../context/AuthContext.jsx";
 import "../../styles/App.css";
 import FailMessage from "../UI/FailMessage";
 import WinMessage from "../UI/WinMessage";
-import { CircularProgress } from "@material-ui/core";
+import { CircularProgress } from '@mui/joy';
 import LeaderboardTable from "../UI/LeaderboardTable.jsx";
 
 const Game = () => {
@@ -389,7 +389,7 @@ const Game = () => {
         <FailMessage hasFailed={hasFailed} onRetry={handleRetry} />
         {isLoading ? (
             <div className="flex items-center justify-center mt-8">
-              <CircularProgress style={{ color: 'white' }} />
+              <CircularProgress color="neutral" variant="plain" size="lg" value={60}/>
             </div>
         ) : (
             leaderboardData && isLeaderboardVisible && <LeaderboardTable leaderboardData={leaderboardData} />
