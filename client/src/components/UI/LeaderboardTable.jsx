@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 const LeaderboardTable = ({ leaderboardData }) => {
     const [leaderboardAvatars, setLeaderboardAvatars] = useState({});
 
+    // fetch avatars for each username in leaderboard
     useEffect(() => {
         const fetchLeaderboardAvatars = async () => {
             const usernames = Object.keys(leaderboardData);
