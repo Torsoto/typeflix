@@ -222,6 +222,7 @@ const Game = () => {
             // otherwise, mark the game as finished, calculate the time taken, and calculate the typing speed (in words per minute)
           } else {
             setIsFinished(true);
+            setHp(hp - 1)
             const timeTaken = time - timeLeft;
             setTimeTaken(timeTaken);
             const durationMs = Date.now() - startTime;
@@ -251,6 +252,7 @@ const Game = () => {
             incorrectLetters.length === 0
           ) {
             setIsFinished(true);
+            setHp(hp - 1)
             setHasFailed(false);
             const timeTaken = time - timeLeft;
             setTimeTaken(timeTaken);
