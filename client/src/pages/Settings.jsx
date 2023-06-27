@@ -11,8 +11,6 @@ import { ERROR_MAP } from "../components/Notification/ERROR_MAP.js";
 function Settings() {
   const [error, setError] = useState("");
   const [showAvatarOptions, setShowAvatarOptions] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
   const [modalIsOpenPassword, setModalIsOpenPassword] = useState(false);
   const [modalIsOpenDelete, setModalIsOpenDelete] = useState(false);
   const [ModalIsOpenDeleteConfirm, setModalIsOpenDeleteConfirm] =
@@ -25,7 +23,6 @@ function Settings() {
     message: "",
   });
   const [email, setEmail] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
 
   Modal.setAppElement("#root");
 
@@ -153,7 +150,8 @@ function Settings() {
     const avatarURL = `https://api.dicebear.com/6.x/${styleName}/svg?seed=${userId}`;
     setAvatarUrl(avatarURL);
     setShowAvatarOptions(false);
-    updateAvatar(avatarURL);
+    updateAvatar(avatarURL).then(r =>
+      console.log(r));
   };
 
   const handleToggleAvatarOptions = () => {
