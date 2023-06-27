@@ -28,6 +28,7 @@ const LevelSelection = () => {
     });
   }, []);
 
+  // set 200ms timeout for fadeout / fadein
   useEffect(() => {
     let timer1 = null;
     if (fadeOut) {
