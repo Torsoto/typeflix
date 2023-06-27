@@ -26,46 +26,32 @@ All of these endpoints can return data in either JSON or XML format. To request 
 Note: The examples provided assume a local development server at `http://localhost:3000/`.
 
 ### Movies
-1. `/movies`: Returns movie collection.
-2. `/movies/:themename`: Returns theme collection.
-3. `/movies/:themename/levels/:levelindex`: Returns text of specified level of specified (theme).
-4. `/unlockNextLevel`: Unlocks the next level in a theme and handles changing bosses if the boss level has been completed or if the last theme sets themeComplete to true for the specified user.
+- `/movies`: Returns movie collection.
+-  `/movies/:themename`: Returns theme collection.
+- `/movies/:themename/levels/:levelindex`: Returns text of specified level of specified (theme).
 
 ### Leaderboard
-5. `/getLeaderBoard`: Returns global leaderboard.
-6. `/getThemeLevelLeaderboard`: Returns leaderboard for a specific theme and level.
-7. `/updateLeaderboard`: Updates global leaderboard and sorts it.
-8. `/updateThemeLevelLeaderboard`: Updates leaderboard for a specific theme and level and sorts it.
+- `/getLeaderBoard`: Returns global leaderboard.
+- `/getThemeLevelLeaderboard`: Returns leaderboard for a specific theme and level.
 
 ### Weather and Time
-9. `/weather/vienna`: Returns weather information about Vienna, which is logged on login.
-10. `/time/vienna`: Returns time information about Vienna, which is logged on login.
+- `/weather/vienna`: Returns weather information about Vienna, which is logged on login.
+- `/time/vienna`: Returns time information about Vienna, which is logged on login.
 
 ### User-related
-11. `/levelsOpened/:username/:movie`: Returns opened levels of a specific user for a given movie.
-12. `/user/:username`: Returns all data of the user.
-13. `/getAvatar`: Returns current avatar from the DiceBear API for a specific user.
-14. `/getFollowing`: Returns a list of people whom the user is following.
-15. `/signup`: Sign Up using Firebase + Firestore.
-16. `/login`: Login using Firebase + Firestore (Email or Username and password).
-17. `/validate`: Checks if the JWT token is still valid.
-18. `/updateavatar`: Updates the avatar of a specific user.
-19. `/follow`: Adds a username to the list of followers for the specified user.
-20. `/unfollow`: Unfollows a username from the list of followers for the specified user.
-21. `/getFollowers`: Returns a list of all followers of a specified username.
-22. `/getFollowersCount`: Returns the number of followers for a specified username.
-23. `/checkUserExists`: Checks if a user with the specified username exists.
-24. `/deleteAccount`: Deletes the account from Firestore and Firebase.
-25. `/setLastActivity`: Adds the latest played theme to the lastActivity array of length 3.
-26. `/reset-password`: Sends user an email for password reset.
+- `/levelsOpened/:username/:movie`: Returns opened levels of a specific user for a given movie.
+- `/user/:username`: Returns all data of the user.
+- `/getAvatar`: Returns current avatar from the DiceBear API for a specific user.
+- `/getFollowing`: Returns a list of people whom the user is following.
+- `/getFollowers`: Returns a list of all followers of a specified username.
+- `/getFollowersCount`: Returns the number of followers for a specified username.
+- `/checkUserExists`: Checks if a user with the specified username exists.
 
-### API Integration
-27. `/getomdbi`: Returns data from the OMDB API for each theme currently displayed.
+### ThemeDB
+- `/getomdbi`: Returns data from the OMDB API for each theme currently displayed.
 
 ### Miscellaneous
-28. `/training`: Returns 200 random words from the Random-Word-API.
-29. `/weather/vienna`: Returns weather information about Vienna.
-30. `/time/vienna`: Returns local time in Vienna.
+- `/training`: Returns 200 random words from the Random-Word-API.
 
 Copyright (c) 2023 FH Campus Wien
 
