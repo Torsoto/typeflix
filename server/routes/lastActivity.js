@@ -10,7 +10,7 @@ import "../db/firebase.mjs";
 const db = getFirestore();
 const app = express.Router();
 
-
+// update user's last played activity
 app.post("/setLastActivity", async (req, res) => {
     try {
         const { username, movie, level, wpm } = req.body;
@@ -35,7 +35,7 @@ app.post("/setLastActivity", async (req, res) => {
         // Add new activity to lastActivity array
         lastActivity.unshift({ movie, level, wpm }); // unshift will add the new activity at the start
 
-        // Keep only the first two activities
+        // Keep only the first three elements in the lastActivity array
         lastActivity = lastActivity.slice(0, 3);
 
         userDocData.lastActivity = lastActivity;
@@ -57,6 +57,5 @@ app.post("/setLastActivity", async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 });
-
 
 export default app;

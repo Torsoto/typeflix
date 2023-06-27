@@ -54,10 +54,8 @@ function Signup() {
   // - Must be at least 8 characters long
   const validatePassword = (e) => {
     setPassword(e.target.value);
-    if (1 === 2) { // REMOVE THE IF STATEMENT BEFORE DEPLOYING
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d-]{8,}$/;
-      setPasswordError(!passwordRegex.test(e.target.value));
-    }
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d-]{8,}$/;
+    setPasswordError(!passwordRegex.test(e.target.value));
     setConfirmPasswordError(confirmPassword !== password);
   };
 
@@ -67,6 +65,7 @@ function Signup() {
   };
 
   const handleSignup = async () => {
+    // check fields for errors
     if (password !== confirmPassword) {
       alert("Passwords do not match");
       return;
@@ -98,15 +97,21 @@ function Signup() {
       });
       const data = await response.json();
       if (data.error) {
-        throw new Error(data.error);
+        // signed up, set data, redirect to home
+        setNotification({
+          show: true,
+          message:
+              "An error occurred during login. Please try again.",
+        });
       } else {
-        console.log(`Successfully created new user with id: ${data.uid}`);
         localStorage.setItem("jwt", data.token);
         login(data.token);
         window.location.href = "/";
       }
     } catch (error) {
       console.log(error.message);
+
+      //show error notification
       setNotification({
         show: true,
         message:

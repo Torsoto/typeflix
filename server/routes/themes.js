@@ -14,6 +14,7 @@ const db = getFirestore();
 const app = express.Router();
 const omdbiApiKey = "f455c145";
 
+// get all movies
 app.get("/movies", async (req, res) => {
   const { r } = req.query;
 
@@ -67,6 +68,7 @@ app.get("/movies", async (req, res) => {
   }
 });
 
+// get count of levels of movie
 app.get("/movies/:movie", async (req, res) => {
   const { r } = req.query;
   const { movie } = req.params;
@@ -152,6 +154,7 @@ function decodeMovieName(encodedMovieName) {
   return decodedMovieName;
 }
 
+// get time, text and img of level
 app.get("/movies/:movie/levels/:level", async (req, res) => {
   const { r } = req.query;
 
@@ -291,6 +294,7 @@ app.get("/movies/:movie/levels/:level", async (req, res) => {
   }
 });
 
+// count how many levels user has opened
 app.get("/levelsOpened/:username/:movie", async (req, res) => {
   try {
     const { r } = req.query;
@@ -375,6 +379,7 @@ app.get("/levelsOpened/:username/:movie", async (req, res) => {
   }
 });
 
+// unlock next level for user and handle bosses won and themesComplete
 app.patch("/unlockNextLevel", async (req, res) => {
   try {
     const { username, movie, selectedLevelIndex } = req.body;
@@ -391,6 +396,7 @@ app.patch("/unlockNextLevel", async (req, res) => {
     const userSnapshot = await getDoc(userDoc);
     let userData = userSnapshot.data();
 
+    // check if level is a boss level to grant user bosses complete and themes complete in profile
     if ([3, 6, 9, 10].includes(selectedLevelIndex)) {
       const currentLevel = String("lvl" + selectedLevelIndex);
       const currentLevelDocRef = doc(
@@ -403,6 +409,7 @@ app.patch("/unlockNextLevel", async (req, res) => {
       const currentLevelSnapshot = await getDoc(currentLevelDocRef);
       const currentLevelData = currentLevelSnapshot.data();
 
+      // check if the boss has already been defeated
       if (!currentLevelData.bossWon) {
         await updateDoc(currentLevelDocRef, {
           completed: true,
@@ -413,6 +420,7 @@ app.patch("/unlockNextLevel", async (req, res) => {
         await updateDoc(userDoc, userData);
       }
 
+      // check if the theme has already been completed
       if (selectedLevelIndex === 10 && !currentLevelData.themeCompleted) {
         userData.themescompleted++;
         await updateDoc(currentLevelDocRef, {
@@ -436,6 +444,7 @@ app.patch("/unlockNextLevel", async (req, res) => {
   }
 });
 
+// get info about each movie from getomdbi api
 app.get("/getomdbi", async (req, res) => {
   const { r } = req.query;
   try {

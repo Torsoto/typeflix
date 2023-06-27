@@ -27,6 +27,7 @@ const db = getFirestore();
 const auth = getAuth();
 const app = express.Router();
 
+// get data about user
 app.get("/user/:username", async (req, res) => {
     const { r } = req.query;
     const { username } = req.params;
@@ -105,15 +106,16 @@ app.get("/user/:username", async (req, res) => {
     }
 });
 
-
+// update user's avatar
 app.put("/updateavatar", async (req, res) => {
     const { token, newAvatar } = req.body;
 
     try {
+        // decodes jwt to get username of jwt
         const decoded = jwt.verify(token, secretKey);
         const { username } = decoded;
 
-        // Get the user documents from Firestore
+        // get user's document
         const userDoc = await getDoc(doc(db, "users", username));
 
         if (!userDoc.exists()) {
@@ -121,7 +123,7 @@ app.put("/updateavatar", async (req, res) => {
             return;
         }
 
-        // Update the avatar field in the user's document
+        // get user's data and update its avatar
         const updatedUser = { ...userDoc.data(), avatar: newAvatar };
         await setDoc(doc(db, "users", username), updatedUser);
         res.status(200).json({ message: "Avatar updated successfully" });
@@ -131,6 +133,7 @@ app.put("/updateavatar", async (req, res) => {
     }
 });
 
+// get user's avatar
 app.get("/getAvatar", async (req, res) => {
     const { r } = req.query;
     try {
@@ -193,24 +196,30 @@ app.get("/getAvatar", async (req, res) => {
     }
 });
 
-
+// follow somebody
 app.post("/follow", async (req, res) => {
     try {
         const { username, toFollowUsername } = req.body;
 
+        // username's doc
         const userDoc = doc(db, "users", username);
         const userSnapshot = await getDoc(userDoc);
         if (!userSnapshot.exists()) {
             res.status(404).json({ error: `User not found` });
         } else {
+
+            //username's data
             const userData = userSnapshot.data();
+
+            // check if "usernames" array of following has the nickname of "toFollowUsername"
             if (userData.following.includes(toFollowUsername)) {
                 res.status(409).json({ message: "Following already added" });
             } else {
+                // "username" starts following "toFollowUsername" and is added to "username's" following array
                 userData.following.push(toFollowUsername);
                 await updateDoc(userDoc, { following: userData.following });
 
-                // Add the username to the toFollowUsername's followers array
+                // "toFollowUsername" gets a new follower inside his followers array
                 const toFollowUserDoc = doc(db, "users", toFollowUsername);
                 const toFollowUserSnapshot = await getDoc(toFollowUserDoc);
                 const toFollowUserData = toFollowUserSnapshot.data();
@@ -226,6 +235,7 @@ app.post("/follow", async (req, res) => {
     }
 });
 
+// unfollow somebody
 app.post("/unfollow", async (req, res) => {
     try {
         const { username, toUnfollowUsername } = req.body;
@@ -238,6 +248,7 @@ app.post("/unfollow", async (req, res) => {
         } else {
             const userData = userSnapshot.data();
 
+            // Check if the "username" is already following the "toUnfollowUsername"
             if (!userData.following.includes(toUnfollowUsername)) {
                 res.status(409).json({ message: "User not found" });
             } else {
@@ -246,7 +257,7 @@ app.post("/unfollow", async (req, res) => {
                 );
                 await updateDoc(userDoc, { following: updatedFollowing });
 
-                // Remove the username from the toUnfollowUsername's followers array
+                // Remove the "username" from the "toUnfollowUsername's" followers array
                 const toUnfollowUserDoc = doc(db, "users", toUnfollowUsername);
                 const toUnfollowUserSnapshot = await getDoc(toUnfollowUserDoc);
                 const toUnfollowUserData = toUnfollowUserSnapshot.data();
@@ -262,6 +273,7 @@ app.post("/unfollow", async (req, res) => {
     }
 });
 
+// get all followERS of user somebody
 app.get("/getFollowers", async (req, res) => {
     const { r } = req.query;
     try {
@@ -287,6 +299,7 @@ app.get("/getFollowers", async (req, res) => {
                 res.status(404).json({ error: "User does not exist" });
             }
         } else {
+            //get followers list
             const userData = userDoc.data();
 
             if (r === "xml") {
@@ -324,6 +337,7 @@ app.get("/getFollowers", async (req, res) => {
     }
 });
 
+// get all followERS count
 app.get("/getFollowersCount", async (req, res) => {
     const { r } = req.query;
     try {
@@ -358,6 +372,8 @@ app.get("/getFollowersCount", async (req, res) => {
     }
 });
 
+
+// get all followING count
 app.get("/getFollowing", async (req, res) => {
     const { r } = req.query;
     try {
@@ -406,6 +422,7 @@ app.get("/getFollowing", async (req, res) => {
     }
 });
 
+// check if user's account still exists
 app.get("/checkUserExists", async (req, res) => {
     const { r } = req.query;
     const { username } = req.query;
@@ -448,6 +465,7 @@ app.get("/checkUserExists", async (req, res) => {
     }
 });
 
+// delete user's account
 app.delete("/deleteAccount", async (req, res) => {
     try {
         const { token, password, username, email } = req.body;

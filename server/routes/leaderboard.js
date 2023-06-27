@@ -11,6 +11,7 @@ const db = getFirestore();
 const app = express.Router();
 import xmlbuilder from "xmlbuilder";
 
+// update global leaderboard
 app.post("/updateLeaderboard", async (req, res) => {
     try {
         const { username, wpm } = req.body;
@@ -82,6 +83,7 @@ app.post("/updateLeaderboard", async (req, res) => {
     }
 });
 
+// get global leaderboard
 app.get("/getLeaderboard", async (req, res) => {
     const { r } = req.query;
     try {
@@ -151,6 +153,7 @@ app.get("/getLeaderboard", async (req, res) => {
     }
 });
 
+// update theme's leaderboard
 app.post("/updateThemeLevelLeaderboard", async (req, res) => {
     try {
         const { username, wpm, theme, levelIndex } = req.body;
@@ -199,6 +202,7 @@ app.post("/updateThemeLevelLeaderboard", async (req, res) => {
     }
 });
 
+// get theme's leaderboard
 app.get("/getThemeLevelLeaderboard", async (req, res) => {
     const { r } = req.query;
     try {

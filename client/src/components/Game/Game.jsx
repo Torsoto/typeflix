@@ -150,7 +150,6 @@ const Game = () => {
     }
   };
 
-
   function handleWinRequests(wpm) {
     setIsLoading(true);
     setIsLeaderboardVisible(true);
@@ -176,36 +175,50 @@ const Game = () => {
 
   const handleKeyDown = useCallback(
     (e) => {
+
+      // if first press - start timer for WPM
       if (!hasStartedTyping) {
         setHasStartedTyping(true);
         setStartTime(Date.now());
       }
 
       setHasStartedTyping(true);
+      // check the type of the key pressed
       const key = e.key;
       const expectedLetter = text[currentLetterIndex];
       const isLetter = key.length === 1;
       const isSpace = key === " ";
       const isBackspace = key === "Backspace";
 
+      // get the cursor's position (yellow one)
       const element = document.querySelector(".blinking-cursor");
       const cursorPosY = element.offsetTop;
 
+      // if the cursor's position hasn't been calculated yet, calculate it and increment the calculation counter
       if (!hasCalculated) {
         setNextCursorY(cursorPosY + 100);
         sethasCalculated(true);
         setTimesCalculated(timesCalculated + 1);
       }
 
+      // if the cursor is at the target position and the calculation counter is at 1, update the target position and increment the update counter
+      // target - third row
       if (cursorPosY >= nextCursorY && timesCalculated === 1) {
         setNextCursorY(cursorPosY);
         setTimesUpdatedCursor(timesUpdatedCursor + 1);
       }
 
+      // if a letter or a space was pressed, and it's the expected input
       if (isLetter || (isSpace && expectedLetter === " ")) {
+
+        // if the player has typed all the letters in the text
         if (currentLetterIndex >= text.length - 1) {
+
+          // if there were incorrect letters typed, mark the game as failed
           if (incorrectLetters.length > 0) {
             setHasFailed(true);
+
+            // otherwise, mark the game as finished, calculate the time taken, and calculate the typing speed (in words per minute)
           } else {
             setIsFinished(true);
             const timeTaken = time - timeLeft;
@@ -218,14 +231,20 @@ const Game = () => {
           }
           return;
         }
+
         const nextLetterIndex = currentLetterIndex + 1;
+
         if (key === expectedLetter) {
+
+          // decrease the player's health points, add the index to the correct letters list, and move to the next letter
           setHp(hp - 1);
           setCorrectLetters((prevCorrectLetters) => [
             ...prevCorrectLetters,
             `${currentLetterIndex}`,
           ]);
           setCurrentLetterIndex(nextLetterIndex);
+
+          // if all letters have been typed and there were no incorrect letters, mark the game as Won and Finished and calculate the typing speed
           if (
             nextLetterIndex === text.length &&
             incorrectLetters.length === 0
@@ -240,10 +259,14 @@ const Game = () => {
             setWpm(wpm);
             handleWinRequests(wpm);
           }
+
+          // Ii all letters have been typed but there were incorrect letters, mark the game as failed
           if (nextLetterIndex === text.length && incorrectLetters.length > 0) {
             setHasFailed(true);
           }
         } else if (expectedLetter !== " ") {
+
+          // if the key press does not match the expected letter and the expected letter is not a space, add the index to the incorrect letters list and move to the next letter
           setIncorrectLetters((prevIncorrectLetters) => [
             ...prevIncorrectLetters,
             `${currentLetterIndex}`,
@@ -253,6 +276,8 @@ const Game = () => {
       }
 
       if (isBackspace) {
+
+        // If there are previous letters, move back one letter and remove it from the correct and incorrect letters lists
         if (currentLetterIndex > 0) {
           setCurrentLetterIndex(currentLetterIndex - 1);
           setCorrectLetters((prevCorrectLetters) =>
@@ -265,12 +290,15 @@ const Game = () => {
               (item) => item !== `${currentLetterIndex - 1}`
             )
           );
+
+          // If the letter was correct, increase the player's health points
           if (correctLetters.includes(`${currentLetterIndex - 1}`)) {
             setHp(hp + 1);
           }
         }
       }
 
+      // don't allow keys to do their default actions like "tab" etc...
       e.preventDefault();
     },
     [

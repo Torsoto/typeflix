@@ -7,6 +7,7 @@ function Leaderboard() {
     const [leaderboardData, setLeaderboardData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    // fetch global Leaderboard
     useEffect(() => {
         const fetchLeaderboard = async () => {
             try {

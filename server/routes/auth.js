@@ -34,27 +34,16 @@ const generateToken = (user, username, email) => {
   return jwt.sign(payload, secretKey, { expiresIn: "336h" });
 };
 
-app.post("/reset-password", async (req, res) => {
-  const { email } = req.body;
-
-  try {
-    await sendPasswordResetEmail(auth, email);
-    res.status(200).json({ message: "Password reset email sent" });
-  } catch (error) {
-    console.error("Error sending password reset email:", error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
 const createThemesCollection = async (username, batch) => {
-  const moviesRef = collection(db, "movies");
-  const moviesSnapshot = await getDocs(moviesRef);
+  const moviesRef = collection(db, "movies"); // /movies collection
+  const moviesSnapshot = await getDocs(moviesRef); // get all movies of the project
 
   for (const movieDoc of moviesSnapshot.docs) {
-    const movieName = movieDoc.id;
-    const userMovieCollectionRef = collection(db, "users", username, movieName);
+    const movieName = movieDoc.id; // get each movie title
+    const userMovieCollectionRef = collection(db, "users", username, movieName); // movie collection inside each user (for levels tracking)
     const userMovieCollectionSnapshot = await getDocs(userMovieCollectionRef);
 
+    // if no specific movie inside username docs - recreate
     if (userMovieCollectionSnapshot.empty) {
       const levelsRef = collection(db, "movies", movieName, "levels");
       const levelsSnapshot = await getDocs(levelsRef);
@@ -66,12 +55,16 @@ const createThemesCollection = async (username, batch) => {
           batch.set(levelDocRef, { completed: true });
           firstLevel = false;
         } else {
+          // second index in levels is lvl 10 (Because: lvl1, lvl10, lvl2, lvl3...)
+          // is last boss and marks theme as completed
           if ([2].includes(levelIndex)) {
             batch.set(levelDocRef, {
               completed: false,
               bossWon: false,
               themeCompleted: false,
             });
+            // 4, 7, 10 are mini boss levels (lvl3, 6 and 9)
+            // they just track if boss has been defeated
           } else if ([4, 7, 10].includes(levelIndex)) {
             batch.set(levelDocRef, { completed: false, bossWon: false });
           } else {
@@ -122,6 +115,7 @@ app.post("/signup", async (req, res) => {
       }
     });
 
+    // username is used
     if (usernameExists) {
       console.log("Username already exists");
       res.status(401).json({ error: "Username already exists" });
@@ -131,11 +125,12 @@ app.post("/signup", async (req, res) => {
           .then(async (userRecord) => {
             console.log("Successfully created new user:", userRecord.user.uid);
 
-            const userDoc = doc(db, "users", lowercaseUsername);
-            const emailToUsernameDoc = doc(db, "emailToUsername", email);
+            const userDoc = doc(db, "users", lowercaseUsername); // user document reference
+            const emailToUsernameDoc = doc(db, "emailToUsername", email); // emailToUsername document reference
 
             const batch = writeBatch(db);
 
+            // create user data
             batch.set(userDoc, {
               username: lowercaseUsername,
               email: email,
@@ -151,12 +146,15 @@ app.post("/signup", async (req, res) => {
               lastActivity: [],
             });
 
+            // map email to username in /emailToUsername collection
             batch.set(emailToUsernameDoc, {
               username: lowercaseUsername,
             });
 
+            // create themes collection in new username docs
             createThemesCollection(lowercaseUsername, batch).then(() => {
               console.log("User data stored in Firestore");
+              // generate JWT
               const token = generateToken(
                 userRecord.user,
                 lowercaseUsername,
@@ -188,22 +186,27 @@ app.post("/login", async (req, res) => {
   const userDoc = await getDocs(collection(db, "users"));
   let email;
 
+  // searches if there is a user with the identifier (username)
   userDoc.forEach((doc) => {
     if (doc.data().username === lowercaseIdentifier) {
+      // email to the identifier (username) found
       email = doc.data().email;
     }
   });
 
   if (email) {
-    // User found by username
+    // email for the given identifier (username) found
     await handleLogin(email, lowercaseIdentifier, password, res);
   } else {
-    // User not found by username, attempt to sign in with the identifier as email
+    // email for the given identifier (username) not found, so the identifier is email
     try {
+      // looks in emailToUsername map to find username to the email (identifier)
       const docSnapshot = await getDoc(
         doc(db, "emailToUsername", lowercaseIdentifier)
       );
+      // takes username field of the email map
       const username = docSnapshot.data().username;
+      // handles login, regenerates themes if needed.
       await handleLogin(lowercaseIdentifier, username, password, res);
     } catch (error) {
       console.error("Error getting username from email:", error);
@@ -216,6 +219,7 @@ app.post("/validate", async (req, res) => {
   const token = req.body.token;
   if (token) {
     try {
+      // secret is random hex (64), generated every startup
       const decoded = jwt.verify(token, secretKey);
       res.status(200).json({ valid: true, username: decoded.username });
     } catch (e) {
@@ -223,6 +227,18 @@ app.post("/validate", async (req, res) => {
     }
   } else {
     res.status(400).json({ valid: false, error: "No token provided" });
+  }
+});
+
+app.post("/reset-password", async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    await sendPasswordResetEmail(auth, email);
+    res.status(200).json({ message: "Password reset email sent" });
+  } catch (error) {
+    console.error("Error sending password reset email:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 

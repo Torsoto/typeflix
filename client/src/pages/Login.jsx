@@ -43,24 +43,32 @@ function Login() {
         }),
       });
       const data = await response.json();
-      if (data.error) {
-        throw new Error(data.error);
-      } else {
+
+      if (response.ok) {
         localStorage.setItem("jwt", data.token);
         login(data.token);
         window.location.href = "/";
+      } else {
+        // show error notification
+        setNotification({
+          show: true,
+          message:
+              "An error occurred during login. Please try again.",
+        });
       }
     } catch (error) {
+      // show error notification
       setNotification({
         show: true,
         message:
-          ERROR_MAP[error.message] ||
-          "An error occurred during login. Please try again.",
+            ERROR_MAP[error.message] ||
+            "An error occurred during login. Please try again.",
       });
     } finally {
       setLoading(false);
     }
   };
+
 
   const handleSendPasswordResetEmail = async () => {
     try {
@@ -75,6 +83,8 @@ function Login() {
       if (response.ok) {
         console.log("Reset password email send successfully");
       } else {
+
+        // show error notification
         setNotification({
           show: true,
           message:

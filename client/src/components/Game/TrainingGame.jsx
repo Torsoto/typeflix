@@ -42,7 +42,6 @@ const TrainingGame = () => {
         fetchData();
     }, []);
 
-
     useEffect(() => {
         if (timeLeft > 0 && hasStartedTyping) {
             const timerId = setTimeout(() => {
@@ -55,7 +54,6 @@ const TrainingGame = () => {
             return () => clearTimeout(timerId);
         }
     }, [timeLeft, hasStartedTyping]);
-
 
     const handleClickForBlur = useCallback(() => {
         setIsBlurred(false);
@@ -135,8 +133,6 @@ const TrainingGame = () => {
 
         e.preventDefault();
     }, [setHasStartedTyping, text, currentLetterIndex, hasCalculated, timesCalculated, timesUpdatedCursor, incorrectLetters, timeLeft, time]);
-
-
 
     const WinMessage = ({ isFinished, timeTaken, wpm }) => {
         if (!isFinished) return null;

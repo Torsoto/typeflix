@@ -60,7 +60,7 @@ const LevelSelection = () => {
       );
       const data = await response.json();
 
-      // Update the levels state
+      // Update the levels amount
       setLevels(
         Array(data.count)
           .fill()

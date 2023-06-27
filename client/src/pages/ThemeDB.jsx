@@ -5,6 +5,7 @@ const ThemeDB = () => {
     const [movies, setMovies] = useState([]);
     const [data, setData] = useState([]);
 
+    // use fetch movie list and store in movies
     useEffect(() => {
         fetchMovieList().then((data) => {
             setMovies(data);
@@ -12,6 +13,7 @@ const ThemeDB = () => {
         });
     }, []);
 
+    // fetch data about movies from backend
     useEffect(() => {
         const fetchMovieData = async () => {
             try {
@@ -31,6 +33,7 @@ const ThemeDB = () => {
         fetchMovieData();
     }, []);
 
+    // fetch movie list
     const fetchMovieList = async () => {
         try {
             const response = await fetch("http://localhost:3000/movies");

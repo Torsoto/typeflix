@@ -24,6 +24,7 @@ function App() {
     const [selectedLevelIndex, setSelectedLevelIndex] = useState(false);
     const [totalLevelsCount, setTotalLevelsCount] = useState(false);
 
+    // check if user has correct JWT and if so - login and setUserId
     useEffect(() => {
         const token = localStorage.getItem("jwt");
         if (token) {
@@ -53,6 +54,8 @@ function App() {
         }
     }, []);
 
+    // as soon as there is userId (after login) - load userData and then refetch it
+    // this way data is first loaded and then "checked" so it makes loading faster
     useEffect(() => {
         if (userId.length > 0) {
             let data = localStorage.getItem('userData');
@@ -99,6 +102,7 @@ function App() {
         localStorage.removeItem("jwt");
     };
 
+    // update userData
     const updateUserData = () => {
         fetchData(userId).then((data) => {
             setUserData(data);
@@ -107,6 +111,7 @@ function App() {
         });
     }
 
+    // fetch userData
     const fetchData = async (userId) => {
         try {
             const response = await fetch(`http://localhost:3000/user/${userId}`);

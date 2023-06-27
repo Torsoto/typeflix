@@ -5,11 +5,12 @@ import xmlbuilder from "xmlbuilder";
 
 const app = express.Router();
 
+// get random 200 words from Random Word API
 app.get("/training", async (req, res) => {
     const { r } = req.query;
     const options = {
         hostname: "random-word-api.herokuapp.com",
-        path: "/word?number=200",
+        path: "/word?number=50",
         method: "GET",
     };
 
