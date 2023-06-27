@@ -8,7 +8,6 @@ import lastActivityRoutes from "./routes/lastActivity.js";
 import leaderboardRoutes from "./routes/leaderboard.js";
 import themesRoutes from "./routes/themes.js";
 import restRoutes from "./routes/restAPI.js";
-import trainingRoutes from "./routes/training.js";
 import { logWeatherAndTime } from "./logsFunction/logWeatherAndTime.js";
 import xmlbuilder from "xmlbuilder";
 
@@ -42,7 +41,6 @@ app.use(lastActivityRoutes);
 app.use(leaderboardRoutes);
 app.use(themesRoutes);
 app.use(restRoutes);
-app.use(trainingRoutes);
 
 app.get("/", (req, res) => {
   const { r } = req.query

@@ -28,11 +28,9 @@ function Leaderboard() {
             <Navbar />
             <div className="m-auto max-w-7xl">
                 <div className="flex items-center justify-center">
-                    <div className="flex items-center justify-center mt-8" style={{ width: 200, height: 200 }}>
-                    </div>
                     {isLoading ? (
                         <div className="flex items-center justify-center mt-8" style={{ width: 200, height: 200 }}>
-                            <CircularProgress color="neutral" variant="plain" size="lg" value={60}/>
+                            <CircularProgress color="neutral" variant="plain" size="lg" value={60} />
                         </div>
                     ) : (
                         <LeaderboardTable leaderboardData={leaderboardData} />
