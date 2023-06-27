@@ -372,7 +372,6 @@ app.get("/getFollowersCount", async (req, res) => {
     }
 });
 
-
 // get all followING count
 app.get("/getFollowing", async (req, res) => {
     const { r } = req.query;
